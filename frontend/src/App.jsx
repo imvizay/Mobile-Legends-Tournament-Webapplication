@@ -1,8 +1,8 @@
 import React from 'react'
-
+import AppRoutesConfig from './routes/AppRoutesConfig'
 function App() {
   return (
-    <div className='text-red-500'>App</div>
+      <AppRoutesConfig/>  
   )
 }
 
