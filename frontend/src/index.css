@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap');
+
+@import 'tailwindcss'; 
+@config '../tailwind.config.js';
+
+/* fonts */
+
+@font-face{
+    font-family: 'RougeScript';
+    src:url('./assets/fonts/RougeScript-Regular.ttf')format('truetype');
+}
+
+@font-face{
+    font-family:"BebasNeue";
+    src: url('./assets/fonts/BebasNeue-Regular.ttf') format('truetype');
+}
+
+@font-face{
+    font-family:"CormorantGaramond";
+    src: url('./assets/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype');
+}
+
+@font-face{
+    font-family:'Inter';
+    src: url('./assets/fonts/Inter-VariableFont_opsz\,wght.ttf') format("truetype");
+}
+
+
+
+body {
+  cursor: url("./assets/cursor/pointer.png"), auto !important;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    cursor: url("./assets/cursor/pointer.png"), auto;
+  }
+}
