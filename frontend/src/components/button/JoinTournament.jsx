@@ -1,12 +1,28 @@
 import { ArrowRight } from "lucide-react";
+import { useState } from "react";
 
 export default function JoinTournamentButton() {
- return(
-  <button className="group relative bg-white backdrop-blur-[20px] px-8 py-3 flex items-center justify-center gap-5 border border-gray-400">
-
-    <span>Join Tournament</span>
-    <span className="group-hover:translate-x-1 duration-200 transition-all"><ArrowRight/></span>
-
-  </button>
- )
+ 
+  return (
+    <button
+      className="
+      group
+      flex 
+      gap-2
+      relative
+      overflow-hidden
+      rounded-2xl
+      border
+      tracking-wide
+      bg-[var(--action-primary-bg)]
+      text-[var(--action-primary-text)]
+      border-[var(--action-primary-border)]
+      px-8
+      py-4
+      "
+    >
+      Join Tournament 
+      <span className="inline"><ArrowRight/></span>
+    </button>
+  )
 }

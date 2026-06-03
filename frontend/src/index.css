@@ -1,40 +1,282 @@
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap');
 
-@import 'tailwindcss'; 
+@import 'tailwindcss';
 @config '../tailwind.config.js';
 
-/* fonts */
+/* =====================================================
+   FONTS
+===================================================== */
 
-@font-face{
-    font-family: 'RougeScript';
-    src:url('./assets/fonts/RougeScript-Regular.ttf')format('truetype');
+@font-face {
+  font-family: 'RougeScript';
+  src: url('./assets/fonts/RougeScript-Regular.ttf') format('truetype');
 }
 
-@font-face{
-    font-family:"BebasNeue";
-    src: url('./assets/fonts/BebasNeue-Regular.ttf') format('truetype');
+@font-face {
+  font-family: 'BebasNeue';
+  src: url('./assets/fonts/BebasNeue-Regular.ttf') format('truetype');
 }
 
-@font-face{
-    font-family:"CormorantGaramond";
-    src: url('./assets/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype');
+@font-face {
+  font-family: 'CormorantGaramond';
+  src: url('./assets/fonts/CormorantGaramond-VariableFont_wght.ttf')
+    format('truetype');
 }
 
-@font-face{
-    font-family:'Inter';
-    src: url('./assets/fonts/Inter-VariableFont_opsz\,wght.ttf') format("truetype");
+@font-face {
+  font-family: 'Inter';
+  src: url('./assets/fonts/Inter-VariableFont_opsz,wght.ttf')
+    format('truetype');
 }
 
-
+/* =====================================================
+   CURSOR
+===================================================== */
 
 body {
-  cursor: url("./assets/cursor/pointer.png"), auto !important;
+  cursor: url('./assets/cursor/pointer.png'), auto !important;
 }
 
 @layer base {
   *,
   *::before,
   *::after {
-    cursor: url("./assets/cursor/pointer.png"), auto;
+    cursor: url('./assets/cursor/pointer.png'), auto;
   }
+}
+
+/* =====================================================
+   LIGHT THEME
+===================================================== */
+
+:root {
+/* -----------------------------------
+   PAGE BACKGROUNDS
+----------------------------------- */
+
+--bg-canvas: #f6f4f1;
+--bg-canvas-secondary: #fbfaf8;
+
+/* -----------------------------------
+  Theme Toggle 
+------------------------------------- */
+--toggle-track: rgba(255,255,255,.5);
+
+--toggle-thumb: #ffffff;
+
+--toggle-sun: #f59e0b;
+--toggle-moon: #64748b;
+
+/* -----------------------------------
+   GLASSMORPHISM
+----------------------------------- */
+
+--glass-surface: rgba(255, 255, 255, 0.45);
+--glass-navbar: rgba(255, 255, 255, 0.20);
+--glass-border: rgba(255, 255, 255, 0.55);
+--glass-highlight: rgba(255, 255, 255, 0.65);
+
+/* -----------------------------------
+   SURFACES
+----------------------------------- */
+
+--surface-base: #ffffff;
+--surface-elevated: #f8f8f8;
+--surface-floating: #ffffff;
+
+/* -----------------------------------
+   TEXT
+----------------------------------- */
+
+--text-primary: #111111;
+--text-secondary: #666b73;
+--text-muted: #8e949b;
+
+/* -----------------------------------
+   HERO TYPOGRAPHY
+----------------------------------- */
+
+--headline-primary: #111111;
+--headline-accent: #c9a95d;
+--headline-script: #7c7c7c;
+
+/* -----------------------------------
+   BORDERS
+----------------------------------- */
+
+--border-subtle: rgba(15, 23, 42, 0.08);
+--border-default: rgba(15, 23, 42, 0.12);
+--border-strong: rgba(15, 23, 42, 0.18);
+
+
+/* -----------------------------------
+   PRIMARY ACTIONS
+----------------------------------- */
+
+--action-primary-bg: rgba(0, 0, 0, 0.92);
+--action-primary-text: #ffffff;
+--action-primary-border: transparent;
+
+/* -----------------------------------
+   SECONDARY ACTIONS
+----------------------------------- */
+
+--action-secondary-bg: rgba(255, 255, 255, 0.75);
+--action-secondary-text: #111111;
+--action-secondary-border: rgba(15, 23, 42, 0.08);
+
+/* -----------------------------------
+  REGISTER BUTTON
+------------------------------------- */
+--action-primary-bg: rgba(0,0,0,.92);
+--action-primary-text: #ffffff;
+--action-primary-border: transparent;
+
+/* -----------------------------------
+  LOGIN BUTTON
+-------------------------------------- */
+--action-secondary-bg: rgba(255,255,255,.75);
+--action-secondary-text: #111111;
+--action-secondary-border: rgba(15,23,42,.08);
+
+/* -----------------------------------
+   NAVIGATION
+----------------------------------- */
+
+--nav-active: #111111;
+
+/* -----------------------------------
+   SHADOWS
+----------------------------------- */
+
+--shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.06);
+--shadow-md: 0 12px 30px rgba(0, 0, 0, 0.08);
+--shadow-glass:
+  0 8px 32px rgba(0, 0, 0, 0.08);
+
+/* -----------------------------------
+   BRAND ACCENT
+----------------------------------- */
+
+--accent-gold: #c8b07a;
+--accent-gold-light: #d7c08a;
+
+}
+
+/* =====================================================
+   DARK THEME
+===================================================== */
+
+.dark {
+/* -----------------------------------
+   PAGE BACKGROUNDS
+----------------------------------- */
+--bg-canvas: #050505;
+--bg-canvas-secondary: #0e0e0e;
+
+/* -----------------------------------
+  Theme Toggle 
+------------------------------------- */
+--toggle-track: rgba(255,255,255,.04);
+
+--toggle-thumb: #f4f4f5;
+
+--toggle-sun: #fbbf24;
+--toggle-moon: #111111;
+
+/* -----------------------------------
+   GLASSMORPHISM
+----------------------------------- */
+
+--glass-surface: rgba(255, 255, 255, 0.04);
+--glass-navbar: rgba(0, 0, 0, 0.35);
+--glass-border: rgba(255, 255, 255, 0.08);
+--glass-highlight: rgba(255, 255, 255, 0.15);
+
+/* -----------------------------------
+   SURFACES
+----------------------------------- */
+
+--surface-base: #101010;
+--surface-elevated: #151515;
+--surface-floating: #1b1b1b;
+
+/* -----------------------------------
+   TEXT
+----------------------------------- */
+
+--text-primary: #f4f4f5;
+--text-secondary: #b1b5bd;
+--text-muted: #7a7f88;
+
+/* -----------------------------------
+   HERO TYPOGRAPHY
+----------------------------------- */
+
+--headline-primary: #ffffff;
+--headline-accent: #d6b66a;
+--headline-script: #b6bdc7;
+
+/* -----------------------------------
+   BORDERS
+----------------------------------- */
+
+--border-subtle: rgba(255, 255, 255, 0.06);
+--border-default: rgba(255, 255, 255, 0.12);
+--border-strong: rgba(255, 255, 255, 0.18);
+
+/* -----------------------------------
+   PRIMARY ACTIONS
+----------------------------------- */
+
+--action-primary-bg: rgba(255, 255, 255, 0.92);
+--action-primary-text: #000000;
+--action-primary-border: transparent;
+
+/* -----------------------------------
+   SECONDARY ACTIONS
+----------------------------------- */
+
+--action-secondary-bg: rgba(255, 255, 255, 0.05);
+--action-secondary-text: #ffffff;
+--action-secondary-border: rgba(255, 255, 255, 0.08);
+
+/* -----------------------------------
+  REGISTER BUTTON
+------------------------------------- */
+--action-primary-bg: rgba(255,255,255,.92);
+--action-primary-text: #000000;
+--action-primary-border: transparent;
+
+/* -----------------------------------
+  LOGIN BUTTON
+-------------------------------------- */
+--action-secondary-bg: rgba(255,255,255,.05);
+--action-secondary-text: #ffffff;
+--action-secondary-border: rgba(255,255,255,.08);
+
+
+/* -----------------------------------
+   NAVIGATION
+----------------------------------- */
+
+--nav-active: #ffffff;
+
+/* -----------------------------------
+   SHADOWS
+----------------------------------- */
+
+--shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.35);
+--shadow-md: 0 12px 30px rgba(0, 0, 0, 0.45);
+--shadow-glass:
+  0 8px 32px rgba(0, 0, 0, 0.45);
+
+
+/* -----------------------------------
+   BRAND ACCENT
+----------------------------------- */
+
+--accent-gold: #c8b07a;
+--accent-gold-light: #d7c08a;
+
 }
