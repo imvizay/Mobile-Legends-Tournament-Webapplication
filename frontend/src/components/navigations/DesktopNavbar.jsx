@@ -3,9 +3,13 @@ import React,{useEffect, useState} from 'react'
 import {ArrowUpRight, Moon, Sun} from 'lucide-react'
 import ThemeToggle from '../button/ThemeToggle'
 
+import { useNavigate } from  'react-router-dom'
+
 function DesktopNavbar() {
 
     const [activeLink ,setActiveLink] = useState(1)
+
+    const navigate = useNavigate()
 
     const navigationLinks = [
         {id:1,path:'/',label:'home'},
@@ -56,7 +60,9 @@ function DesktopNavbar() {
 
         <div className='font-[Inter] text-[14px] font-[500] flex gap-2'>
 
-            <button className='
+            <button
+            onClick={ () => navigate('/login') }
+            className='
             backdrop-blur-1xl px-4 py-1.5 border rounded-2xl 
             flex items-center justify-center
             bg-[var(--action-secondary-bg)]
@@ -68,7 +74,9 @@ function DesktopNavbar() {
                 <span className='inline'><ArrowUpRight size={20} fontWeight={200}/></span>
             </button>
 
-            <button className='
+            <button 
+            onClick={ () => navigate('/register') }
+            className='
             backdrop-blur-1xl px-4 py-2 rounded-2xl
             bg-[var(--action-primary-bg)]
             text-[var(--action-primary-text)]

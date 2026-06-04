@@ -1,6 +1,6 @@
 // hooks
 import React from 'react'
-import { useThemeAsset } from '../../hooks/useThemeAsset';
+import { useThemeAsset } from '../../hooks/common/useThemeAsset';
 
 // Components
 import { Gamepad,ArrowBigLeft, ArrowLeft, ArrowRight, Crown, Calendar } from 'lucide-react'

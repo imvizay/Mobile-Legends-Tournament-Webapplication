@@ -4,20 +4,78 @@ import ThemeToggle from "../../components/button/ThemeToggle";
 
 import { useNavigate } from 'react-router-dom'
 
+// validator
+import { validateSignUpCredentials } from "../../utils/validators/signupValidator";
+
+// Registeration hook
+import { useRegisterMutation } from "../../hooks/auth/useRegisterMutation";
+
 export default function SignupPage() {
+
+  // STATES
+  const [userCred,setUserCred]  = useState({});
+  const [userCredError,setUserCredError] = useState({});
   
   const [showPassword, setShowPassword] = useState(false);
-  
   const [showConfirm, setShowConfirm] = useState(false);
   
-  const navigate = useNavigate()
+  // HOOKS
+  const navigate = useNavigate();
+  const {
+    mutateAsync,
+    isPending,
+    error
+  } = useRegisterMutation();
+
+
+  // HANDLER FUNCTIONS
+  const handleInputFields = (e) => {
+
+    const {name,value} = e.target
+
+    setUserCred((prev) => ({
+      ...prev,
+      [name]:value
+    })
+    )
+  }
+
+  // REGISTRATION FUNCTION
+  const handleRegistration = async (e) => {
+    console.group("ACCOUNT REGISTRATION STARTED:")
+    e.preventDefault()
+    
+    // console.log("[1] Started Validation")
+    const { isValid,errors} = validateSignUpCredentials(userCred);
+    
+    // checkErrors
+    if(!isValid){
+      setUserCredError(errors)
+      return;
+    }
+    // console.log('[2] Completed Validation')
+    setUserCredError({})
+   
+
+    try{
+      const data = await mutateAsync(userCred)
+      // console.log("Backend Data",data)
+      navigate('/login')
+    
+    } 
+    catch(error){
+      // console.log('Registration Error : ',error)
+    } 
+    finally{
+      console.groupEnd()
+    }
+  }
 
 
 
   return (
     <div className="min-h-screen bg-[var(--bg-canvas)] relative overflow-hidden">
-      
-
+  
       <div className="relative z-10 px-4 py-4 md:px-8">
 
         {/* Header */}
@@ -67,7 +125,7 @@ export default function SignupPage() {
             </div>
 
             {/* Form */}
-            <form className="space-y-3 md:space-y-5">
+            <form onSubmit={handleRegistration} className="space-y-3 md:space-y-5">
 
               <div className="text-[var(--text-secondary)]">
                 <label className="block mb-1  text-sm font-medium">
@@ -77,10 +135,12 @@ export default function SignupPage() {
                 <div className="relative">
                   <Mail
                     size={18}
-                    className="absolute left-4 top-1/2 -translate-y-1/2"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 "
                   />
 
                   <input
+                    name="email" value={userCred.email || ""}
+                    onChange={handleInputFields}
                     type="email"
                     placeholder="Enter your email"
                     className="
@@ -92,7 +152,9 @@ export default function SignupPage() {
                     focus:border-[var(--border-strong)] 
                     transition"
                   />
+                  
                 </div>
+                {userCredError.email && <p className="mt-1 text-red-400 md:text-[10px] text-[8px] capitalize">{userCredError.email}</p>}
               </div>
 
               <div className="text-[var(--text-secondary)]">
@@ -107,6 +169,9 @@ export default function SignupPage() {
                   />
 
                   <input
+
+                    name="password" onChange={handleInputFields} value={userCred.password || ""}
+
                     type={showPassword ? "text" : "password"}
                     placeholder="Create password"
                     className="
@@ -120,7 +185,7 @@ export default function SignupPage() {
                   />
 
                   <button
-                    type="button"
+                    type="submit"
                     onClick={() =>
                       setShowPassword(!showPassword)
                     }
@@ -129,6 +194,8 @@ export default function SignupPage() {
                     <Eye size={18} />
                   </button>
                 </div>
+                  {userCredError.password && <p className="mt-1 text-red-400 md:text-[10px] text-[8px] capitalize">{userCredError.password}</p>}
+
               </div>
 
               <div className="text-[var(--text-secondary)]">
@@ -143,6 +210,8 @@ export default function SignupPage() {
                   />
 
                   <input
+                    name="confirm_password" value={userCred.confirm_password || ""}
+                    onChange={handleInputFields}
                     type={showConfirm ? "text" : "password"}
                     placeholder="Confirm password"
                     className="
@@ -167,6 +236,8 @@ export default function SignupPage() {
                     <Eye size={18} />
                   </button>
                 </div>
+                  {userCredError.confirm_password && <p className="mt-1 text-red-400 md:text-[10px] text-[8px] capitalize">{userCredError.confirm_password}</p>}
+
               </div>
 
               {/* CTA */}
