@@ -1,7 +1,7 @@
 import DesktopNavbar from "../navigations/DesktopNavbar";
 import MobileNavbar from "../navigations/MobileNavbar";
 
-import { useMediaQuery } from "../../hooks/useMediaQuery";
+import { useMediaQuery } from "../../hooks/common/useMediaQuery";
 
 function Navbar() {
 
