@@ -97,7 +97,7 @@ body {
 ----------------------------------- */
 
 --headline-primary: #111111;
---headline-accent: #c9a95d;
+--headline-accent: #d89c0f;
 --headline-script: #7c7c7c;
 
 /* -----------------------------------
@@ -221,9 +221,9 @@ body {
    BORDERS
 ----------------------------------- */
 
---border-subtle: rgba(255, 255, 255, 0.06);
+--border-subtle: rgba(255, 255, 255, 0.37);
 --border-default: rgba(255, 255, 255, 0.12);
---border-strong: rgba(255, 255, 255, 0.18);
+--border-strong: rgba(255, 255, 255, 0.758);
 
 /* -----------------------------------
    PRIMARY ACTIONS

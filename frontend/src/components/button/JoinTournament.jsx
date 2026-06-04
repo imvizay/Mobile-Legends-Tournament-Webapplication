@@ -17,8 +17,8 @@ export default function JoinTournamentButton() {
       bg-[var(--action-primary-bg)]
       text-[var(--action-primary-text)]
       border-[var(--action-primary-border)]
-      px-8
-      py-4
+      md:px-8 px-6
+      md:py-4 py-2
       "
     >
       Join Tournament 

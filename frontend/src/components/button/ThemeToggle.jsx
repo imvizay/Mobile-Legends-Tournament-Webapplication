@@ -18,7 +18,7 @@ export default function ThemeToggle() {
         flex items-center
         w-[80px] h-[40px] p-[4px]
 
-        bg-[var(--glass-navbar)] backdrop-blur-xl
+        bg-[var(--glass-highlight)] backdrop-blur-xl
 
         rounded-full border border-[var(--border-default)] shadow-[0_4px_20px_rgba(0,0,0,0.08)]
         transition-all duration-300
@@ -53,7 +53,7 @@ export default function ThemeToggle() {
             text-[var(--toggle-sun)]
             transition-opacity
             duration-300
-            ${dark ? "opacity-30" : "opacity-100"}
+            ${dark ? "opacity-50" : "opacity-100"}
           `}
         />
 
@@ -63,7 +63,7 @@ export default function ThemeToggle() {
             text-[var(--toggle-moon)]
             transition-opacity
             duration-300
-            ${dark ? "opacity-100" : "opacity-30"}
+            ${dark ? "opacity-100" : "opacity-50"}
           `}
         />
       </div>
