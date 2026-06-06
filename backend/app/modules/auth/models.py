@@ -23,3 +23,24 @@ class Player(Base):
     created_at = Column(DateTime,default=lambda:datetime.now(UTC))
 
     
+
+class PendingRegistration(Base):
+    
+    __tablename__ = "pending_registration"
+
+    id = Column(Integer,primary_key=True) #auto generated
+
+    email=Column(String,nullable=False,unique=True)
+    password = Column(String,nullable=False)
+    provider = Column(String,nullable=False)
+    role=Column(String,default='player')
+
+    verification_token = Column(String,nullable=False,unique=True)
+    token_expire_at = Column(DateTime,nullable=True)
+
+    email_sent = Column(Boolean,default=False)
+    email_sent_at = Column(DateTime,nullable=True)
+
+    created_at = Column(DateTime,default=lambda: datetime.now(UTC))
+
+    

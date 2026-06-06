@@ -1,1 +1,1 @@
-from app.modules.auth.models import Player
+from app.modules.auth.models import Player,PendingRegistration
