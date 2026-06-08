@@ -24,11 +24,12 @@ class TeamRepository:
         self.db = db
 
     # ================== ROSTER ======================
-    def get_selected_roster(self, registration_id: int):
+    def get_selected_roster_and_contribution(self, registration_id: int):
         return (
             self.db.query(TournamentRosterPlayer)
             .join(TournamentRosterPlayer.roster)
             .options(
+                joinedload(TournamentRosterPlayer.contribution),
                 joinedload(TournamentRosterPlayer.player),
             )
             .filter(TournamentRoster.registration_id == registration_id)

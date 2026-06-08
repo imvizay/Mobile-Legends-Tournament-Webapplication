@@ -39,11 +39,7 @@ from .schemas import (
     TeamDashboardResponse,
     TeamMembers,
 )
-from .models import (
-    TournamentRoster,
-    TournamentRosterStatus,
-    TournamentRosterPlayerStatus,
-)
+from .models import *
 
 from .helpers import (
     make_member_response,
@@ -83,9 +79,9 @@ class TeamService:
 
             tournament = registration.tournament
 
-            start = tournament.starts_at
+            start = tournament.registration_opens_at
 
-            end = tournament.ends_at
+            end = tournament.registration_closes_at
             # Currently started tournament
             if start <= now <= end:
                 current_tournament = registration
@@ -97,7 +93,7 @@ class TeamService:
         # Current Registered Tournament Roster.
         roster_players = []
         if current_tournament:
-            roster_players = self.repository.get_selected_roster(
+            roster_players = self.repository.get_selected_roster_and_contribution(
                 registration_id=current_tournament.id
             )
 

@@ -46,8 +46,6 @@ export const tournamentService = {
         return api.post(TOURNAMENT_ENDPOINTS.REGISTER,{
             tournament_id
         })
-    },
-
-    
+    },    
 
 }

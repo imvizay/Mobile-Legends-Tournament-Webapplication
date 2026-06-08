@@ -157,6 +157,7 @@ class RosterPlayer(BaseModel):
     role: str
     tournament_readiness: str
     status: str
+    fee_status:str
 
 
 class TeamRosterPlayer(BaseModel):
