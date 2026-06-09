@@ -106,6 +106,8 @@ export default function TeamDashboard() {
     const isRosterLocked = currentTournament?.roster?.is_roster_locked
     const isCurrentUserInRoster = roster?.roster_players?.some(el => el.id == user.id)
 
+    const isPlayerPaid = roster?.roster_players?.find(u => u.id == user.id)?.fee_status === "paid"
+
 
     const addRoster = async (member) => {
 
@@ -156,7 +158,7 @@ export default function TeamDashboard() {
                             tournament={currentTournament}
                             isRosterLocked={isRosterLocked}
                             isCurrentUserInRoster={isCurrentUserInRoster}
-                            // isPlayerPaid={isPlayerPaid}
+                            isPlayerPaid={isPlayerPaid}
                             // isCheckInOpen={isCheckInOpen}
                             // isPlayerCheckIn={isPlayerCheckIn}
                             // isTournamentLive={isTournamentLive}
