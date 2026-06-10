@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import {
   Mail,
   ShieldCheck,
@@ -8,6 +9,66 @@ import {
 
 export const EmailVerificationPending = () => {
   const email = "player@example.com";
+=======
+import {Mail,ShieldCheck,RefreshCcw,ArrowRight,} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+
+// api resend verification
+import { useResendVerification } from "../../hooks/auth/useRegisterMutation";
+
+// toast
+import { toast } from "react-toastify";
+
+
+export const EmailVerificationPending = () => {
+
+  const [email,setEmail] = useState(null)
+  const [linkCooldown,setLinkCooldown] = useState(0)
+  const [searchParams] = useSearchParams()
+
+  // Resend Verification Link hook
+  const { mutateAsync } = useResendVerification()
+ 
+  useEffect(()=>{
+    console.log("email",searchParams.get("email"))
+    setEmail(searchParams.get('email'))
+  },[])
+
+  useEffect( () => {
+    if(linkCooldown <=0 ) return
+    const timer = setInterval(() => {
+        setLinkCooldown(prev => prev-1)
+    }, 1000);
+
+    return ()=> clearInterval(timer)
+
+  },[linkCooldown])
+
+  const resendVerification = async () => {
+    if(!email) return 
+
+    try{
+      console.log("Resend Verficaition Email:" ,email)
+      console.log("Resend Verficaition Email:" ,typeof(email))
+
+      const data = await mutateAsync(email)
+      console.log("RESENT Data Message",data.message)
+
+      if(data.message == "RESENT_LINK_DONE"){
+        setLinkCooldown(120)
+      }
+      
+      toast.done("resent verification please check your mail inbox.")
+      
+    }
+    catch(error){
+      console.log("RESEND LINK FAILED:",error)
+    }
+    
+  }
+
+>>>>>>> Stashed changes
 
   return (
     <section
@@ -83,6 +144,7 @@ export const EmailVerificationPending = () => {
         </div>
 
         {/* Buttons */}
+<<<<<<< Updated upstream
         <div className="mt-4 space-y-3">
           <button
             className=" w-full h-10 sm:h-12 rounded-2xl bg-black text-white font-semibold text-sm sm:text-base flex items-center justify-center gap-2 hover:opacity-90 transition " >
@@ -90,6 +152,18 @@ export const EmailVerificationPending = () => {
             Resend Verification Link
           </button>
 
+=======
+        <div  className="mt-4 space-y-3">
+          <button
+            disabled={linkCooldown > 0}
+            onClick={resendVerification}
+
+            className=" w-full h-10 sm:h-12 rounded-2xl bg-black text-white font-semibold text-sm sm:text-base flex items-center justify-center gap-2 hover:opacity-90 transition " >
+            <RefreshCcw size={16} />
+             {linkCooldown > 0 ? `Resend in ${linkCooldown}s` : "Resend Verification Link"}
+          </button>
+   
+>>>>>>> Stashed changes
         </div>
 
         {/* Footer */}
