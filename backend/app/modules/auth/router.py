@@ -1,5 +1,5 @@
 from fastapi import APIRouter,Depends
-from .schema import AuthCreateRequest,AuthResponse
+from .schema import AuthCreateRequest
 from .service import AuthService
 from .dependency import get_auth_service
 
@@ -20,17 +20,22 @@ def register(
     service: AuthService = Depends(get_auth_service),
 ):
     
-    result = service.pending_registration(payload,bg_task)
+    return service.pending_registration(payload,bg_task)
 
-    return {
-        "status": 200,
-        "data": {
-            "id": result.id,
-            "email": result.email,
-        }
-    }
 
 @router.post('/verify-email')
-def verify_email(token:str,service: AuthService=Depends(get_auth_service)):
+def verify_email(
+    token:str,
+    service: AuthService=Depends(get_auth_service)
+):
 
-    pass
+    return service.verify_registration_token(token)
+    
+
+@router.post('/resend-verification')
+def resend_verification_token(
+    email:str,
+    bg_task: BackgroundTasks,
+    service: AuthService=Depends(get_auth_service)
+):
+    return service.resend_verification_token(email,bg_task)

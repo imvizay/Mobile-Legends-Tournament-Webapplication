@@ -20,7 +20,7 @@ class Player(Base):
 
     role = Column(String,default="player")
 
-    created_at = Column(DateTime,default=lambda:datetime.now(UTC))
+    created_at = Column(DateTime(timezone=True),default=lambda:datetime.now(UTC))
 
     
 
@@ -36,11 +36,15 @@ class PendingRegistration(Base):
     role=Column(String,default='player')
 
     verification_token = Column(String,nullable=False,unique=True)
-    token_expire_at = Column(DateTime,nullable=True)
+    token_expire_at = Column(DateTime(timezone=True),nullable=True)
 
-    email_sent = Column(Boolean,default=False)
-    email_sent_at = Column(DateTime,nullable=True)
+    email_sent = Column(String,default="PENDING")
+    email_sent_at = Column(DateTime(timezone=True),nullable=True)
 
-    created_at = Column(DateTime,default=lambda: datetime.now(UTC))
+    last_resent_at = Column(DateTime(timezone=True),nullable=True)
+    resent_count = Column(Integer,default=0)
+    last_error = Column(String,nullable=True,default='N/A')
+
+    created_at = Column(DateTime(timezone=True),default=lambda: datetime.now(UTC))
 
     

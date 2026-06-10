@@ -15,8 +15,7 @@ async def user_pending_registration_exists(request:requests,exception:PendingReg
     return JSONResponse(
         status_code=409,
         content={
-            "message":str(exception.message),
-            "status":exception.status,
-            "email_sent_at":exception.email_sent_at
+            "status":'pending',
+            "message":str(exception),
         }
     )
