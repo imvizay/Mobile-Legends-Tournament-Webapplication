@@ -10,6 +10,8 @@ import { validateSignUpCredentials } from "../../utils/validators/signupValidato
 // Registeration hook
 import { useRegisterMutation } from "../../hooks/auth/useRegisterMutation";
 
+import { toast } from "react-toastify";
+
 export default function SignupPage() {
 
   // STATES
@@ -56,15 +58,26 @@ export default function SignupPage() {
     // console.log('[2] Completed Validation')
     setUserCredError({})
    
-
     try{
       const data = await mutateAsync(userCred)
-      // console.log("Backend Data",data)
-      navigate('/login')
+      console.log("Backend Data",data)
+
+      if (data.message === "VERIFICATION_TOKEN_ALREADY_SENT") {
+
+      const formattedDate = new Date(data.expires_at).toLocaleString("en-IN", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
     
+      toast.info(
+        `Verification email already sent. Token expires on ${formattedDate}`
+      ) 
+      
+      navigate(`/verify-email?email=${userCred.email}`)
+      }
     } 
     catch(error){
-      // console.log('Registration Error : ',error)
+      console.log('Registration Error : ',error)
     } 
     finally{
       console.groupEnd()

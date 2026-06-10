@@ -11,17 +11,24 @@ import HeroSection from '../components/sections/HeroSection'
 // common components
 import LoginPage from '../pages/common/LoginPage'
 import RegisterPage from '../pages/common/SignupPage'
+import { EmailVerificationPending } from '../pages/common/EmailVerification'
+import RegistrationSuccess from '../pages/common/RegistrationSuccess'
 
 
 function AppRoutesConfig() {
 
   return (
+  
     <Routes>
 
         {/* Public Routes */}
         <Route element={<AuthLayout/>}>
             <Route path='/login' element={<LoginPage/>} /> 
             <Route path='/register' element={<RegisterPage/>} />
+            <Route path='/verify-email' element={<EmailVerificationPending/>}/>
+            <Route path='/activate-account' element={<RegistrationSuccess/>}/>
+
+
         </Route>
 
         {/* Platform Home */}
@@ -37,6 +44,7 @@ function AppRoutesConfig() {
         {/* <Route path='*' element={<NotFound/>}/> */}
 
     </Routes>
+    
   )
 
 }
