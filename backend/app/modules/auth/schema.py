@@ -22,7 +22,16 @@ class AuthCreateRequest(BaseModel):
         return self
     
 
-# Res schema
-class AuthResponse(BaseModel):
-    access_token:str 
 
+
+
+# Res schema
+from datetime import datetime
+
+class RegistrationResponse(BaseModel):
+    status: str
+    message: str
+    expires_at: datetime | None = None
+    email_sent_at:datetime | None = None
+
+    
