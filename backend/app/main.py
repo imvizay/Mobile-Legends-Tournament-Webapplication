@@ -4,8 +4,8 @@ from app.core.middleware.middleware import register_middlewares
 from app.modules.auth.router import router as auth_router
 
 # Exceptions
-from app.core.exceptions.exceptions import UserAlreadyExistsError,PendingRegistrationExistsError
-from app.core.exceptions.handlers import user_already_exists,user_pending_registration_exists
+from app.core.exceptions.exceptions import *
+from app.core.exceptions.handlers import * 
 
 app = FastAPI()
 
@@ -20,8 +20,16 @@ register_middlewares(app)
 app.include_router(auth_router,prefix='/api')
 
 # App Exception
-app.add_exception_handler(UserAlreadyExistsError,user_already_exists)
-app.add_exception_handler(PendingRegistrationExistsError,user_pending_registration_exists)
+EXCEPTION_DICT = {
+    UserAlreadyExistsError:user_already_exists,
+    PendingRegistrationExistsError:user_pending_registration_exists,
+    UserNotFoundException:user_not_found,
+    UserBannedException:user_banned,
+    InvalidCredentialsException:invalid_credentials,
+    InvalidTokenException:invalid_token
+}
+for exception,handler in EXCEPTION_DICT.items():
+    app.add_exception_handler(exception,handler) 
 
 
 

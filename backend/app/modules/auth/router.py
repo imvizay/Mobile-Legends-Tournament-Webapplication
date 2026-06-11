@@ -1,5 +1,5 @@
-from fastapi import APIRouter,Depends
-from .schema import AuthCreateRequest
+from fastapi import APIRouter,Depends,Response
+from .schema import AuthCreateRequest,LoginRequest
 from .service import AuthService
 from .dependency import get_auth_service
 
@@ -11,7 +11,39 @@ router = APIRouter(
     tags=['Authentication']
 )
 
-# dependency
+
+@router.post('/login')
+def login(
+    payload:LoginRequest,
+    response:Response,
+    service:AuthService=Depends(get_auth_service)
+    
+):
+
+    result =  service.login(payload)
+
+    response.set_cookie(
+        key="access_token",
+        value=result['access'],
+        httponly=True,
+        secure=False,
+        samesite='lax'
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=result['refresh'],
+        httponly=True,
+        secure=False,
+        samesite='lax'
+    )
+
+    return {
+        "status":200,
+        "message":"login success"
+    }
+
+
 
 @router.post('/register')
 def register(

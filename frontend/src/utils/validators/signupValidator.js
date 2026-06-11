@@ -1,7 +1,5 @@
 // SIGNUP FORM VALIDATION HELPER FN.
 
-import { isValidElement } from "react";
-
 export const validateSignUpCredentials = (creds) => {
     // console.log("Started Signup Form validation")
     let errors = {}

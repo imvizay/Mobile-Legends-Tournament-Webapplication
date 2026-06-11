@@ -21,7 +21,10 @@ class AuthCreateRequest(BaseModel):
         
         return self
     
-
+# Login request
+class LoginRequest(BaseModel):
+    email:EmailStr
+    password:str 
 
 
 

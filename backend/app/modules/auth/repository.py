@@ -7,6 +7,13 @@ class AuthRepository:
     def __init__(self,db:Session):
         self.db = db
 
+    def get_current_user(self,email:str):
+        return(
+            self.db.query(Player)
+            .filter(Player.email == email)
+            .first()
+        )
+
     # returns pending registration
     def get_pending_user(self,email:str):
         return (
