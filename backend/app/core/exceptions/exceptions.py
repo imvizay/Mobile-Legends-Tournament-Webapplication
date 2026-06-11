@@ -7,3 +7,15 @@ class UserAlreadyExistsError(AppException):
 
 class PendingRegistrationExistsError(AppException):
     pass
+
+class UserNotFoundException(AppException):
+    pass
+
+class UserBannedException(AppException):
+    pass
+
+class InvalidCredentialsException(AppException):
+    pass
+
+class InvalidTokenException(AppException):
+    pass

@@ -1,15 +1,3 @@
-<<<<<<< Updated upstream
-import {
-  Mail,
-  ShieldCheck,
-  RefreshCcw,
-  ArrowRight,
-} from "lucide-react";
-
-
-export const EmailVerificationPending = () => {
-  const email = "player@example.com";
-=======
 import {Mail,ShieldCheck,RefreshCcw,ArrowRight,} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -68,7 +56,6 @@ export const EmailVerificationPending = () => {
     
   }
 
->>>>>>> Stashed changes
 
   return (
     <section
@@ -144,15 +131,6 @@ export const EmailVerificationPending = () => {
         </div>
 
         {/* Buttons */}
-<<<<<<< Updated upstream
-        <div className="mt-4 space-y-3">
-          <button
-            className=" w-full h-10 sm:h-12 rounded-2xl bg-black text-white font-semibold text-sm sm:text-base flex items-center justify-center gap-2 hover:opacity-90 transition " >
-            <RefreshCcw size={16} />
-            Resend Verification Link
-          </button>
-
-=======
         <div  className="mt-4 space-y-3">
           <button
             disabled={linkCooldown > 0}
@@ -163,7 +141,6 @@ export const EmailVerificationPending = () => {
              {linkCooldown > 0 ? `Resend in ${linkCooldown}s` : "Resend Verification Link"}
           </button>
    
->>>>>>> Stashed changes
         </div>
 
         {/* Footer */}

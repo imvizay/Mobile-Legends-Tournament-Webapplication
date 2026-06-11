@@ -17,7 +17,7 @@ class Player(Base):
     verified = Column(Boolean,default=False)
     is_membership_active = Column(Boolean,default=False)
     is_banned = Column(Boolean,default=False) # temporary banned check
-
+    
     role = Column(String,default="player")
 
     created_at = Column(DateTime(timezone=True),default=lambda:datetime.now(UTC))

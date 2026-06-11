@@ -2,9 +2,13 @@ import os
 from passlib.context import CryptContext
 from .repository import AuthRepository
 
+from jose import jwt,JWTError
+from app.core.config.settings import settings
+from uuid import uuid4
+
 
 from .models import Player,PendingRegistration
-from .schema import AuthCreateRequest,RegistrationResponse
+from .schema import AuthCreateRequest,RegistrationResponse,LoginRequest
 
 from app.core.exceptions import exceptions
 from fastapi.background import BackgroundTasks
@@ -12,6 +16,8 @@ from fastapi.background import BackgroundTasks
 # secrets
 import secrets
 from datetime import datetime,UTC,timedelta
+
+from app.core.security.security import hash_password,verify_password
 
 # background tasks
 from app.common.services.email_service import AuthEmailService 
@@ -25,11 +31,111 @@ password_context = CryptContext(
 
 frontend_url = os.getenv("FRONTEND_URL")
 
+
+class TokenService:
+
+    ACCESS_TOKEN_EXPIRE_MINUTES = 6*60  # valid for 6 hours
+    REFRESH_TOKEN_EXPIRE_DAYS = 1    # for 7 days
+
+    SECRET_KEY = settings.SECRET_KEY
+    ALGORITHM = "HS256"
+
+    def create_access_token(self,user_id:int):
+        payload = {
+            "sub":str(user_id),
+            "type":"access",
+            "jti":str(uuid4()),
+            "exp":datetime.now(UTC) + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
+        }
+        access_token = jwt.encode(
+            payload,
+            self.SECRET_KEY,
+            algorithm=self.ALGORITHM
+        )
+
+        return access_token
+
+    def create_refresh_token(self,user_id:int):
+
+        payload = {
+            "sub":str(user_id),
+            "type":"refresh",
+            "jti":str(uuid4()),
+            "exp":datetime.now(UTC) + timedelta(days=self.REFRESH_TOKEN_EXPIRE_DAYS)
+        }
+
+        refresh_token = jwt.encode(
+            payload,
+            self.SECRET_KEY,
+            algorithm=self.ALGORITHM
+        )
+
+        return refresh_token
+
+    def decode_token(self,token:str):
+
+        try :
+            payload = jwt.decode(
+                token,
+                self.SECRET_KEY,
+                algorithms=[self.ALGORITHM]
+            )
+
+            return payload 
+        
+        except JWTError as error:
+            print("JWT ERROR:",error)
+            raise exceptions.InvalidTokenException()
+            
+
+
+    def verify_token_type(self,payload:dict,token_type:str):
+        
+        if payload.get('type') != token_type:
+            raise exceptions.InvalidTokenException()
+        
+        return payload
+
+
+
+
+
+
 class AuthService:
 
-    def __init__(self,repository:AuthRepository,email_service:AuthEmailService):
+    def __init__(self,repository:AuthRepository,email_service:AuthEmailService , token_service:TokenService):
         self.repository = repository
         self.email_service = email_service
+        self.token_service = token_service
+
+    
+    def login(self, payload: LoginRequest):
+
+        current_user = self.repository.get_current_user(
+            payload.email
+        )
+
+        if not current_user:
+            raise exceptions.UserNotFoundException()
+
+        if current_user.is_banned:
+            raise exceptions.UserBannedException()
+
+        if not verify_password( payload.password, current_user.password ):
+            raise exceptions.InvalidCredentialsException()
+        
+        # generate access and refresh token
+        access_token  = self.token_service.create_access_token(current_user.id)
+        refresh_token = self.token_service.create_refresh_token(current_user.id)
+
+        return {
+            'access':access_token,
+            'refresh':refresh_token,
+            'user':{
+                'id':current_user.id,
+                'email':current_user.email
+            }
+        }
 
 
     def resend_verification_token(self,email:str,bg_task: BackgroundTasks):
@@ -108,8 +214,6 @@ class AuthService:
             bg_task:BackgroundTasks
         ):
 
-       
-        
         existing_user = self.repository.check_user_exists(payload.email)
 
         if(existing_user):

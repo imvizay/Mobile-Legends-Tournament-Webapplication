@@ -1,13 +1,73 @@
 import { Mail, Lock, Eye } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ThemeToggle from "../../components/button/ThemeToggle";
 
 import { useNavigate } from 'react-router-dom'
 
+import { useLogin } from "../../hooks/auth/useLogin";
+import { validLoginCredentials } from "../../utils/validators/loginValidator";
+import { toast } from "react-toastify";
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [userCredError,setUserCredError] = useState({});
+  const [formData,setFormData] = useState({
+    email:'',
+    password:''
+  })
 
   const navigate = useNavigate()
+  const {
+    mutateAsync,
+    isPending,
+  } = useLogin()
+
+  // handle input 
+  const handleInputFields = (e) => {
+    const {name,value} = e.target
+
+    setFormData(
+      prev => (
+        {
+          ...prev,
+          [name]:value
+        }
+      )
+    )
+  }
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    const { isValid, errors} = validLoginCredentials(formData)
+
+    if (!isValid) {
+      setUserCredError(errors)
+
+      if (errors.empty_fields) {
+        toast.info("All fields are required.",{
+           toastId: "fields-required-info",
+          })
+      }
+        return;
+    }
+
+    try{
+      const data = await mutateAsync(formData) 
+      console.log('Login Response:',data)
+      navigate('/')
+    }
+    catch(e){
+      console.log("LOGIN ERROR",e)
+    }
+
+  }
+
+  const handleSocialLogin = (socialProvider) => {
+    // socialProvider (facebook or google)
+
+
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg-canvas)]  relative overflow-hidden">
@@ -92,7 +152,7 @@ export default function LoginPage() {
             </div>
 
             {/* Form */}
-            <form className="space-y-2">
+            <form className="space-y-2" onSubmit={handleLogin}>
 
               {/* Email */}
               <div className="text-[var(--text-primary)]">
@@ -107,7 +167,10 @@ export default function LoginPage() {
                   "/>
 
                   <input
-                    type="email"
+                    type="text"
+                    onChange={handleInputFields}
+                    name="email"
+                    value={formData.email}
                     placeholder="Enter your email"
                     className="
                     w-full
@@ -124,7 +187,7 @@ export default function LoginPage() {
                   />
 
                 </div>
-
+                {userCredError.email && <p className="text-red-400 text-[12px]">{userCredError.email}</p>} 
               </div>
 
               {/* Password */}
@@ -140,6 +203,9 @@ export default function LoginPage() {
                     size={18} className=" absolute left-4 top-1/2 -translate-y-1/2 " />
 
                   <input
+                  onChange={handleInputFields}
+                  name="password"
+                  value={formData.password}
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter password"
                     className="
@@ -201,6 +267,7 @@ export default function LoginPage() {
 
               {/* Login Button */}
               <button
+              type="submit"
                 className="
                 w-full
                 h-12
@@ -236,6 +303,7 @@ export default function LoginPage() {
             <div className="text-[var(--text-secondary)] grid sm:grid-cols-2 gap-3">
 
               <button
+                onClick={() => handleSocialLogin('google')}
                 className="
                 h-12
                 rounded-xl
@@ -250,6 +318,7 @@ export default function LoginPage() {
               </button>
 
               <button
+                onClick={() => handleSocialLogin('facebook')}
                 className="
                 h-12
                 rounded-xl
