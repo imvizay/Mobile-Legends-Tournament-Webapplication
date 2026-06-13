@@ -1,5 +1,7 @@
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from ..config.settings import settings
 
 async def security_headers(request, call_next):
    response = await call_next(request)
@@ -27,6 +29,11 @@ def register_middlewares(app):
         allowed_hosts = [
             '127.0.0.1'
         ]
+    )
+
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=settings.SECRET_KEY
     )
 
     app.middleware('http')(security_headers)

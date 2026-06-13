@@ -13,6 +13,7 @@ class Player(Base):
     email = Column(String,nullable=False,unique=True)
     password = Column(String,nullable=False)
     provider = Column(String,nullable=False)
+    provider_id = Column(String,nullable=True)
 
     verified = Column(Boolean,default=False)
     is_membership_active = Column(Boolean,default=False)

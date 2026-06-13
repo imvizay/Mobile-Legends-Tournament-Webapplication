@@ -108,6 +108,41 @@ class AuthService:
         self.email_service = email_service
         self.token_service = token_service
 
+    async def social_login(
+        self,
+        email: str,
+        provider: str,
+        provider_id: str
+    ):
+
+        user, created = self.repository.get_or_create_user(
+            email=email,
+            provider=provider,
+            provider_id=provider_id
+        )
+
+        if user.is_banned:
+            raise exceptions.UserBannedException()
+
+        access_token = self.token_service.create_access_token( user.id )
+
+        refresh_token = self.token_service.create_refresh_token( user.id )
+
+        return {
+            "access": access_token,
+            "refresh": refresh_token,
+            "message": (
+                "Account Created Successfully."
+                if created
+                else "Login Successful."
+            ),
+            "user": {
+                "id": user.id,
+                "email": user.email
+            }
+        }
+
+
     
     def login(self, payload: LoginRequest):
 

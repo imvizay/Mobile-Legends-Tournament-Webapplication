@@ -7,6 +7,41 @@ class AuthRepository:
     def __init__(self,db:Session):
         self.db = db
 
+    def get_or_create_user(
+            self,
+            email:str,
+            provider_id:int,
+            provider:str
+    ):
+        
+        # check existing user or create it 
+        user = (
+            self.db.query(Player)
+            .filter(
+                Player.email == email,
+                Player.provider_id == provider_id
+            )
+            .first()
+        )
+
+        if user:
+            return user,False
+        
+        user = Player(
+            email=email,
+            provider_id=provider_id,
+            provider=provider,
+            verified=True,
+            password='n/a',
+        )
+        
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+
+        return user,True
+
+
     def get_current_user(self,email:str):
         return(
             self.db.query(Player)
