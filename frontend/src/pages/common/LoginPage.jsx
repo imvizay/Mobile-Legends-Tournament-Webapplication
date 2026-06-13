@@ -8,6 +8,7 @@ import { useLogin } from "../../hooks/auth/useLogin";
 import { validLoginCredentials } from "../../utils/validators/loginValidator";
 import { toast } from "react-toastify";
 
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [userCredError,setUserCredError] = useState({});
@@ -17,10 +18,20 @@ export default function LoginPage() {
   })
 
   const navigate = useNavigate()
+
+  // Default Login
   const {
     mutateAsync,
     isPending,
   } = useLogin()
+
+  // Social Login
+  // const {
+  //   mutateAsync : socialMutateAsync,
+  //   isPending: socialLoginPending,
+  // } = useSocialLogin()
+
+
 
   // handle input 
   const handleInputFields = (e) => {
@@ -63,9 +74,22 @@ export default function LoginPage() {
 
   }
 
-  const handleSocialLogin = (socialProvider) => {
+  const handleSocialLogin = async (socialProvider) => {
     // socialProvider (facebook or google)
 
+    try{
+      if(socialProvider == "google"){
+        window.location.href = 'http://127.0.0.1:8000/api/auth/google/login';
+      }
+      else{
+        window.location.href="http://127.0.0.1:8000/api/auth/discord/login";
+      }
+      // const data = await socialMutateAsync(socialProvider)
+      // console.log("Social Login Success:",data)
+    }
+    catch(e){
+      console.log("Social Login Failed Error:",e)
+    }
 
   }
 
@@ -329,7 +353,7 @@ export default function LoginPage() {
                 hover:bg-zinc-50
               "
               >
-                Facebook
+                Discord
               </button>
 
             </div>
