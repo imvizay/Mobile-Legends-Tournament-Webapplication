@@ -10,7 +10,7 @@ function TopbarHeader() {
   return (
     <>
      <header
-          className="relative h-[80px] px-8 flex items-center justify-between border-b border-[var(--border-default)] bg-[var(--surface-base)] backdrop-blur-xl " >
+          className="relative h-[75px] px-8 flex items-center justify-between border-b border-[var(--border-default)] bg-[var(--surface-base)] backdrop-blur-xl " >
                 
           {/* Search */}
           <div

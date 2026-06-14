@@ -15,6 +15,7 @@ import { EmailVerificationPending } from '../pages/common/EmailVerification'
 import RegistrationSuccess from '../pages/common/RegistrationSuccess'
 import PlayerLayout from '../layouts/PlayerLayout'
 import TournamentLanding from '../components/sections/TournamentLanding'
+import EmptyTeamState from '../pages/player/team/EmptyTeam'
 
 
 function AppRoutesConfig() {
@@ -37,7 +38,7 @@ function AppRoutesConfig() {
         </Route>
 
         <Route path='/player/dashboard' element={<PlayerLayout/>}>
-          {/* <Route index element = {<PlayerHome/>}/> */}
+          <Route index element = {<EmptyTeamState/>}/>
         </Route>
 
 
