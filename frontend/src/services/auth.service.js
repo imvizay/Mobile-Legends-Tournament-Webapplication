@@ -1,10 +1,3 @@
-/* 
-This file contain backend API endpoints 
-Account Creation,
-Login
-Logout
-CurrentUser
-*/
 
 import { api } from "../api/client/request"
 import { AUTH_ENDPOINTS } from "../api/endpoints/authEndpoints"

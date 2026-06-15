@@ -60,27 +60,28 @@ const PLAYER_DASHBOARD_NAVIGATION_LINKS = [
 function PlayerLayout() {
 
   return (
-      <section className="select-none bg-[var(--bg-canvas)] grid grid-cols-[230px_1fr] h-screen">
-        <AsideSidebar dashboardLinks = {PLAYER_DASHBOARD_NAVIGATION_LINKS}/>
-      
-        
-      {/* Right Content Area */}
-      <div className="grid grid-rows-[88px_1fr]">
-        
-        {/* Topbar */}
-      
-       <TopbarHeader/>
-    
-        {/* Page Content */}
-        <main className="overflow-y-auto p-8">
+     <section className="h-screen overflow-hidden bg-[var(--bg-canvas)] grid grid-cols-[230px_1fr]">
+
+      {/* Sidebar */}
+      <AsideSidebar dashboardLinks = {PLAYER_DASHBOARD_NAVIGATION_LINKS}/>
+
+      {/* Right Side */}
+      <div className="grid grid-rows-[88px_1fr] h-screen overflow-hidden">
+
+        {/* Fixed Header */}
+        <TopbarHeader />
+
+        {/* Scroll Container */}
+        <main className="min-h-0 overflow-hidden p-4">
           <Outlet />
         </main>
-        
+
       </div>
-        
+
     </section>
-)
+  )
   
 }
 
 export default PlayerLayout
+
