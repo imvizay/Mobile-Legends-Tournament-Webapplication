@@ -36,12 +36,16 @@ function TeamCreatePage() {
     const teamLogoInputRef = useRef(null)
     const teamLogoBgInputRef = useRef(null)
 
-    const {
-        mutateAsync,
-        isPending,
-        isError
-    } = useMutation({
-        mutationFn: (teamData) => teamService.createTeam(teamData)
+    const createTeamMutation = useMutation({
+        mutationFn: teamService.createTeam,
+
+        onSuccess: () => {
+            toast.success("Team created successfully.")
+        },
+
+        onError: (error) => {
+            toast.error( error.response?.data?.message ?? "Unable to create team." )
+        },
     })
 
     // useEffect for preview logo and background image 
@@ -147,7 +151,28 @@ function TeamCreatePage() {
 
         // API Call To Create Team
         try{
-            const data = await mutateAsync(teamInfo)
+            const formData = new FormData()
+            formData.append("team_logo",teamLogoFile)
+            formData.append("team_banner",teamBgLogoFile)
+
+            Object.entries(teamInfo).forEach(([Key,value]) => {
+                formData.append(Key,value)
+            })
+
+            const data = await createTeamMutation.mutateAsync(formData);
+
+            setTeamInfo({
+                team_name: "",
+                team_bio: "",
+                team_visibility: "public",
+                team_region: "India",
+                team_language: "English",
+                team_communication_link: "",
+                team_tag: "",
+            })
+
+            setTeamLogoFile(null)
+            setTeamBgLogoFile(null)
             setTeamErrors(null)
         }
         catch(error){
