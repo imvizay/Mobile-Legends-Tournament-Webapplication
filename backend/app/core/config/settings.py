@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Settings(BaseSettings):
-
+    
     APP_NAME : str = "MLBB Esports Tournamnet WebApp"
     APP_VERSION : str =  '1.0'\
     
@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     DISCORD_CLIENT_SECRET : str  = os.getenv("DISCORD_CLIENT_SECRET")
 
     BACKEND_URL: str = os.getenv("BACKEND_URL")
+
+    # Cloudinary Config
+    CLOUDINARY_CLOUD_NAME: str = os.getenv("CLOUDINARY_CLOUD_NAME")
+    CLOUDINARY_API_KEY:str = os.getenv("CLOUDINARY_API_KEY")
+    CLOUDINARY_API_SECRET:str = os.getenv("CLOUDINARY_API_SECRET")
 
 
 

@@ -19,3 +19,12 @@ class InvalidCredentialsException(AppException):
 
 class InvalidTokenException(AppException):
     pass
+
+
+# TEAM EXCEPTIONS
+class ExceptionPlayerAlreadyHasTeam(AppException):
+    pass
+
+class ExceptionTeamAlreadyExits(AppException):
+    pass
+

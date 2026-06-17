@@ -6,20 +6,20 @@ from .services import TeamService
 from .dependency import get_team_service
 
 router = APIRouter(
-    prefix='/player',
-    tags='Team'
+    prefix='/player/team',
+    tags=['Team']
 )
 
-@router.post('/create-team')
-@router.post("/teams")
+@router.post('/create')
 async def create_team(
     payload: TeamCreateSchema = Depends(TeamCreateSchema.as_form),
     team_service: TeamService = Depends(get_team_service),
     logo: UploadFile | None = File(None),
     banner: UploadFile | None = File(None),
     current_user: Player = Depends(get_current_user),
-):
+):  
 
+    print("Create Team endpoint reached")
     return team_service.create_team(
         payload,
         logo,

@@ -1,10 +1,13 @@
 from sqlalchemy.orm import Session
-from .schemas import TeamCreateSchema
+from .schemas import TeamCreateSchema , CreatedTeamResponse , TeamResponse , TeamWalletResponse , TeamMemberResponse
 from fastapi import UploadFile
-from .validators import validate_image , validate_user_eligibility
+from .validators import validate_image 
+from app.core.exceptions.exceptions import ExceptionTeamAlreadyExits,ExceptionPlayerAlreadyHasTeam 
 from ...modules.auth.models import Player
 from .repository import TeamRepository
 
+# upload image to cloudinary 
+from ...core.cloudinary.cloudinary_services import cloud_service 
 
 class TeamService:
 
@@ -19,39 +22,75 @@ class TeamService:
         banner: UploadFile | None,
         current_user: Player,
     ):
-
+        
         validate_image(logo)
         validate_image(banner)
 
         # Ensure user eligible to create team.
-        user_eligibility = self.repository.player_has_team(current_user.id)
-        if user_eligibility is not None:
-           raise "ExceptionPlayerHasTeam"
+        player_in_team = self.repository.player_has_team(current_user.id)
+
+        if player_in_team:
+           raise ExceptionPlayerAlreadyHasTeam()
 
         # Ensure wehther a team with team name already exits or not. 
         team_exists = self.repository.get_team_by_name(payload.team_name)
-        if team_exists is not None:
-           raise "ExceptionTeamExits"
+        if team_exists:
+           raise ExceptionTeamAlreadyExits()
         
+        print("LOGO:",logo)
+        print("BANNER:",banner)
+
         # upload image to cloudinary helper
-        # logo_url = self._upload_logo(logo)
-        # banner_url = self._upload_banner(banner)
+        logo = cloud_service.upload_image(logo,folder="teams/logo")
+        banner = cloud_service.upload_image(banner,folder="teams/banner")
 
         try:
             # create team
             team = self.repository.create_team(
-                payload,
-                logo_url,
-                banner_url,
-                current_user,
-            )
+                current_user=current_user,
+                payload=payload,
+                logo=logo,
+                banner=banner,
+            )   
 
-            self.repository.create_wallet(team)
-            self.repository.create_owner_membership(team,current_user)
+            self.db.flush()
+
+            team_wallet = self.repository.create_team_wallet(team_id=team.id)
+            team_member = self.repository.join_team(team_id=team.id,player_id=current_user.id,player_role="captain")
 
             self.db.commit()
+            self.db.refresh(team)
 
-            return team
+            return CreatedTeamResponse(
+
+                message="Team created successfully",
+
+                team=TeamResponse(
+                    team_id = team.id,
+                    team_name=team.name, 
+                    team_bio=team.description or "",  
+                    team_tag=team.tag,    
+
+                    team_logo_url=team.logo_url, 
+                    team_banner_url=team.banner_url, 
+                    
+                    team_country=team.country,   
+                    
+                    team_visibility=team.visibility,
+                    team_wallet=TeamWalletResponse(
+                        wallet_balance=team_wallet.balance,
+                        team_id=team.id,
+                    ),
+
+                    team_members=[
+                        TeamMemberResponse(
+                            player_id=current_user.id, 
+                            player_name=current_user.email, 
+                            player_role="captain",
+                        )
+                    ]
+                )
+            )
         
         except:
          self.db.rollback()

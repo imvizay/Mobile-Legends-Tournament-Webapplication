@@ -6,7 +6,11 @@ from app.core.exceptions.exceptions import (
     UserBannedException,
     UserNotFoundException,
     InvalidCredentialsException,
-    InvalidTokenException
+    InvalidTokenException,
+
+    ExceptionPlayerAlreadyHasTeam,
+    ExceptionTeamAlreadyExits
+
 )
 
 async def user_already_exists(request:requests,exception:UserAlreadyExistsError):
@@ -57,5 +61,21 @@ async def invalid_token(request:requests,exception:InvalidTokenException):
         status_code = 404,
         content = {
             "message":"token is either invalid or expired."
+        }
+    )
+
+async def team_exists(request:requests,exception:ExceptionTeamAlreadyExits):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "message":"Team with this name already exits."
+        }
+    )
+
+async def player_already_in_team(request:requests,exception:ExceptionPlayerAlreadyHasTeam):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "message":"Player is associated with some team."
         }
     )

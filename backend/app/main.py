@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from app.core.middleware.middleware import register_middlewares
 from app.modules.auth.router import router as auth_router
+from app.modules.teams.router import router as team_router
 
 # Exceptions
 from app.core.exceptions.exceptions import *
@@ -18,6 +19,8 @@ register_middlewares(app)
 
 
 app.include_router(auth_router,prefix='/api')
+app.include_router(team_router,prefix='/api')
+
 
 # App Exception
 EXCEPTION_DICT = {
@@ -26,7 +29,12 @@ EXCEPTION_DICT = {
     UserNotFoundException:user_not_found,
     UserBannedException:user_banned,
     InvalidCredentialsException:invalid_credentials,
-    InvalidTokenException:invalid_token
+    InvalidTokenException:invalid_token,
+
+    ExceptionPlayerAlreadyHasTeam:player_already_in_team,
+    ExceptionTeamAlreadyExits:team_exists
+
+
 }
 for exception,handler in EXCEPTION_DICT.items():
     app.add_exception_handler(exception,handler) 

@@ -4,7 +4,11 @@ export const teamService = {
     createTeam(data){
         return api.post(
             USER_TEAM_ENDPOINTS.CREATE_TEAM,
-            data
+            data,
+            {
+                withCredentials:true,
+                timeout:15000
+            }
         )
     }
 }

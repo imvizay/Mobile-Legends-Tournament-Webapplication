@@ -26,55 +26,6 @@ class TeamStatus(str, Enum):
     ARCHIVED = "archived"
 
 
-class Team(Base):
-    __tablename__ = "teams"
-  
-    id = Column(Integer, primary_key=True, index=True)
-
-    name = Column(String(60),nullable=False,unique=True,index=True)
-    tag = Column(String(10),nullable=False,unique=False,index=False)
-
-    logo_url = Column(Text, nullable=True)
-    banner_url = Column(Text, nullable=True)
-
-    description = Column(Text,nullable=True,)
-    country = Column(String(50),nullable=False,index=True,default="india")
-    region = Column(String(50),nullable=False,index=True)
-    city = Column(String(60),nullable=True)
-    visibility = Column(SQLEnum(TeamVisibility),default=TeamVisibility.PUBLIC,nullable=False)
-    max_members = Column(Integer,default=7,nullable=False)
-    status = Column(SQLEnum(TeamStatus),default=TeamStatus.ACTIVE,nullable=False,index=True)
-    is_verified = Column(Boolean,default=False,nullable=False)
-
-    # Ownership    
-    captain_id = Column(Integer,ForeignKey("players.id", ondelete="RESTRICT"),nullable=False,index=True)
-    created_by = Column(Integer,ForeignKey("players.id", ondelete="RESTRICT"),nullable=False)
-
-    # Moderation
-    ban_reason = Column(Text,nullable=True)
-    banned_at = Column(DateTime(timezone=True),nullable=True)
-    banned_by = Column(Integer,ForeignKey("players.id", ondelete="SET NULL"),nullable=True)
-
-    # Audit
-    created_at = Column(DateTime(timezone=True),server_default=func.now(),nullable=False)
-    updated_at = Column(DateTime(timezone=True),server_default=func.now(),onupdate=func.now(),nullable=False)
-    deleted_at = Column(DateTime(timezone=True),nullable=True)
-
-    # Relationships
-    
-    captain = relationship("Player",foreign_keys=[captain_id])
-    creator = relationship("Player",foreign_keys=[created_by])
-    moderator = relationship("Player",foreign_keys=[banned_by])
-
-    members = relationship("TeamMember",back_populates="team",cascade="all, delete-orphan")
-    wallet = relationship("TeamWallet",back_populates="team",uselist=False)
-    tournaments = relationship("TournamentRegistration",back_populates="team")
-
-    __table_args__ = (
-        Index("idx_team_status_visibility", "status", "visibility"),
-        Index("idx_team_region_status", "country", "region", "status")
-    )
-
 
 
 class TeamRole(str, Enum):
@@ -110,10 +61,64 @@ class TeamMember(Base):
     player = relationship("Player",back_populates="teams")
 
     __table_args__ = (
-        Index("idx_team_player","team_id","player_id")
+        Index("idx_team_player","team_id","player_id"),
         Index("idx_team_role","team_id","role")
     )
     
+
+
+class Team(Base):
+    __tablename__ = "teams"
+  
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String(60),nullable=False,unique=True,index=True)
+    tag = Column(String(10),nullable=False,unique=False,index=False)
+
+    logo_public_id = Column(String(255), nullable=True)
+    logo_url = Column(Text, nullable=True)
+
+    banner_public_id = Column(String(255), nullable=True)
+    banner_url = Column(Text, nullable=True)
+
+    description = Column(Text,nullable=True,)
+    country = Column(String(50),nullable=False,index=True,default="india")
+    region = Column(String(50),nullable=True)
+    city = Column(String(60),nullable=True)
+    visibility = Column(SQLEnum(TeamVisibility),default=TeamVisibility.PUBLIC,nullable=False)
+    max_members = Column(Integer,default=7,nullable=False)
+    status = Column(SQLEnum(TeamStatus),default=TeamStatus.ACTIVE,nullable=False,index=True)
+    is_verified = Column(Boolean,default=False,nullable=False)
+
+    # Ownership    
+    captain_id = Column(Integer,ForeignKey("players.id", ondelete="RESTRICT"),nullable=False,index=True)
+    created_by = Column(Integer,ForeignKey("players.id", ondelete="RESTRICT"),nullable=False)
+
+    # Moderation
+    ban_reason = Column(Text,nullable=True)
+    banned_at = Column(DateTime(timezone=True),nullable=True)
+    banned_by = Column(Integer,ForeignKey("players.id", ondelete="SET NULL"),nullable=True)
+
+    # Audit
+    created_at = Column(DateTime(timezone=True),server_default=func.now(),nullable=False)
+    updated_at = Column(DateTime(timezone=True),server_default=func.now(),onupdate=func.now(),nullable=False)
+    deleted_at = Column(DateTime(timezone=True),nullable=True)
+
+    # Relationships
+    
+    captain = relationship("Player",foreign_keys=[captain_id])
+    creator = relationship("Player",foreign_keys=[created_by])
+    moderator = relationship("Player",foreign_keys=[banned_by])
+
+    members = relationship("TeamMember",back_populates="team",cascade="all, delete-orphan")
+    wallet = relationship("TeamWallet",back_populates="team",uselist=False)
+    # tournaments = relationship(TournamentRegistration,back_populates="team")
+
+    __table_args__ = (
+        Index("idx_team_status_visibility", "status", "visibility"),
+        Index("idx_team_region_status", "country", "region", "status")
+    )
+
 
 
 class WalletStatus(str, Enum):
@@ -140,3 +145,5 @@ class TeamWallet(Base):
     updated_at = Column(DateTime(timezone=True),server_default=func.now(),onupdate=func.now())
 
     team = relationship("Team",back_populates="wallet")
+
+    
