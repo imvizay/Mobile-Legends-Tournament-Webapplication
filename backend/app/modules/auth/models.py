@@ -1,6 +1,8 @@
 from sqlalchemy import Column,String,Boolean,Integer,DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime,UTC
+from ..users.models import GameProfile
+
 
 # Base model
 from app.core.db.base_class import Base
@@ -21,6 +23,10 @@ class Player(Base):
     role = Column(String,default="player")
 
     created_at = Column(DateTime(timezone=True),default=lambda:datetime.now(UTC))
+
+    game_profile  = relationship('GameProfile',back_populates='user',uselist=False)
+
+    membership = relationship('PlayerMembership',back_populates='player_membership',uselist=False)
 
     
 

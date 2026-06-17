@@ -30,6 +30,73 @@ class AuthService:
     def __init__(self,repository:AuthRepository,email_service:AuthEmailService):
         self.repository = repository
         self.email_service = email_service
+<<<<<<< Updated upstream
+=======
+        self.token_service = token_service
+
+    async def social_login(
+        self,
+        email: str,
+        provider: str,
+        provider_id: str
+    ):
+
+        user, created = self.repository.get_or_create_user(
+            email=email,
+            provider=provider,
+            provider_id=provider_id
+        )
+
+        if user.is_banned:
+            raise exceptions.UserBannedException()
+
+        access_token = self.token_service.create_access_token( user.id )
+        refresh_token = self.token_service.create_refresh_token( user.id )
+
+        return {
+            "access": access_token,
+            "refresh": refresh_token,
+            "message": (
+                "Account Created Successfully."
+                if created
+                else "Login Successful."
+            ),
+            "user": {
+                "id": user.id,
+                "email": user.email
+            }
+        }
+
+
+    
+    def login(self, payload: LoginRequest):
+
+        current_user = self.repository.get_current_user(
+            payload.email
+        )
+
+        if not current_user:
+            raise exceptions.UserNotFoundException()
+
+        if current_user.is_banned:
+            raise exceptions.UserBannedException()
+
+        if not verify_password( payload.password, current_user.password ):
+            raise exceptions.InvalidCredentialsException()
+        
+        # generate access and refresh token
+        access_token  = self.token_service.create_access_token(current_user.id)
+        refresh_token = self.token_service.create_refresh_token(current_user.id)
+
+        return {
+            'access':access_token,
+            'refresh':refresh_token,
+            'user':{
+                'id':current_user.id,
+                'email':current_user.email
+            }
+        }
+>>>>>>> Stashed changes
 
 
     def resend_verification_token(self,email:str,bg_task: BackgroundTasks):
