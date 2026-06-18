@@ -13,6 +13,8 @@ import LoginPage from '../pages/common/LoginPage'
 import RegisterPage from '../pages/common/SignupPage'
 import { EmailVerificationPending } from '../pages/common/EmailVerification'
 import RegistrationSuccess from '../pages/common/RegistrationSuccess'
+import PlayerLayout from '../layouts/PlayerLayout'
+import TournamentLanding from '../components/sections/TournamentLanding'
 
 
 function AppRoutesConfig() {
@@ -27,13 +29,15 @@ function AppRoutesConfig() {
             <Route path='/register' element={<RegisterPage/>} />
             <Route path='/verify-email' element={<EmailVerificationPending/>}/>
             <Route path='/activate-account' element={<RegistrationSuccess/>}/>
-
-
         </Route>
 
         {/* Platform Home */}
         <Route path='/' element={<PlatformLayout/>}>
-          <Route element={<HeroSection/>}/>
+          
+        </Route>
+
+        <Route path='/player/dashboard' element={<PlayerLayout/>}>
+          {/* <Route index element = {<PlayerHome/>}/> */}
         </Route>
 
 

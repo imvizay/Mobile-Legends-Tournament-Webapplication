@@ -45,21 +45,37 @@ body {
   }
 }
 
-/* =====================================================
-   LIGHT THEME
-===================================================== */
+/* scrollbar userdashboard sidebar */
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    var(--accent-gold),
+    var(--accent-gold-light)
+  );
+  border-radius: 999px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  opacity: 0.9;
+}
+
+/* LIGHT THEME */
 
 :root {
-/* -----------------------------------
-   PAGE BACKGROUNDS
------------------------------------ */
+/* PAGE BACKGROUNDS */
 
 --bg-canvas: #f6f4f1;
 --bg-canvas-secondary: #fbfaf8;
 
-/* -----------------------------------
-  Theme Toggle 
-------------------------------------- */
+/* Theme Toggle  */
 --toggle-track: rgba(255,255,255,.5);
 
 --toggle-thumb: #ffffff;
@@ -67,116 +83,88 @@ body {
 --toggle-sun: #f59e0b;
 --toggle-moon: #64748b;
 
-/* -----------------------------------
-   GLASSMORPHISM
------------------------------------ */
+/* GLASSMORPHISM */
 
 --glass-surface: rgba(255, 255, 255, 0.45);
 --glass-navbar: rgba(255, 255, 255, 0.20);
 --glass-border: rgba(255, 255, 255, 0.55);
 --glass-highlight: rgba(255, 255, 255, 0.65);
 
-/* -----------------------------------
-   SURFACES
------------------------------------ */
+/* SURFACES */
 
 --surface-base: #ffffff;
 --surface-elevated: #f8f8f8;
 --surface-floating: #ffffff;
 
-/* -----------------------------------
-   TEXT
------------------------------------ */
+/*  TEXT */
 
 --text-primary: #111111;
 --text-secondary: #666b73;
 --text-muted: #8e949b;
 
-/* -----------------------------------
-   HERO TYPOGRAPHY
------------------------------------ */
+/*  HERO TYPOGRAPHY */
 
 --headline-primary: #111111;
 --headline-accent: #d89c0f;
 --headline-script: #7c7c7c;
 
-/* -----------------------------------
-   BORDERS
------------------------------------ */
+/*  BORDERS */
 
 --border-subtle: rgba(15, 23, 42, 0.08);
 --border-default: rgba(15, 23, 42, 0.12);
 --border-strong: rgba(15, 23, 42, 0.18);
 
 
-/* -----------------------------------
-   PRIMARY ACTIONS
------------------------------------ */
+/*  PRIMARY ACTIONS */
 
 --action-primary-bg: rgba(0, 0, 0, 0.92);
 --action-primary-text: #ffffff;
 --action-primary-border: transparent;
 
-/* -----------------------------------
-   SECONDARY ACTIONS
------------------------------------ */
+/*  SECONDARY ACTIONS */
 
 --action-secondary-bg: rgba(255, 255, 255, 0.75);
 --action-secondary-text: #111111;
 --action-secondary-border: rgba(15, 23, 42, 0.08);
 
-/* -----------------------------------
-  REGISTER BUTTON
-------------------------------------- */
+/* REGISTER BUTTON  */
 --action-primary-bg: rgba(0,0,0,.92);
 --action-primary-text: #ffffff;
 --action-primary-border: transparent;
 
-/* -----------------------------------
-  LOGIN BUTTON
--------------------------------------- */
+/*  LOGIN BUTTON */
 --action-secondary-bg: rgba(255,255,255,.75);
 --action-secondary-text: #111111;
 --action-secondary-border: rgba(15,23,42,.08);
 
-/* -----------------------------------
-   NAVIGATION
------------------------------------ */
+/* NAVIGATION */
 
 --nav-active: #111111;
 
-/* -----------------------------------
-   SHADOWS
------------------------------------ */
+/* SHADOWS */
 
 --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.06);
 --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.08);
 --shadow-glass:
   0 8px 32px rgba(0, 0, 0, 0.08);
 
-/* -----------------------------------
-   BRAND ACCENT
------------------------------------ */
+/* BRAND ACCENT */
 
 --accent-gold: #c8b07a;
 --accent-gold-light: #d7c08a;
 
 }
 
-/* =====================================================
+/* ==================
    DARK THEME
-===================================================== */
+===================== */
 
 .dark {
-/* -----------------------------------
-   PAGE BACKGROUNDS
------------------------------------ */
+/* PAGE BACKGROUNDS */
 --bg-canvas: #050505;
 --bg-canvas-secondary: #0e0e0e;
 
-/* -----------------------------------
-  Theme Toggle 
-------------------------------------- */
+/* Theme Toggle  */
 --toggle-track: rgba(255,255,255,.04);
 
 --toggle-thumb: #f4f4f5;
@@ -184,87 +172,65 @@ body {
 --toggle-sun: #fbbf24;
 --toggle-moon: #111111;
 
-/* -----------------------------------
-   GLASSMORPHISM
------------------------------------ */
+/*  GLASSMORPHISM */
 
 --glass-surface: rgba(255, 255, 255, 0.04);
 --glass-navbar: rgba(0, 0, 0, 0.35);
 --glass-border: rgba(255, 255, 255, 0.08);
 --glass-highlight: rgba(255, 255, 255, 0.15);
 
-/* -----------------------------------
-   SURFACES
------------------------------------ */
+/* SURFACES */
 
 --surface-base: #101010;
 --surface-elevated: #151515;
 --surface-floating: #1b1b1b;
 
-/* -----------------------------------
-   TEXT
------------------------------------ */
+/* TEXT */
 
 --text-primary: #f4f4f5;
 --text-secondary: #b1b5bd;
 --text-muted: #7a7f88;
 
-/* -----------------------------------
-   HERO TYPOGRAPHY
------------------------------------ */
+/* HERO TYPOGRAPHY */
 
 --headline-primary: #ffffff;
 --headline-accent: #d6b66a;
 --headline-script: #b6bdc7;
 
-/* -----------------------------------
-   BORDERS
------------------------------------ */
+/* BORDERS */
 
 --border-subtle: rgba(255, 255, 255, 0.37);
 --border-default: rgba(255, 255, 255, 0.12);
 --border-strong: rgba(255, 255, 255, 0.758);
 
-/* -----------------------------------
-   PRIMARY ACTIONS
------------------------------------ */
+/* PRIMARY ACTIONS */
 
 --action-primary-bg: rgba(255, 255, 255, 0.92);
 --action-primary-text: #000000;
 --action-primary-border: transparent;
 
-/* -----------------------------------
-   SECONDARY ACTIONS
------------------------------------ */
+/* SECONDARY ACTIONS */
 
 --action-secondary-bg: rgba(255, 255, 255, 0.05);
 --action-secondary-text: #ffffff;
 --action-secondary-border: rgba(255, 255, 255, 0.08);
 
-/* -----------------------------------
-  REGISTER BUTTON
-------------------------------------- */
+/* REGISTER BUTTON */
 --action-primary-bg: rgba(255,255,255,.92);
 --action-primary-text: #000000;
 --action-primary-border: transparent;
 
-/* -----------------------------------
-  LOGIN BUTTON
--------------------------------------- */
+/* LOGIN BUTTON */
 --action-secondary-bg: rgba(255,255,255,.05);
 --action-secondary-text: #ffffff;
 --action-secondary-border: rgba(255,255,255,.08);
 
 
-/* -----------------------------------
-   NAVIGATION
------------------------------------ */
+/* NAVIGATION */
 
 --nav-active: #ffffff;
 
-/* -----------------------------------
-   SHADOWS
------------------------------------ */
+/* SHADOWS */
 
 --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.35);
 --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.45);
@@ -272,9 +238,7 @@ body {
   0 8px 32px rgba(0, 0, 0, 0.45);
 
 
-/* -----------------------------------
-   BRAND ACCENT
------------------------------------ */
+/* BRAND ACCENT */
 
 --accent-gold: #c8b07a;
 --accent-gold-light: #d7c08a;
