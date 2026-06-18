@@ -125,7 +125,6 @@ class AuthService:
             raise exceptions.UserBannedException()
 
         access_token = self.token_service.create_access_token( user.id )
-
         refresh_token = self.token_service.create_refresh_token( user.id )
 
         return {
