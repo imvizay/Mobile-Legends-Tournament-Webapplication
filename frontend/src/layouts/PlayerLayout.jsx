@@ -50,8 +50,6 @@ const PLAYER_DASHBOARD_NAVIGATION_LINKS = [
       {icon:Headset,name:"Support",path:'player/support'},
       {icon:MessageSquare,name:"Feedback",path:'player/feedback'},
       {icon:TicketPlus,name:"Raise Ticket",path:'player/raise-ticket'},
-
-
     ]
   }
 ];
@@ -60,7 +58,7 @@ const PLAYER_DASHBOARD_NAVIGATION_LINKS = [
 function PlayerLayout() {
 
   return (
-     <section className="h-screen overflow-hidden bg-[var(--bg-canvas)] grid grid-cols-[230px_1fr]">
+     <section className="h-screen overflow-hidden bg-[var(--bg-canvas)] grid grid-cols-[200px_1fr]">
 
       {/* Sidebar */}
       <AsideSidebar dashboardLinks = {PLAYER_DASHBOARD_NAVIGATION_LINKS}/>
@@ -72,7 +70,7 @@ function PlayerLayout() {
         <TopbarHeader />
 
         {/* Scroll Container */}
-        <main className="min-h-0 overflow-hidden p-4">
+        <main className="min-h-0 overflow-hidden px-6">
           <Outlet />
         </main>
 

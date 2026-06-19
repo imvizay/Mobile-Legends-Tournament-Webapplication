@@ -8,15 +8,28 @@ import PlatformLayout from '../layouts/PlatformLayout'
 // components
 import HeroSection from '../components/sections/HeroSection'
 
+/* Auth components */
 // common components
 import LoginPage from '../pages/common/LoginPage'
 import RegisterPage from '../pages/common/SignupPage'
+
+// auth verification component
 import { EmailVerificationPending } from '../pages/common/EmailVerification'
 import RegistrationSuccess from '../pages/common/RegistrationSuccess'
-import PlayerLayout from '../layouts/PlayerLayout'
+
+// Default Home page component.
 import TournamentLanding from '../components/sections/TournamentLanding'
-import EmptyTeamState from '../pages/player/team/EmptyTeam'
-import TeamCreatePage from '../pages/player/team/TeamCreatePage'
+
+/* PlayerDashboard Components */
+import PlayerLayout from '../layouts/PlayerLayout'
+// Teams
+import TeamListingPage from '../pages/player/team/TeamListingPage';
+
+
+import EmptyTeamState from '../pages/player/team/EmptyTeam';
+import TeamCreatePage from '../pages/player/team/TeamCreatePage';
+import TeamPageSkeleton from '../skeletons/playerdash/my_team/TeamPageSkeleton'
+import TeamLayout from '../layouts/TeamLayout'
 
 
 function AppRoutesConfig() {
@@ -26,11 +39,11 @@ function AppRoutesConfig() {
     <Routes>
 
         {/* Public Routes */}
-        <Route element={<AuthLayout/>}>
-            <Route path='/login' element={<LoginPage/>} /> 
-            <Route path='/register' element={<RegisterPage/>} />
-            <Route path='/verify-email' element={<EmailVerificationPending/>}/>
-            <Route path='/activate-account' element={<RegistrationSuccess/>}/>
+        <Route element  = {<AuthLayout/>}>
+            <Route path = '/login' element = {<LoginPage/>} /> 
+            <Route path = '/register' element = {<RegisterPage/>} />
+            <Route path = '/verify-email' element = {<EmailVerificationPending/>}/>
+            <Route path = '/activate-account' element = {<RegistrationSuccess/>}/>
         </Route>
 
         {/* Platform Home */}
@@ -38,9 +51,19 @@ function AppRoutesConfig() {
           
         </Route>
 
-        <Route path='/player-dashboard' element={<PlayerLayout/>}>
-          <Route index element = {<EmptyTeamState/>}/>
-          <Route path= '/player-dashboard/team-creation' element =  {<TeamCreatePage/>}/>
+        <Route path ='/player-dashboard' element = {<PlayerLayout/>}>
+
+          <Route path="team" element={<TeamLayout />}>
+            {/* <Route index element={<TeamOverview />} /> */}
+            {/* <Route path = "history" element = {<TournamentHistory />} /> */}
+            {/* <Route path = "applications" element = {<TeamApplications />} /> */}
+            {/* <Route path = "chat" element = {<TeamChat />} /> */}
+            {/* <Route path = "settings" element = {<TeamSettings />} /> */}
+          </Route>
+          
+          <Route path = 'no-team'    element =  {<EmptyTeamState/>}/>
+          <Route path = 'create-team'   element =  {<TeamCreatePage/>}/>
+          <Route path = 'discover-team' element =  {<TeamListingPage/>}/>
 
         </Route>
 

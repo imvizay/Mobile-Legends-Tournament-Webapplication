@@ -9,7 +9,9 @@ from app.core.exceptions.exceptions import (
     InvalidTokenException,
 
     ExceptionPlayerAlreadyHasTeam,
-    ExceptionTeamAlreadyExits
+    ExceptionTeamAlreadyExits,
+    NoTeamException
+    
 
 )
 
@@ -77,5 +79,13 @@ async def player_already_in_team(request:requests,exception:ExceptionPlayerAlrea
         status_code=404,
         content={
             "message":"Player is associated with some team."
+        }
+    )
+
+async def player_no_team(request:requests,exception:NoTeamException):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "message":"You are not part of any team."
         }
     )

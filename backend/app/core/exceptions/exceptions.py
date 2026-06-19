@@ -28,3 +28,5 @@ class ExceptionPlayerAlreadyHasTeam(AppException):
 class ExceptionTeamAlreadyExits(AppException):
     pass
 
+class NoTeamException(AppException):
+    pass
