@@ -30,6 +30,7 @@ import EmptyTeamState from '../pages/player/team/EmptyTeam';
 import TeamCreatePage from '../pages/player/team/TeamCreatePage';
 import TeamPageSkeleton from '../skeletons/playerdash/my_team/TeamPageSkeleton'
 import TeamLayout from '../layouts/TeamLayout'
+import Overview from '../pages/player/team/Overview'
 
 
 function AppRoutesConfig() {
@@ -54,7 +55,7 @@ function AppRoutesConfig() {
         <Route path ='/player-dashboard' element = {<PlayerLayout/>}>
 
           <Route path="team" element={<TeamLayout />}>
-            {/* <Route index element={<TeamOverview />} /> */}
+            <Route index element={<Overview />} />
             {/* <Route path = "history" element = {<TournamentHistory />} /> */}
             {/* <Route path = "applications" element = {<TeamApplications />} /> */}
             {/* <Route path = "chat" element = {<TeamChat />} /> */}

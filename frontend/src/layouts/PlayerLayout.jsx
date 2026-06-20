@@ -4,10 +4,12 @@ import { Crown, Gift, GlobeIcon, Headset, Home, Medal, Newspaper, Receipt,Lucide
 import React from 'react'
 import { Outlet } from 'react-router-dom'
 
+// Desktop Navbar
 import AsideSidebar from '../components/playerLayout/Sidebar';
 import TopbarHeader from '../components/playerLayout/Topbar';
 
-
+// Mobile Navbar
+import MobileNavbar from '../components/navigations/MobileNavbar';
 
 const PLAYER_DASHBOARD_NAVIGATION_LINKS = [
   {
@@ -58,23 +60,44 @@ const PLAYER_DASHBOARD_NAVIGATION_LINKS = [
 function PlayerLayout() {
 
   return (
-     <section className="h-screen overflow-hidden bg-[var(--bg-canvas)] grid grid-cols-[200px_1fr]">
+    <section className="h-fit lg:h-screen overflow-hidden bg-[var(--bg-canvas)] lg:grid lg:grid-cols-[220px_1fr]">
 
-      {/* Sidebar */}
-      <AsideSidebar dashboardLinks = {PLAYER_DASHBOARD_NAVIGATION_LINKS}/>
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:block">
+            <AsideSidebar dashboardLinks={PLAYER_DASHBOARD_NAVIGATION_LINKS}/>
+        </aside>
 
-      {/* Right Side */}
-      <div className="grid grid-rows-[88px_1fr] h-screen overflow-hidden">
+        {/* Right */}
+        <div className="min-h-screen flex flex-col">
 
-        {/* Fixed Header */}
-        <TopbarHeader />
+            {/* Desktop Header */}
+            <div className="hidden lg:block">
+                <TopbarHeader/>
+            </div>
 
-        {/* Scroll Container */}
-        <main className="min-h-0 overflow-hidden px-6">
-          <Outlet />
-        </main>
+            {/* Mobile Header */}
+            <div className="lg:hidden">
+                <MobileNavbar/>
+            </div>
 
-      </div>
+            <main
+                className="
+                flex-1
+                overflow-y-auto
+                px-4
+                pt-20
+                pb-6
+
+                md:px-6
+
+                lg:px-8
+                lg:pt-6
+                "
+            >
+                <Outlet/>
+            </main>
+
+        </div>
 
     </section>
   )

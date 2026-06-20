@@ -1,98 +1,154 @@
-import {
-  Users,
-  Calendar,
-  MapPin,
-  Pencil,
-  BadgeCheck,
-} from "lucide-react";
+import { Users, Calendar, MapPin, Pencil, BadgeCheck, } from "lucide-react";
 
-export default function TeamMetaData({team}) {
-    console.log("TEAM DATA",team)
+export default function TeamMetaData({ team }) {
+  
   return (
-    <section className="relative h-[150px] overflow-hidden rounded-3xl border bg-white shadow-sm">
+    <section
+      className="relative overflow-hidden rounded-3xl border"
+      style={{
+        background: "var(--surface-base)",
+        borderColor: "var(--border-default)",
+        boxShadow: "var(--shadow-sm)",
+      }}
+    >
+      {/* Banner */}
 
-        {/* Banner */}
-        <img
-          src={team.team_banner_url}
-          alt="banner_image"
-          className="absolute inset-0 h-full w-full object-cover object-[center_20%]"/>
+      <img
+        src={team.team_banner_url}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover object-center"
+      />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/10 to-transparent" />
+      {/* Overlay */}
 
+      <div className="absolute inset-0 bg-gradient-to-r from-[rgba(246,244,241,.94)] via-[rgba(246,244,241,.72)] to-[rgba(246,244,241,.18)] dark:from-[rgba(5,5,5,.92)] dark:via-[rgba(5,5,5,.70)] dark:to-[rgba(5,5,5,.15)]" />
 
-        {/* Edit button */}
-        <button
-          className="absolute top-4 right-4 z-20 rounded-xl border bg-white/80 backdrop-blur-md p-2 shadow-lg transition hover:scale-105 ">
-          <Pencil size={12} />
-        </button>
+      {/* Edit */}
 
-        {/* Content */}
-        <div className="relative z-10 flex h-full items-end gap-5 px-6 pb-5">
+      <button
+        className="absolute right-4 top-4 z-20 rounded-xl border p-2 backdrop-blur-md transition hover:scale-105"
+        style={{
+          background: "var(--glass-surface)",
+          borderColor: "var(--glass-border)",
+        }}
+      >
+        <Pencil
+          size={16}
+          color="var(--text-primary)"
+        />
+      </button>
 
-          {/* Logo */}
-          <div
-            className="
-              mb-1
-              h-24 w-24
-              shrink-0
-              overflow-hidden
-              rounded-2xl
-              border-4
-              border-white
-              bg-white
-              shadow-lg
-            "
-          >
-            <img
-              src={team.team_logo_url}
-              alt="logo_image"
-              className="h-full w-full object-cover"
+      {/* Content */}
+
+      <div
+        className=" relative z-10 flex items-center gap-4 p-4 sm:p-5 lg:gap-6 lg:p-6 " >
+        {/* Logo */}
+
+        <div
+          className=" h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 sm:h-24 sm:w-24 "
+          style={{
+            borderColor: "var(--surface-base)",
+            boxShadow: "var(--shadow-md)",
+          }}
+        >
+          <img
+            src={team.team_logo_url}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+        </div>
+
+        {/* Team Info */}
+
+        <div className="min-w-0 flex-1">
+
+          {/* Title */}
+
+          <div className="flex flex-wrap items-center gap-2">
+
+            <h1
+              className=" truncate text-xl font-bold sm:text-2xl lg:text-3xl "
+              style={{
+                color: "var(--headline-primary)",
+                fontFamily: "Google Sans",
+              }}
+            >
+              {team.team_name}
+            </h1>
+
+            <BadgeCheck
+              size={18}
+              color="var(--accent-gold)"
             />
+
           </div>
 
-          {/* Right Side */}
-          <div className="flex-1">
+          {/* Bio */}
 
-            <div className="flex items-center gap-2">
-
-              <h1 className="text-3xl font-bold tracking-tight">
-                {team.team_name || ""}
-              </h1>
-
-              <BadgeCheck
-                size={16}
-                className="text-sky-500"
-              />
-
-            </div>
-
-            <p className="mt-1 max-w-xl text-sm leading-6 text-zinc-600">
-              {team.team_bio || ""}
+          {team.team_bio && (
+            <p
+              className=" mt-2 line-clamp-2 text-xs leading-5 sm:text-sm "
+              style={{
+                color: "var(--text-secondary)",
+              }}
+            >
+              {team.team_bio}
             </p>
+          )}
 
-            <div className="mt-3 flex gap-6 text-sm text-zinc-600">
+          {/* Stats */}
 
-              <div className="flex items-center gap-2">
-                <Users size={15} />
-                <span>{team.team_max_members || 0}</span>
-              </div>
+          <div
+            className=" mt-4 flex flex-wrap gap-2 sm:gap-3 lg:gap-4 " >
+            <InfoPill
+              icon={<Users size={14} />}
+              value={`${team.team_max_members} Players`}
+            />
 
-              <div className="flex items-center gap-2">
-                <Calendar size={15} />
-                <span>{team.team_created_at.split("T")[0]}</span>
-              </div>
+            <InfoPill
+              icon={<Calendar size={14} />}
+              value={team.team_created_at.split("T")[0]}
+            />
 
-              <div className="flex items-center gap-2">
-                <MapPin size={15} />
-                <span>{team.team_country || "India"}</span>
-              </div>
-
-            </div>
-
+            <InfoPill
+              icon={<MapPin size={14} />}
+              value={team.team_country}
+            />
           </div>
 
         </div>
 
+      </div>
     </section>
+  )
+}
+
+
+function InfoPill({ icon, value }) {
+  return (
+    <div
+      className=" flex items-center gap-2 rounded-xl px-3 py-2 text-xs sm:text-sm "
+      style={{
+        background: "var(--glass-surface)",
+        border: "1px solid var(--glass-border)",
+        backdropFilter: "blur(14px)",
+      }}
+    >
+      <span
+        style={{
+          color: "var(--accent-gold)",
+        }}
+      >
+        {icon}
+      </span>
+
+      <span
+        style={{
+          color: "var(--text-secondary)",
+        }}
+      >
+        {value}
+      </span>
+    </div>
   )
 }

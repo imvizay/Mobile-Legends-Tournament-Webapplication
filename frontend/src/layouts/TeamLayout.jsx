@@ -52,14 +52,17 @@ function TeamLayout() {
 
 
   return (
-    <div className="flex flex-col gap-3">
-      <TeamMetaData team = {myTeamData.team} />
+     <div className="h-screen space-y-4  md:space-y-5 lg:space-y-6 ">
+
+      <TeamMetaData team={myTeamData.team} />
 
       <TeamNavbar links={TEAM_NAVIGATION_LINKS} />
 
-      <section className="min-h-[500px]">
-        <Outlet />
+      <section className="min-h-[400px] md:min-h-[500px]">
+
+        <Outlet context={myTeamData.team.team_wallet} />
       </section>
+
     </div>
   );
 }
