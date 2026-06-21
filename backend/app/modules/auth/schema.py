@@ -2,7 +2,6 @@ from pydantic import (
     BaseModel,
     EmailStr,
     Field,
-    field_validator,
     model_validator
 )
 
@@ -25,6 +24,7 @@ class AuthCreateRequest(BaseModel):
 class LoginRequest(BaseModel):
     email:EmailStr
     password:str 
+
 
 
 

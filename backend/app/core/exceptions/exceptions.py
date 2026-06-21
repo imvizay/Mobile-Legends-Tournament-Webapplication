@@ -2,6 +2,7 @@ class AppException(Exception):
     pass
 
 
+# USER REGISTRATION EXCEPTION
 class UserAlreadyExistsError(AppException):
     pass
 
@@ -14,10 +15,17 @@ class UserNotFoundException(AppException):
 class UserBannedException(AppException):
     pass
 
-class InvalidCredentialsException(AppException):
+# TOKEN EXCEPTIONS
+class InvalidTokenException(AppException):
     pass
 
-class InvalidTokenException(AppException):
+class TokenExpiredException(AppException):
+    pass
+
+class InvalidSessionException(AppException):
+    pass
+
+class RevokedTokenException(AppException):
     pass
 
 

@@ -1,14 +1,14 @@
 import os
 from fastapi import HTTPException
 from passlib.context import CryptContext
-from .repository import AuthRepository
+from .repository import AuthRepository,SessionRepository
 
 from jose import jwt,JWTError
 from app.core.config.settings import settings
 from uuid import uuid4
 
 
-from .models import Player,PendingRegistration
+from .models import Player,PendingRegistration,PlayerSession
 from .schema import AuthCreateRequest,RegistrationResponse,LoginRequest
 
 from app.core.exceptions import exceptions
@@ -35,18 +35,19 @@ frontend_url = os.getenv("FRONTEND_URL")
 
 class TokenService:
 
-    ACCESS_TOKEN_EXPIRE_MINUTES = 6*60  # valid for 6 hours
-    REFRESH_TOKEN_EXPIRE_DAYS = 1    # for 7 days
+    ACCESS_TOKEN_EXPIRE_MINUTES = 12*60  # valid for 12 hours
+    REFRESH_TOKEN_EXPIRE_DAYS = 7    # for 7 days
 
     SECRET_KEY = settings.SECRET_KEY
     ALGORITHM = "HS256"
 
     def create_access_token(self,user_id:int):
+
         payload = {
-            "sub":str(user_id),
-            "type":"access",
-            "jti":str(uuid4()),
-            "exp":datetime.now(UTC) + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
+            "sub": str(user_id),
+            "type": "access",
+            "jti": str(uuid4()),
+            "exp": datetime.now(UTC) + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
         }
         access_token = jwt.encode(
             payload,
@@ -56,12 +57,18 @@ class TokenService:
 
         return access_token
 
-    def create_refresh_token(self,user_id:int):
+    def create_refresh_token(  
+            self,
+            user_id: int,
+            session_id: int,
+            refresh_jti: str,
+        ):
 
         payload = {
             "sub":str(user_id),
             "type":"refresh",
-            "jti":str(uuid4()),
+            "session_id":session_id,
+            "jti":refresh_jti,
             "exp":datetime.now(UTC) + timedelta(days=self.REFRESH_TOKEN_EXPIRE_DAYS)
         }
 
@@ -100,15 +107,122 @@ class TokenService:
 
 
 
+   
+
+class SessionService:
+
+    def __init__(self,token_service: TokenService,repository:SessionRepository):
+        self.token_service = token_service
+        self.repository = repository
+
+    # pvt helper function
+
+    def _validate_refresh_session(
+        self,
+        refresh_token: str
+    ) -> tuple[PlayerSession, dict]:
+
+        if not refresh_token:
+            raise exceptions.InvalidTokenException()
+
+        payload = self.token_service.decode_token(refresh_token)
+
+        self.token_service.verify_token_type(payload,"refresh")
+
+        session = self.repository.get_session_by_id(payload["session_id"])
+
+        if session is None:
+            raise exceptions.InvalidSessionException()
+
+        if session.is_revoked:
+            raise exceptions.RevokedTokenException()
+
+        if session.refresh_jti != payload["jti"]:
+            raise exceptions.InvalidTokenException()
+
+        return session, payload
+
+
+    def create_login_session(
+            self,
+            player:Player
+        ):
+
+        refresh_jti = str(uuid4())
+        expires_at = (
+            datetime.now(UTC) + timedelta(days=self.token_service.REFRESH_TOKEN_EXPIRE_DAYS)
+        )
+
+        session = self.repository.create_session(
+            player_id=player.id,
+            refresh_jti=refresh_jti,
+            expires_at=expires_at
+        )
+
+        access_token = self.token_service.create_access_token(
+            player.id
+        )
+
+        refresh_token = self.token_service.create_refresh_token(
+            player.id,
+            session.id,
+            refresh_jti
+        )
+
+        return {
+            "access": access_token,
+            "refresh": refresh_token,
+        }
+
+    def refresh_session(
+            self,
+            refresh_token:str
+        ):
+
+        _,payload = self._validate_refresh_session(refresh_token)
+        
+        # new access token
+        new_access = self.token_service.create_access_token(int(payload["sub"]))
+
+        return{
+            "access":new_access
+        }
+        
+
+    def rotate_refresh_token():
+        ...
+
+    def revoke_session(self,refresh_token:str):
+
+        session,_ = self._validate_refresh_session(refresh_token)
+
+        self.repository.revoke_session(
+            session,
+            reason="logout"
+        )
+        
+        # logget out successfully via router response
+
+    def revoke_all_sessions():
+        ...
+
+    def cleanup_expired_sessions():
+        ...
+
 
 
 class AuthService:
 
-    def __init__(self,repository:AuthRepository,email_service:AuthEmailService , token_service:TokenService):
+    def __init__(
+            self,
+            session_service:SessionService,
+            repository:AuthRepository,
+            email_service:AuthEmailService, 
+        ):
         
+        self.session_service = session_service
         self.repository = repository
         self.email_service = email_service
-        self.token_service = token_service
 
     async def social_login(
         self,
@@ -126,12 +240,11 @@ class AuthService:
         if user.is_banned:
             raise exceptions.UserBannedException()
 
-        access_token = self.token_service.create_access_token( user.id )
-        refresh_token = self.token_service.create_refresh_token( user.id )
+        session = self.session_service.create_login_session(user)
 
         return {
-            "access": access_token,
-            "refresh": refresh_token,
+            "access": session.access,
+            "refresh": session.refresh,
             "message": (
                 "Account Created Successfully."
                 if created
@@ -139,7 +252,9 @@ class AuthService:
             ),
             "user": {
                 "id": user.id,
-                "email": user.email
+                "email": user.email,
+                "role":user.role,
+                "membership":user.is_membership_active
             }
         }
 
@@ -166,18 +281,19 @@ class AuthService:
         if not verify_password( payload.password, current_user.password ):
             raise exceptions.InvalidCredentialsException()
         
-        # generate access and refresh token
-        access_token  = self.token_service.create_access_token(current_user.id)
-        refresh_token = self.token_service.create_refresh_token(current_user.id)
+        session =  self.session_service.create_login_session(current_user)
 
         return {
-            'access':access_token,
-            'refresh':refresh_token,
-            'user':{
-                'id':current_user.id,
-                'email':current_user.email
+            "access":session['access'],
+            "refresh":session['refresh'],
+            "user":{
+                "id":current_user.id,
+                "email":current_user.email,
+                "role":current_user.role,
+                "membership":current_user.is_membership_active
             }
         }
+        
 
 
     def resend_verification_token(self,email:str,bg_task: BackgroundTasks):
@@ -340,4 +456,4 @@ class AuthService:
 
         return pending_player
         
-    
+ 

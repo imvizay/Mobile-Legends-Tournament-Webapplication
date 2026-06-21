@@ -1,6 +1,7 @@
 from sqlalchemy import Column,String,Boolean,Integer,DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime,UTC
+from sqlalchemy import ForeignKey
 
 
 
@@ -25,12 +26,11 @@ class Player(Base):
 
     created_at = Column(DateTime(timezone=True),default=lambda:datetime.now(UTC))
 
+    # Relationships
     teams = relationship("TeamMember",back_populates="player",cascade="all, delete-orphan")
+    sessions = relationship("PlayerSession",back_populates="player",cascade="all, delete-orphan")
 
    
-
-    
-
 class PendingRegistration(Base):
     
     __tablename__ = "pending_registration"
@@ -55,3 +55,23 @@ class PendingRegistration(Base):
     created_at = Column(DateTime(timezone=True),default=lambda: datetime.now(UTC))
 
     
+# TOKEN RELETED MODELS
+
+class PlayerSession(Base):
+
+    __tablename__ = "player_sessions"
+
+    id = Column(Integer,primary_key=True)   
+    player_id = Column(Integer, ForeignKey("players.id",ondelete="CASCADE"), nullable=False)
+    refresh_jti = Column(String,unique=True,nullable=False,index=True)
+
+    is_revoked = Column(Boolean,default=False)
+
+    expires_at = Column(DateTime(timezone=True),nullable=False)
+    last_used_at = Column(DateTime(timezone=True),nullable=True)
+    revoked_at = Column(DateTime(timezone=True),nullable=True)
+    revoke_reason = Column(String,nullable=True)
+
+    created_at = Column(DateTime(timezone=True),default=lambda: datetime.now(UTC))
+
+    player = relationship("Player",back_populates="sessions")
