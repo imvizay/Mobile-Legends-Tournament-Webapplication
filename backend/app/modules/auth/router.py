@@ -44,10 +44,10 @@ async def refresh_token(
 
     response.set_cookie(
         key="access_token",
-        value=token['access'],
+        value=token["access"],
         httponly=True,
-        samesite=None,
-        secure=True
+        secure=False, 
+        samesite="lax"
     )
 
     return {
