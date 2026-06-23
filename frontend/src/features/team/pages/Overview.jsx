@@ -1,17 +1,17 @@
 import { useOutletContext } from "react-router-dom";
 
 // components
-import WalletOverview from "../components/overview/WalletOverview";
 import AccountSecurity from "../components/overview/AccountSecurity";
 import ActiveTournament from "../components/overview/ActiveTournament";
 import ActivityFeed from "../components/overview/ActivityFeed";
-import TeamRoster from "../components/overview/TeamRoster";
 import SubstitutePlayers from "../components/overview/Substitute";
+import TeamRoster from "../components/overview/TeamRoster";
+import WalletOverview from "../components/overview/WalletOverview";
 
 
 const Overview = () => {
 
-    const wallet = useOutletContext()
+  const wallet = useOutletContext()
 
   return (
     <section className="space-y-5 lg:space-y-6">

@@ -1,5 +1,7 @@
-from mailtrap import Mail,Address,MailtrapClient
-from .email_client import MAIL_FROM,MAILTRAP_API_TOKEN
+
+from .email_client import client
+
+
 from app.core.db.session import SessionLocal
 from app.modules.auth.models import PendingRegistration
 from urllib.parse import urlparse,parse_qs
@@ -16,6 +18,7 @@ class AuthEmailService:
             verify_url:str
         ):
         print("EMAIL TASK STARTED...")
+        print("VERIFY_URL",verify_url)
         pending_user = None
 
         db = SessionLocal()
@@ -260,20 +263,14 @@ class AuthEmailService:
             """
 
 
-        mail = Mail(
-            sender = Address(
-                email=MAIL_FROM,
-                name="MLBB Tournament Platform"
-            ),
-            to     = [
-                    Address(email="vizzaymeena@gmail.com")
-            ],
-            subject="Verify Your Email",
-            html=html_content
-        )
+        params = {
+            "from": "Gamix <onboarding@resend.dev>",
+            "to": [email],
+            "subject": "Verify Your Email",
+            "html": html_content,
+        }
 
-        client = MailtrapClient(MAILTRAP_API_TOKEN)
-        print("Mail Trap API Token",MAILTRAP_API_TOKEN)
+
         try:
             
             pending_user = (
@@ -281,9 +278,9 @@ class AuthEmailService:
                 .filter(PendingRegistration.email == email)
                 .first()
             )
-            response = client.send(mail)
-            print("EMAIL SENT:",response)
 
+            response = client.Emails.send(params)
+         
             # ensure pending_user exists before checking its status
             if pending_user and pending_user.email_sent == "SENT":
                 pending_user.last_resent_at = datetime.now(UTC)
@@ -311,7 +308,7 @@ class AuthEmailService:
                     pending_user.email_sent = "FAILED"
                     db.commit()
 
-            print("MAIL TRAP ERROR",e)
+            print("RESEND MAIL APP ERROR",e)
             raise 
 
         finally:

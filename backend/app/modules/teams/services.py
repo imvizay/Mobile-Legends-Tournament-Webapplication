@@ -16,12 +16,12 @@ class TeamService:
         self.repository = repository
 
     def get_my_team(self,current_user: Player):
+        
         team = self.repository.get_team_by_player(current_user.id)
+
         if not team:
            raise NoTeamException()
         
-        print(team)
-
         return( TeamResponseOutput (
           team = TeamResponse(
            team_name = team.name,

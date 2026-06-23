@@ -1,4 +1,4 @@
-import os
+
 from fastapi import HTTPException
 from passlib.context import CryptContext
 from .repository import AuthRepository
@@ -30,7 +30,7 @@ password_context = CryptContext(
     deprecated="auto"
 )
 
-frontend_url = os.getenv("FRONTEND_URL")
+frontend_url = "http://127.0.0.1:5173"
 
 
 class TokenService:

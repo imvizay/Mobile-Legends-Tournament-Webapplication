@@ -17,7 +17,7 @@ async def get_my_team(
     team_service:TeamService = Depends(get_team_service),
     current_user:Player = Depends(get_current_user)
 ):
-    print("Get My Team Endpoint Reached.")
+    
     return team_service.get_my_team(current_user)
     
 

@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     DISCORD_CLIENT_ID : str = os.getenv('DISCORD_CLIENT_ID')
     DISCORD_CLIENT_SECRET : str  = os.getenv("DISCORD_CLIENT_SECRET")
 
+    # Mail
+    RESEND_API_KEY:str = os.getenv("RESEND_API_KEY")
+
+    FRONTEND_URL:str = os.getenv("FRONTEND_URL")
     BACKEND_URL: str = os.getenv("BACKEND_URL")
 
     # Cloudinary Config

@@ -1,8 +1,10 @@
-import { Crown, Gift, GlobeIcon, Headset, Home, Medal, Newspaper, Receipt,LucideBadgePlus, Shield, Trophy, Users, Wallet, History, MessageSquare, TicketPlus } from 'lucide-react';
-
-
+// hooks and state
 import React from 'react'
 import { Outlet } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query';
+
+// icons
+import { Crown, Gift, GlobeIcon, Headset, Home, Medal, Newspaper, Receipt,LucideBadgePlus, Shield, Trophy, Users, Wallet, History, MessageSquare, TicketPlus } from 'lucide-react';
 
 // Desktop Navbar
 import AsideSidebar from '../components/playerLayout/Sidebar';
@@ -10,6 +12,7 @@ import TopbarHeader from '../components/playerLayout/Topbar';
 
 // Mobile Navbar
 import MobileNavbar from '../components/navigations/MobileNavbar';
+import { teamService } from '../services/team_service';
 
 const PLAYER_DASHBOARD_NAVIGATION_LINKS = [
   {
@@ -58,6 +61,22 @@ const PLAYER_DASHBOARD_NAVIGATION_LINKS = [
 
 
 function PlayerLayout() {
+  
+  // Player Team Status
+  const{
+    data:teamQuery,
+    pending,
+    isError,
+    error
+  } = useQuery({
+    queryKey:['check-member'],
+    queryFn:teamService.getMyTeam,
+    staleTime:1000*60*5, // no refetch for 5 minutes
+    gcTime:1000*60*10,   // cache for 10 minutes
+    refetchOnWindowFocus:false
+  })
+
+
 
   return (
     <section className="h-fit lg:h-screen overflow-hidden bg-[var(--bg-canvas)] lg:grid lg:grid-cols-[220px_1fr]">
@@ -94,7 +113,7 @@ function PlayerLayout() {
                 lg:pt-6
                 "
             >
-                <Outlet/>
+                <Outlet context={teamQuery}/>
             </main>
 
         </div>
