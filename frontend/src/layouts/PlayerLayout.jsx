@@ -60,7 +60,7 @@ const PLAYER_DASHBOARD_NAVIGATION_LINKS = [
 function PlayerLayout() {
 
   return (
-      <section className="select-none bg-[var(--bg-canvas)] grid grid-cols-[250px_1fr] h-screen">
+      <section className="select-none bg-[var(--bg-canvas)] grid grid-cols-[230px_1fr] h-screen">
         <AsideSidebar dashboardLinks = {PLAYER_DASHBOARD_NAVIGATION_LINKS}/>
       
         
