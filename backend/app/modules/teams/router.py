@@ -38,3 +38,21 @@ async def create_team(
         banner,
         current_user
     )
+
+
+
+@router.get("/discover")
+async def discover_team( 
+        cursor:int |None=None,
+        limit:int = 12,
+        current_user: Player = Depends(get_current_user),
+        team_service: TeamService = Depends(get_team_service),
+    ):
+    
+    return team_service.discover_team(
+        cursor=cursor,
+        limit=limit,
+        current_user=current_user
+    )
+
+    

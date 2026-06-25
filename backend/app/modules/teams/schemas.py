@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated,Optional
 import re
 from datetime import datetime
 from fastapi import Form
@@ -98,4 +98,23 @@ class TeamResponse(BaseModel):
    
     
 class TeamResponseOutput(BaseModel):
-    team:TeamResponse
+    team:Optional[TeamResponse] = None
+
+
+class DiscoverTeamResponse(BaseModel):
+    id : int
+    name : str
+    tag : str | None
+    description : str | None
+    logo_url : str | None
+    banner_url : str | None
+    country : str | None
+    created_at : datetime   
+    max_members : int
+    members_count : int
+
+class DiscoverTeamOutput(BaseModel):
+
+    has_next : bool
+    next_cursor : int | None
+    items : list[DiscoverTeamResponse]

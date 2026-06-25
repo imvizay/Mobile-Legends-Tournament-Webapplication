@@ -27,7 +27,8 @@ import Overview from '../features/team/pages/Overview'
 import TeamLayout from '../layouts/TeamLayout'
 import EmptyTeamState from '../pages/player/team/EmptyTeam'
 import TeamCreatePage from '../pages/player/team/TeamCreatePage'
-import TeamRoute from './TeamRoute'
+import RequireTeam from './RequireTeam'
+import DiscoverTeamPage from '../pages/player/team/DiscoverTeamPage'
 
 
 function AppRoutesConfig() {
@@ -50,19 +51,21 @@ function AppRoutesConfig() {
       </Route>
 
       {/* Player Dashboard */}
-      <Route path='/player' element={<PlayerLayout />}>
+      <Route path='/player/' element={<PlayerLayout />}>
 
-        {/* <Route path='no-team' element={<EmptyTeamState />} /> */}
         <Route path='create' element={<TeamCreatePage />} />
-        <Route path='discover' element={<TeamListingPage />} />
+        <Route path='discover' element={<DiscoverTeamPage />} />
 
         {/* Team Routes */}
-        <Route path="team" element={<TeamRoute />}>
-          <Route index element={<Overview />} />
-          {/* <Route path = "history" element = {<TournamentHistory />} /> */}
-          {/* <Route path = "applications" element = {<TeamApplications />} /> */}
-          {/* <Route path = "chat" element = {<TeamChat />} /> */}
-          {/* <Route path = "settings" element = {<TeamSettings />} /> */}
+        <Route path="team" element={<RequireTeam />}>
+
+            <Route element={<TeamLayout />}>
+                <Route index element={<Overview />} />       
+                {/* <Route path="members" element={<Members />} />
+                <Route path="applications" element={<Applications />} />
+                <Route path="settings" element={<Settings />} /> */}
+            </Route>
+
         </Route>
       
       </Route>

@@ -1,32 +1,43 @@
+import { LogOut } from 'lucide-react'
 import React from 'react'
 
 import { useState,useEffect } from 'react'
 
 import { createContext,useContext } from 'react'
 
-export const UserContext = createContext(null)
+export const UserContext = createContext()
 
 export const UserProvider = ({children}) => {
 
-    let [user,setUser] = useState({
-        username:null,
-        email:null,
-        mlbb_id:null,
-        mlbb_server:null
-    })
+    const [user,setUser] = useState(null)
 
-    const logoutUser = () => {
-        // backendapi call to blacklist token
+    useEffect( () => {
+      const storedUser = JSON.parse(localStorage.getItem("MLBB_User"))
+      
+      if(!storedUser){
+        setUser(null)
+        return
+      }
+
+      setUser(storedUser)
+      console.log("Context user",storedUser)
+    } ,[])
+
+  
+    const logout = () => {
+        localStorage.removeItem("MLBB_User")
+        setUser(null)
+        // call backend server to blacklist the token.
     }
 
   return (
-    <UserContext.Provider>
+    <UserContext.Provider value={{user,setUser,logout}}>
         {children}
     </UserContext.Provider>
   )
 }
 
 
-export const useUser = () => {
+export const useUserContext = () => {
   return useContext(UserContext)
 }

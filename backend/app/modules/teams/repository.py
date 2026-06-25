@@ -1,11 +1,33 @@
 from sqlalchemy.orm import Session , joinedload , selectinload
 from .models import Team,TeamMember,TeamWallet,TeamMemberStatus
 from ..auth.models import Player
-from sqlalchemy import exists
+from sqlalchemy import exists,func
+
+
 class TeamRepository:
 
     def __init__(self, db: Session):
         self.db = db
+
+    
+    def load_all_active_teams(self, current_user: Player, cursor: int | None, limit: int):
+
+        query = (
+            self.db.query(Team,func.count(TeamMember.id).label("members_count"))
+
+            .outerjoin(TeamMember, Team.id == TeamMember.team_id)
+
+            .filter(Team.visibility == "public",Team.captain_id != current_user.id,)
+
+            .group_by(Team.id).order_by(Team.id)
+        )
+
+        if cursor is not None:
+            query = query.filter(Team.id > cursor)
+
+        return query.limit(limit + 1).all()
+
+    
 
     # check whether user is already associated with team as member or captain.
     def get_team_by_player(self,current_user_id:int):
