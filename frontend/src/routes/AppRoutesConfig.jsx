@@ -16,6 +16,7 @@ import RegistrationSuccess from '../pages/common/RegistrationSuccess'
 import PlayerLayout from '../layouts/PlayerLayout'
 import TournamentLanding from '../components/sections/TournamentLanding'
 import EmptyTeamState from '../pages/player/team/EmptyTeam'
+import TeamCreatePage from '../pages/player/team/TeamCreatePage'
 
 
 function AppRoutesConfig() {
@@ -37,8 +38,10 @@ function AppRoutesConfig() {
           
         </Route>
 
-        <Route path='/player/dashboard' element={<PlayerLayout/>}>
+        <Route path='/player-dashboard' element={<PlayerLayout/>}>
           <Route index element = {<EmptyTeamState/>}/>
+          <Route path= '/player-dashboard/team-creation' element =  {<TeamCreatePage/>}/>
+
         </Route>
 
 

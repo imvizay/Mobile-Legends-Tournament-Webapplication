@@ -67,6 +67,25 @@ body {
   opacity: 0.9;
 }
 
+/* scrollbar for team creation page */
+.team-form-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.team-form-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.team-form-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+}
+
+.team-form-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-gold);
+}
+
+
 /* LIGHT THEME */
 
 :root {
