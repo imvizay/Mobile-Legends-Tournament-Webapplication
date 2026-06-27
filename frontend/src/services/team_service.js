@@ -21,9 +21,21 @@ export const teamService = {
     },
 
     loadTeam(){
-        console.log("Load team is called.")
         return api.get(
             USER_TEAM_ENDPOINTS.DISCOVER_TEAMS
         )
+    },
+    
+    joinTeam(teamId){
+        return api.post(
+            USER_TEAM_ENDPOINTS.JOIN_TEAM(teamId),
+        )
+    },
+
+    leaveTeam(teamId){
+        return api.post(
+            USER_TEAM_ENDPOINTS.LEAVE_TEAM(teamId)
+        )
     }
+
 }

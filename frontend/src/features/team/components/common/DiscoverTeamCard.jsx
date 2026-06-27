@@ -1,8 +1,13 @@
 import { Users, MapPin, CalendarDays, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { useUserContext } from "../../../../contexts/UserContext";
 
-function DiscoverTeamCard({ team }) {
+function DiscoverTeamCard({ team,onJoin,isJoining,myTeamId }) {
+
   const [loaded,setLoaded] = useState(false)
+  const { user } = useUserContext()
+  console.log("MYTEAMID",myTeamId)
+  
   const joinedDate = new Date(team.created_at).toLocaleDateString("en-US", {
     month: "short",
     year: "numeric",
@@ -66,6 +71,19 @@ function DiscoverTeamCard({ team }) {
       </div>
 
       <div className="flex w-full gap-2 md:w-auto md:shrink-0">
+       {team.id === myTeamId ? (
+          <button
+            className="group flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold "
+            style={{
+              background: "transparent",
+              borderColor: "var(--accent-gold)",
+              color: "var(--accent-gold)",
+            }}
+         >
+            My Team
+          <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+        </button> )   :
+        <>
         <button
           className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition hover:opacity-80 md:flex-none"
           style={{
@@ -78,15 +96,26 @@ function DiscoverTeamCard({ team }) {
         </button>
 
         <button
+          onClick={() => onJoin(team.id)}
+          disabled={isJoining}
           className="group flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all hover:gap-3 md:flex-none"
           style={{
             background: "var(--action-primary-bg)",
             color: "var(--action-primary-text)",
           }}
         >
-          Request
+          {isJoining
+                    ? team.visibility === "public"
+                      ? "Joining..."
+                      : "Requesting..."
+                    : team.visibility === "public"
+                      ? "Join"
+                      : "Request"}
+
           <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
         </button>
+       </>
+       }
       </div>
     </article>
   );

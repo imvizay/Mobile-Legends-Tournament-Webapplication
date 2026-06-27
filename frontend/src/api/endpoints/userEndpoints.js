@@ -12,8 +12,8 @@ export const USER_TEAM_ENDPOINTS = {
     SEARCH_TEAMS: "/player/team/search",
 
     // Membership
-    JOIN_TEAM: "/player/team/join",
-    LEAVE_TEAM: "/player/team/leave",
+    JOIN_TEAM:(teamId) => `/player/team/${teamId}/join`,
+    LEAVE_TEAM:(teamId) => `/player/team/${teamId}/leave`,
 
     // Invitations
     INVITE_PLAYER: "/player/team/invite",

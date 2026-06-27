@@ -106,6 +106,7 @@ class DiscoverTeamResponse(BaseModel):
     name : str
     tag : str | None
     description : str | None
+    visibility: str 
     logo_url : str | None
     banner_url : str | None
     country : str | None
@@ -113,8 +114,15 @@ class DiscoverTeamResponse(BaseModel):
     max_members : int
     members_count : int
 
-class DiscoverTeamOutput(BaseModel):
 
+class DiscoverTeamOutput(BaseModel):
+    my_team_id:int | None
     has_next : bool
     next_cursor : int | None
     items : list[DiscoverTeamResponse]
+
+
+class JoinTeamResponse(BaseModel):
+    success:bool
+    status:int
+    message:str
