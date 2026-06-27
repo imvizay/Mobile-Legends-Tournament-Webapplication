@@ -36,6 +36,19 @@ export const teamService = {
         return api.post(
             USER_TEAM_ENDPOINTS.LEAVE_TEAM(teamId)
         )
+<<<<<<< Updated upstream
     }
 
+=======
+    },
+
+    loadTeamMembers(teamId){
+        return api.get(
+            USER_TEAM_ENDPOINTS.JOIN_TEAM
+        )
+    }
+
+
+
+>>>>>>> Stashed changes
 }

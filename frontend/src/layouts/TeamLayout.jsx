@@ -21,7 +21,7 @@ const TEAM_NAVIGATION_LINKS = [
   { label: "Overview", path: "", icon: LayoutDashboard },
   { label: "Members", path: "members", icon: Users },
   { label: "Tournaments", path: "tournaments", icon: Trophy },
-  { label: "Applications", path: "applications", icon: Inbox },
+  { label: "Applications", path: "application", icon: Inbox },
   { label: "Finances", path: "finances", icon: Wallet },
   { label: "Settings", path: "settings", icon: Settings },
 ]
@@ -29,16 +29,6 @@ const TEAM_NAVIGATION_LINKS = [
 function TeamLayout() {
 
   const team = useOutletContext()
-
-  useEffect(()=>{
-    console.log("Team Layout Mounting...")
-    console.log("TEAAAAM : ",team)
-
-    return () => {
-      console.log("Team Layout Unmounting...")
-    }
-  },[])
-
 
   return (
      <div className="h-screen space-y-4  md:space-y-5 lg:space-y-6 ">
