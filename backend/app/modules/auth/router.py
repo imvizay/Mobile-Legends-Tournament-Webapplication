@@ -1,7 +1,7 @@
-from fastapi import APIRouter,Depends,Response,Request
+from fastapi import APIRouter,Depends,Response,Request,Cookie
 from .schema import AuthCreateRequest,LoginRequest
-from .service import AuthService
-from .dependency import get_auth_service
+from .service import AuthService,SessionService
+from .dependency import get_auth_service,get_session_service
 from app.core.config.settings import settings
 import json
 
@@ -15,6 +15,46 @@ router = APIRouter(
     prefix='/auth',
     tags=['Authentication']
 )
+
+
+@router.post("/logout")
+async def logout(
+    response: Response,
+    refresh_token: str | None = Cookie(None),
+    session_service: SessionService = Depends(get_session_service),
+):
+    
+    session_service.refresh_session(refresh_token)
+
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+    return {
+        "message": "Logged out successfully."
+    }
+
+# Refresh token endpoint
+@router.post("/refresh")
+async def refresh_token(
+    response: Response,
+    refresh_token:str | None = Cookie(default=None),
+    session_service:SessionService = Depends(get_session_service)
+):
+    token = session_service.refresh_session(refresh_token)
+
+    response.set_cookie(
+        key="access_token",
+        value=token["access"],
+        httponly=True,
+        secure=False, 
+        samesite="lax"
+    )
+
+    return {
+        "message":"Authentication session refreshed."
+    }
+
+
 
 # Social Login
 @router.get('/discord/login')
@@ -148,7 +188,8 @@ def login(
 
     return {
         "status":200,
-        "message":"login success"
+        "message":"success",
+        "data":result["user"]
     }
 
 

@@ -1,8 +1,6 @@
 import axios from "axios";
 
-/* ---------------------- 
-    AXIOS INSTANCE
- -------------------- */
+// axios instance
 export const axiosClient = axios.create({
     baseURL:'http://127.0.0.1:8000/api',
     timeout:1000,
@@ -10,16 +8,10 @@ export const axiosClient = axios.create({
 })
 
 
-/* -------------------------------
-    REQ AND RES INTERCEPTORS
------------------------------------ */
 
 axiosClient.interceptors.response.use(
-    
     (response) => {
         return response.data
-<<<<<<< Updated upstream
-=======
     },
     async (error) => {
 
@@ -63,7 +55,7 @@ axiosClient.interceptors.response.use(
             }
         }
         return Promise.reject(error);
->>>>>>> Stashed changes
+
     }
 )
 

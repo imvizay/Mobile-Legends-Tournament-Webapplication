@@ -31,8 +31,8 @@ EXCEPTION_DICT = {
     PendingRegistrationExistsError:user_pending_registration_exists,
     UserNotFoundException:user_not_found,
     UserBannedException:user_banned,
-    InvalidCredentialsException:invalid_credentials,
-    InvalidTokenException:invalid_token,
+    InvalidTokenException:invalid_credentials,
+    TokenExpiredException:invalid_token,
 
     # TEAM EXCEPTION
     ExceptionPlayerAlreadyHasTeam:player_already_in_team,
