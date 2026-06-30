@@ -23,7 +23,7 @@ const TEAM_NAVIGATION_LINKS = [
   { label: "Tournaments", path: "tournaments", icon: Trophy },
   { label: "Applications", path: "application", icon: Inbox },
   { label: "Finances", path: "finances", icon: Wallet },
-  { label: "Settings", path: "settings", icon: Settings },
+  // { label: "Settings", path: "settings", icon: Settings },
 ]
 
 function TeamLayout() {

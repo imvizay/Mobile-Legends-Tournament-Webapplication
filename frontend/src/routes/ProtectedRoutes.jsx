@@ -1,38 +1,40 @@
-import React from 'react'
-import PlayerLayout from '../layouts/PlayerLayout';
-import AdminLayout from '../layouts/AdminLayout';
-import PlatformLayout from '../layouts/PlatformLayout';
-import { Navigate, Outlet, replace } from 'react-router-dom';
+import { Navigate, Outlet } from "react-router-dom"
+import { useUserContext } from "../contexts/UserContext"
+import PlayerLayout from "../layouts/PlayerLayout"
+import AdminLayout from "../layouts/AdminLayout"
 
-function ProtectedRoutes(role,user) {
+function ProtectedRoutes({ role }) {
+    const { user, loading } = useUserContext()
 
-    // restrict access to role based routes without login
-    if(!user) {
+    if (loading) {
+        return <div>Loading...</div>
+    }
+
+    if (!user) {
+        return <Navigate to="/login" replace />
+    }
+
+    if (user.role !== role) {
+        return <Navigate to="/unauthorized" replace />
+    }
+
+    if (role === "player") {
         return (
-            <Navigate to="/login" replace/>
+            <PlayerLayout>
+                <Outlet />
+            </PlayerLayout>
         )
     }
 
-    // protected player routes
-    if(role == "player") {
-        return (
-            <PlatformLayout>
-                <Outlet/>    
-            </ PlatformLayout>
-        )
-    }
-
-    // protected admin routes
-    if ( role == "admin") {
+    if (role === "admin") {
         return (
             <AdminLayout>
-                <Outlet/>
+                <Outlet />
             </AdminLayout>
         )
     }
 
-    // unauthorized
-    return <Navigate to="/unauthorized" replace/>
+    return <Navigate to="/unauthorized" replace />
 }
 
 export default ProtectedRoutes

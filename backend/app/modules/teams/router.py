@@ -55,11 +55,7 @@ async def discover_team(
         current_user=current_user
     )
 
-<<<<<<< Updated upstream
-
-=======
 # Join team
->>>>>>> Stashed changes
 @router.post("/{team_id}/join")
 async def join_team(
     team_id : int,

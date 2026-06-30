@@ -1,6 +1,6 @@
-import { Home, User } from 'lucide-react';
+import { Home, User } from 'lucide-react'
 import React,{useState} from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 
 function AsideSidebar({dashboardLinks}) {
 
@@ -50,7 +50,7 @@ function AsideSidebar({dashboardLinks}) {
           
               <div className="space-y-1">
                 {group.links.map((link) => {
-                  const Icon = link.icon;
+                  const Icon = link.icon
                 
                   return (
                     <button

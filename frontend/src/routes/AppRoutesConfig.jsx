@@ -32,9 +32,13 @@ import DiscoverTeamPage from '../pages/player/team/DiscoverTeamPage'
 import TeamApplication from '../features/team/pages/TeamApplication'
 import TeamMembers from '../features/team/pages/TeamMembers'
 
+import ProtectedRoutes from './ProtectedRoutes'
+import AdminLayout from '../layouts/AdminLayout'
+import CreateTournament from '../pages/admin/pages/tournament/CreateTournament'
+
 
 function AppRoutesConfig() {
-
+  
   return (
 
     <Routes>
@@ -53,27 +57,38 @@ function AppRoutesConfig() {
       </Route>
 
       {/* Player Dashboard */}
-      <Route path='/player/' element={<PlayerLayout />}>
+      <Route
+        path='/player/:id'
+        element={<ProtectedRoutes role="player"/>}>
 
         <Route path='create' element={<TeamCreatePage />} />
         <Route path='discover' element={<DiscoverTeamPage />} />
 
         {/* Team Routes */}
         <Route path="team" element={<RequireTeam />}>
-
-            <Route element={<TeamLayout />}>
-                <Route index element={<Overview />} />       
-                <Route path="members" element={<TeamMembers/>} />
-                <Route path="application" element={<TeamApplication />} />
-                {/* <Route path="settings" element={<Settings />} /> */}
-            </Route>
+          <Route element={<TeamLayout />}>
+            <Route index element={<Overview />} />
+            <Route path="members" element={<TeamMembers />} />
+            <Route path="application" element={<TeamApplication />} />
+            {/* <Route path="settings" element={<Settings />} /> */}
+          </Route>
 
         </Route>
-      
+
       </Route>
 
 
       {/* Admin Routes */}
+      <Route
+        path="/admin/:id/"
+        element={<ProtectedRoutes role="admin" />}>
+          <Route path='create-tournament' element={<CreateTournament/>} />
+
+
+
+        
+
+      </Route>
 
 
       {/* Forbidden Or Invalid Routes */}
