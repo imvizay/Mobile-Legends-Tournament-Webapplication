@@ -1,4 +1,5 @@
 import os
+from fastapi import HTTPException
 from passlib.context import CryptContext
 from .repository import AuthRepository
 
@@ -154,6 +155,12 @@ class AuthService:
 
         if current_user.is_banned:
             raise exceptions.UserBannedException()
+        
+        if current_user.provider != "email":
+            raise HTTPException(
+                status_code=400,
+                detail=f"This account was created using {current_user.provider}. Please sign in with that provider."
+            )
 
         if not verify_password( payload.password, current_user.password ):
             raise exceptions.InvalidCredentialsException()
