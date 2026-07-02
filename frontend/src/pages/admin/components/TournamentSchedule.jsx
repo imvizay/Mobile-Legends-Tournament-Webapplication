@@ -1,7 +1,7 @@
 import React from "react"
 import { CalendarDays, Clock3 } from "lucide-react"
 
-const DateTimeField = ({ label, required = false }) => {
+const DateTimeField = ({ label, required = false,dateName,timeName,handleInputChange,data }) => {
 
     return (
         <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>
@@ -13,7 +13,11 @@ const DateTimeField = ({ label, required = false }) => {
                     <CalendarDays size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2"
                         style={{ color: "var(--text-muted)" }} />
                     <input
+                        name={dateName}
+                        value={data[dateName] || ""}
+                        onChange={handleInputChange}
                         type="date"
+
                         className="h-9 w-full rounded-lg border bg-transparent pl-8 pr-2 text-[10px] outline-none focus:border-[var(--accent-gold)]"
                         style={{
                             borderColor: "var(--border-default)",
@@ -24,7 +28,12 @@ const DateTimeField = ({ label, required = false }) => {
 
                 <div className="relative">
                     <Clock3 size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
-                    <input type="time"
+                    <input 
+                        name={timeName}
+                        value={data[timeName] || ""}
+                        onChange={handleInputChange}
+
+                        type="time"
                         className="h-9 w-full rounded-lg border bg-transparent pl-8 pr-2 text-[10px] outline-none focus:border-[var(--accent-gold)]"
                         style={{
                             borderColor: "var(--border-default)",
@@ -37,7 +46,17 @@ const DateTimeField = ({ label, required = false }) => {
     )
 }
 
-const TournamentSchedule = () => {
+const TournamentSchedule = ({data,setData}) => {
+
+
+    const handleInputChange = (e) => {
+        const {name,value} = e.target
+
+        setData(prev => ({
+            ...prev,[name]:value
+        }))
+    }
+
     return (
         <section
             className="rounded-xl border"
@@ -68,8 +87,25 @@ const TournamentSchedule = () => {
                     </p>
 
                     <div className="space-y-4">
-                        <DateTimeField label="Registration Opens" required />
-                        <DateTimeField label="Registration Closes" required />
+                        <DateTimeField 
+                        label="Registration Opens" 
+                        required
+                        dateName="reg_open_date"
+                        timeName="reg_open_time"
+                        handleInputChange={handleInputChange}
+                        data={data}
+
+                        />
+
+                        <DateTimeField 
+                        label="Registration Closes" 
+                        required
+                        dateName="reg_close_date"
+                        timeName="reg_close_time"
+                        handleInputChange={handleInputChange}
+                        data={data}
+                        />
+
                     </div>
                 </div>
 
@@ -82,8 +118,25 @@ const TournamentSchedule = () => {
                     </p>
 
                     <div className="space-y-4">
-                        <DateTimeField label="Tournament Start" required />
-                        <DateTimeField label="Tournament End" required />
+                        <DateTimeField 
+                            label="Tournament Start" 
+                            required 
+                            dateName="tournament_start_date"
+                            timeName="tournament_start_time"
+                            handleInputChange={handleInputChange}
+                            data={data}
+
+                        />
+
+                        <DateTimeField 
+                            label="Tournament End" 
+                            required
+                            dateName="tournament_end_date"
+                            timeName="tournament_end_time"
+                            handleInputChange={handleInputChange}
+                            data={data}
+
+                        />
                     </div>
                 </div>
 
@@ -93,16 +146,20 @@ const TournamentSchedule = () => {
                             Check-in
                         </label>
                         <select
+                            name="check_in_time"
+                            value={data.check_in}
+                            onChange={handleInputChange}
+
                             className="h-9 w-full rounded-lg border bg-transparent px-3 text-xs outline-none focus:border-[var(--accent-gold)]"
                             style={{
                                 borderColor: "var(--border-default)",
                                 color: "var(--text-primary)",
                             }}
                         >
-                            <option>15 min</option>
-                            <option>30 min</option>
-                            <option>45 min</option>
-                            <option>60 min</option>
+                            <option value="15-min">15 min</option>
+                            <option value="30-min">30 min</option>
+                            <option value="45-min">45 min</option>
+                            <option value="60-min">60 min</option>
                         </select>
                     </div>
 
@@ -111,16 +168,19 @@ const TournamentSchedule = () => {
                             Grace Period
                         </label>
                         <select
+                            name="grace_period"
+                            value={data.grace_period}
+                            onChange={handleInputChange}
                             className="h-9 w-full rounded-lg border bg-transparent px-3 text-xs outline-none focus:border-[var(--accent-gold)]"
                             style={{
                                 borderColor: "var(--border-default)",
                                 color: "var(--text-primary)",
                             }}
                         >
-                            <option>5 min</option>
-                            <option>10 min</option>
-                            <option>15 min</option>
-                            <option>30 min</option>
+                            <option value="5-min">5 min</option>
+                            <option value="10-min">10 min</option>
+                            <option value="15-min">15 min</option>
+                            <option value="30-min">30 min</option>
                         </select>
                     </div>
                 </div>
@@ -132,6 +192,9 @@ const TournamentSchedule = () => {
                     </label>
 
                     <select
+                        name="timezone"
+                        value={data.timezone}
+                        onChange={handleInputChange}
                         className="h-9 w-full rounded-lg border bg-transparent px-3 text-xs outline-none focus:border-[var(--accent-gold)]"
                         style={{
                             borderColor: "var(--border-default)",

@@ -1,7 +1,24 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { ChevronDown, Gamepad2, Tag, Users, Trophy } from "lucide-react"
 
-const TournamentBasicInfo = () => {
+const TournamentBasicInfo = ({ data, setData }) => {
+
+    const [len, setLength] = useState(0)
+
+    useEffect(() => {
+        setLength(data.description?.length || 0)
+    }, [data.description])
+
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target
+
+        setData(prev => ({
+            ...prev, [name]: value
+        }))
+    }
+
+
     return (
         <section className="overflow-hidden rounded-xl border" style={{ background: "var(--surface-base)", borderColor: "var(--border-default)" }}>
 
@@ -56,6 +73,9 @@ const TournamentBasicInfo = () => {
 
                             <input
                                 type="text"
+                                name="tournament_name"
+                                value={data?.tournament_name || ""}
+                                onChange={handleInputChange}
                                 placeholder="e.g. Gamix Summer Cup"
                                 className="h-9 w-full rounded-lg border bg-transparent px-3 text-xs outline-none transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)]"
                                 style={{
@@ -117,13 +137,16 @@ const TournamentBasicInfo = () => {
                                 <Gamepad2 size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
 
                                 <select
+                                    name="game_name"
+                                    value={data.game_name || "Mobile Legends: Bang Bang"}
+                                    onChange={handleInputChange}
                                     className="h-9 w-full appearance-none rounded-lg border bg-transparent pl-9 pr-9 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]"
                                     style={{
                                         borderColor: "var(--border-default)",
                                         color: "var(--text-primary)",
                                     }}
                                 >
-                                    <option>Mobile Legends: Bang Bang</option>
+                                    <option value={"mlbb"}>Mobile Legends: Bang Bang</option>
                                 </select>
 
                                 <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
@@ -145,6 +168,9 @@ const TournamentBasicInfo = () => {
                                 <Tag size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
 
                                 <select
+                                    name="tournament_type"
+                                    value={data?.tournament_type}
+                                    onChange={handleInputChange}
                                     className="h-9 w-full appearance-none rounded-lg border bg-transparent pl-9 pr-9 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]"
                                     style={{
                                         borderColor: "var(--border-default)",
@@ -176,15 +202,18 @@ const TournamentBasicInfo = () => {
                                 <Users size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
 
                                 <select
+                                    name="team_format"
+                                    value={data.team_format || "5 vs 5"}
+                                    onChange={handleInputChange}
                                     className="h-9 w-full appearance-none rounded-lg border bg-transparent pl-9 pr-9 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]"
                                     style={{
                                         borderColor: "var(--border-default)",
                                         color: "var(--text-primary)",
                                     }}
                                 >
-                                    <option>5 vs 5</option>
-                                    <option>3 vs 3</option>
-                                    <option>1 vs 1</option>
+                                    <option value={"5vs5"} >5 vs 5</option>
+                                    <option value={"3vs3"} >3 vs 3</option>
+                                    <option value={"1vs1"} >1 vs 1</option>
                                 </select>
 
                                 <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
@@ -192,6 +221,34 @@ const TournamentBasicInfo = () => {
                             </div>
 
                         </div>
+
+                         <div className="space-y-1.5">
+
+                            <label className="flex items-center gap-1 text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>
+                                Minimum Teams
+                                <span style={{ color: "var(--accent-gold)" }}>*</span>
+                            </label>
+
+                            <input
+                                name="min_teams"
+                                value={data.min_teams}
+                                onChange={handleInputChange}
+                                type="number"
+                                min="1"
+                                max="99"
+                                onInput={(e) => {
+                                    e.currentTarget.value = e.currentTarget.value.slice(0, 2);
+                                }}
+                                placeholder="25"
+                                className="h-9 w-full rounded-lg border bg-transparent px-3 text-xs outline-none transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)]"
+                                style={{
+                                    borderColor: "var(--border-default)",
+                                    color: "var(--text-primary)",
+                                }}
+                            />
+
+                        </div>
+
 
 
                         <div className="space-y-1.5">
@@ -202,9 +259,16 @@ const TournamentBasicInfo = () => {
                             </label>
 
                             <input
+                                name="max_teams"
+                                value={data.max_teams}
+                                onChange={handleInputChange}
                                 type="number"
-                                min="2"
-                                placeholder="64"
+                                min="1"
+                                max="99"
+                                onInput={(e) => {
+                                    e.currentTarget.value = e.currentTarget.value.slice(0, 2);
+                                }}
+                                placeholder="25"
                                 className="h-9 w-full rounded-lg border bg-transparent px-3 text-xs outline-none transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)]"
                                 style={{
                                     borderColor: "var(--border-default)",
@@ -240,7 +304,12 @@ const TournamentBasicInfo = () => {
                     </div>
 
                     <textarea
-                        rows="3"
+                        rows="4"
+                        name="description"
+                        value={data.description || ""}
+                        onChange={handleInputChange}
+                        maxLength={3000}
+
                         placeholder="Describe the tournament format, eligibility, rules or other information players should know..."
                         className="w-full resize-none rounded-lg border bg-transparent px-3 py-2.5 text-xs leading-relaxed outline-none transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)]"
                         style={{
@@ -251,7 +320,7 @@ const TournamentBasicInfo = () => {
 
                     <div className="mt-1.5 flex justify-end">
                         <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
-                            0 / 500 characters
+                            {len} / 3000 characters
                         </span>
                     </div>
 
