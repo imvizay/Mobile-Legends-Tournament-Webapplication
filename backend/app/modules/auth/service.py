@@ -105,6 +105,7 @@ class TokenService:
 class AuthService:
 
     def __init__(self,repository:AuthRepository,email_service:AuthEmailService , token_service:TokenService):
+        
         self.repository = repository
         self.email_service = email_service
         self.token_service = token_service
