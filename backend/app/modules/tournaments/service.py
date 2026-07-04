@@ -1,15 +1,26 @@
 from fastapi import UploadFile
 from app.modules.auth.models import Player
-from .schema import TournamentForm
+from app.modules.tournaments.models import Tournament
+from .schema import TournamentForm,AdminTournamentRes,TournamentListResponse
 
 from ...core.cloudinary.cloudinary_services import cloud_service
 from .validators import validate_image
-from pprint import pprint
+
 
 class TournamentService:
 
     def __init__(self, repository):
         self.repository = repository
+        
+    def get_tournaments(self,current_user:Player):
+        
+        if current_user.role == "admin":
+            results =  self.repository.load_tournaments()
+            
+            return AdminTournamentRes(
+                tournament=results
+            )
+            
 
     async def create_tournament(
         self,

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom"
 import {
   LayoutDashboard,
   Users,
@@ -113,10 +114,10 @@ export default function AdminSidebar() {
               <span>Teams</span>
             </button>
 
-            <button className="admin-nav-item">
+            <Link to='tournaments' className="admin-nav-item">
               <Trophy size={15} strokeWidth={1.6} />
               <span>Tournaments</span>
-            </button>
+            </Link>
 
             <button className="admin-nav-item">
               <ChartPie size={15} strokeWidth={1.6} />

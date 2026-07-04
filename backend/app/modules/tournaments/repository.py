@@ -13,6 +13,13 @@ class TournamentRepository:
             self.db.query(Tournament).
             filter(Tournament.tournament_name == tournament_name).exists()
         ).scalar()
+        
+    def load_tournaments(self):
+        return ( 
+                self.db.query(Tournament).
+                all() 
+        )
+        
 
     def create_tournament(self, tournament_data: dict):
 
