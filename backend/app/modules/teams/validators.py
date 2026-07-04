@@ -30,6 +30,3 @@ def validate_image(file: UploadFile | None) -> None:
     finally:
         file.file.seek(0)
 
-
-def validate_user_eligibility(current_user):
-    pass

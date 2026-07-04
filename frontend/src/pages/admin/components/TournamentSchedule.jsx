@@ -169,7 +169,7 @@ const TournamentSchedule = ({data,setData}) => {
                         </label>
                         <select
                             name="grace_period"
-                            value={data.grace_period}
+                            value={data.grace_period || "5"}
                             onChange={handleInputChange}
                             className="h-9 w-full rounded-lg border bg-transparent px-3 text-xs outline-none focus:border-[var(--accent-gold)]"
                             style={{
@@ -177,10 +177,10 @@ const TournamentSchedule = ({data,setData}) => {
                                 color: "var(--text-primary)",
                             }}
                         >
-                            <option value="5-min">5 min</option>
-                            <option value="10-min">10 min</option>
-                            <option value="15-min">15 min</option>
-                            <option value="30-min">30 min</option>
+                            <option value="5">5 min</option>
+                            <option value="10">10 min</option>
+                            <option value="15">15 min</option>
+                            <option value="30">30 min</option>
                         </select>
                     </div>
                 </div>

@@ -203,7 +203,7 @@ const TournamentBasicInfo = ({ data, setData }) => {
 
                                 <select
                                     name="team_format"
-                                    value={data.team_format || "5 vs 5"}
+                                    value={data.team_format || "5vs5"}
                                     onChange={handleInputChange}
                                     className="h-9 w-full appearance-none rounded-lg border bg-transparent pl-9 pr-9 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]"
                                     style={{
