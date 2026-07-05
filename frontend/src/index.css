@@ -355,6 +355,28 @@ body {
 }
 
 
+.admin-nav-item {
+  @apply flex items-center gap-3 rounded-md px-3 py-2 text-[11px]
+    font-medium text-[var(--text-muted)] transition-colors;
+}
+
+.admin-nav-item:hover {
+  @apply bg-[rgba(255,255,255,0.025)] text-[var(--text-primary)];
+}
+
+.admin-nav-item svg {
+  color: var(--text-muted);
+}
+
+.admin-sub-item {
+  @apply block px-2 py-1.5 text-[10px]
+    text-[var(--text-muted)] transition-colors;
+}
+
+.admin-sub-item:hover {
+  color: var(--text-primary);
+}
+
 
 /* admin */
 /* error animation */
