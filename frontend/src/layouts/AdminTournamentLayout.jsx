@@ -1,15 +1,50 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Outlet } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query';
+import TournamentDetailsModal from '../pages/admin/pages/tournament/AdminTournamentDetail';
+import { tournamentService } from '../services/admin/tournament_service';
+
 function AdminTournamentLayout() {
 
-  return (
-    <div>
+  const [isSelectedTournament, setSelectedTournament] = useState(null);
 
-      <main className='min-h-screen'>
-        <Outlet />
+  const publishMutation = useMutation({
+    mutationKey: ['publish-tournament'],
+    mutationFn: tournamentService.publishTournament
+  })
+
+  const onPublish = async (id) => {
+    try {
+      const res = await publishMutation.mutateAsync(id)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
+  return (
+    <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <main className="min-h-0 min-w-0 flex-1 overflow-hidden">
+
+
+
+        <Outlet context={{
+          isSelTournament: isSelectedTournament,
+          setSelTournament: setSelectedTournament
+        }} />
       </main>
 
-    </div>
+
+      {isSelectedTournament && (
+        <TournamentDetailsModal
+          tournament={isSelectedTournament}
+          onClose={() => setSelectedTournament(null)}
+          onPublish={onPublish}
+        />
+      )}
+
+
+    </section>
   )
 }
 

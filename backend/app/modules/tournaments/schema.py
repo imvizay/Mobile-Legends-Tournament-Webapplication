@@ -49,7 +49,7 @@ class TournamentForm(BaseModel):
 
     registration_access: str | None = None
     registration_approval: str | None = None
-
+    
     server: str
 
     @classmethod
@@ -78,12 +78,17 @@ class TournamentForm(BaseModel):
 # Admin List tournament
 class TournamentListResponse(BaseModel):
 
+    id:int
     tournament_name: str
     game_name: str
     tournament_type: str
     team_format: str 
     min_teams: int
     max_teams: int
+    
+    # images
+    background_image_url:Optional[str] | None
+    banner_image_url:Optional[str] | None
 
     description: str | None = None
 
@@ -119,6 +124,10 @@ class TournamentListResponse(BaseModel):
     registration_approval: str | None = None
 
     server: str
+    # status
+    registration_status:str
+    status:str
+    visibility_status:str
     
     model_config= ConfigDict(from_attributes=True)
     

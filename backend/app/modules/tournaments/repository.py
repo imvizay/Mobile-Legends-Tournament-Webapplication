@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from fastapi import HTTPException
 from .models import Tournament
 
 
@@ -11,15 +11,15 @@ class TournamentRepository:
     def check_tournament_name(self,tournament_name:str):
         return (
             self.db.query(Tournament).
-            filter(Tournament.tournament_name == tournament_name).exists()
-        ).scalar()
+            filter(Tournament.tournament_name == tournament_name).first() is not None
+        )
         
     def load_tournaments(self):
         return ( 
                 self.db.query(Tournament).
                 all() 
         )
-        
+           
 
     def create_tournament(self, tournament_data: dict):
 
@@ -54,4 +54,32 @@ class TournamentRepository:
         self.db.commit()
         self.db.refresh(tournament)
 
+        return tournament
+
+
+    def publish_tournament(self,tournament_id:int):
+        
+        tournament = (
+            self.db.query(Tournament).
+            filter(Tournament.id == tournament_id)
+            .first()
+        )
+        
+        if not tournament:
+            raise HTTPException(
+                status_code=404,
+                detail="Tournament not found."
+            )
+        
+        if tournament.visibility_status == "published":
+            raise HTTPException(
+                status_code=400,
+                detail="Tournament already published"
+            )
+            
+        tournament.visibility_status = "published"
+        
+        self.db.commit()
+        self.db.refresh(tournament)
+        
         return tournament

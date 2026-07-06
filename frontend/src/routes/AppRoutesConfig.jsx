@@ -38,6 +38,8 @@ import CreateTournament from '../pages/admin/pages/tournament/CreateTournament'
 import AdminTournamentLayout from '../layouts/AdminTournamentLayout'
 import AdminTournamentOverview from '../pages/admin/pages/tournament/AdminTournamentOverview'
 
+import TournamentDetailsModal from '../pages/admin/pages/tournament/AdminTournamentDetail'
+
 
 function AppRoutesConfig() {
 
@@ -88,12 +90,9 @@ function AppRoutesConfig() {
         <Route path="tournaments" element={<AdminTournamentLayout />}>
           {/* Index Component */}
           <Route index element={<AdminTournamentOverview />} /> 
-          <Route path='create-tournament' element={<CreateTournament />} />
+          <Route path='create' element={<CreateTournament />} />
+         
         </Route>
-
-
-
-
 
       </Route>
 
