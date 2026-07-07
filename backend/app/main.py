@@ -6,6 +6,7 @@ from app.core.middleware.middleware import register_middlewares
 from app.modules.auth.router import router as auth_router
 from app.modules.teams.router import router as team_router
 from app.modules.tournaments.router import router as tournament_router
+from app.modules.users.router import router as users_router
 
 # Exceptions
 from app.modules.teams.exceptions import *
@@ -27,6 +28,7 @@ register_middlewares(app)
 app.include_router(auth_router,prefix='/api')
 app.include_router(team_router,prefix='/api')
 app.include_router(tournament_router,prefix="/api")
+app.include_router(users_router,prefix="/api")
 
 
 # App Exception

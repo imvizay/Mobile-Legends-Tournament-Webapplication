@@ -1,19 +1,19 @@
+import { LayoutDashboard, Users, Trophy, Inbox, Activity, Wallet, Settings, } from "lucide-react";
+
 import { useEffect, useState } from "react";
 
 import { Outlet, useOutlet } from "react-router-dom";
-
 import { useOutletContext } from "react-router-dom";
 
-import { teamService } from "../services/team_service";
+import { teamService } from "../../../services/team_service";
 
 // Team Components
-import TeamMetaData from "../features/team/components/common/TeamMetaData";
-import TeamNavbar from "../features/team/navigation/TeamNavbar";
-import TeamPageSkeleton from "../skeletons/playerdash/my_team/TeamPageSkeleton";
+import TeamMetaData from "../../../features/team/components/common/TeamMetaData";
+import TeamNavbar from '../../../features/team/navigation/TeamNavbar'
+import TeamPageSkeleton from "../../../skeletons/playerdash/my_team/TeamPageSkeleton";
 
-// Icons
-import { LayoutDashboard, Users, Trophy, Inbox, Activity, Wallet, Settings, } from "lucide-react";
-import EmptyTeamState from "../pages/player/team/EmptyTeam";
+import EmptyTeamState from "../team/EmptyTeam";
+
 import { useQuery } from "@tanstack/react-query";
 
 const TEAM_NAVIGATION_LINKS = [
