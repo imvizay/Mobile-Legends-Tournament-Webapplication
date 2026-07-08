@@ -13,15 +13,20 @@ def get_current_user(
         request:Request,
         db:Session = Depends(get_db)
 ):
+    
+    print("Cookies:", request.cookies)
 
-    # extract token from cookie
     token = request.cookies.get("access_token")
 
+    print("Access Token:", token)
+
     if not token:
+        print("No access token found")
         raise InvalidTokenException()
-    
+ 
     # decode token
     payload = token_service.decode_token(token)
+    print("Payload:", payload)
 
     # verify token
     verified_token = token_service.verify_token_type(payload,"access")

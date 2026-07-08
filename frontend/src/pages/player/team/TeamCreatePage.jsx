@@ -36,7 +36,7 @@ function TeamCreatePage() {
     const teamLogoInputRef = useRef(null)
     const teamLogoBgInputRef = useRef(null)
 
-    const createTeamMutation = useMutation({
+    const {isPending,mutateAsync:createTeamMutation } = useMutation({
         mutationFn: teamService.createTeam,
 
         onSuccess: () => {
@@ -152,14 +152,14 @@ function TeamCreatePage() {
         // API Call To Create Team
         try{
             const formData = new FormData()
-            formData.append("team_logo",teamLogoFile)
-            formData.append("team_banner",teamBgLogoFile)
+            formData.append("logo",teamLogoFile)
+            formData.append("banner",teamBgLogoFile)
 
             Object.entries(teamInfo).forEach(([Key,value]) => {
                 formData.append(Key,value)
             })
 
-            const data = await createTeamMutation.mutateAsync(formData);
+            const data = await createTeamMutation(formData);
 
             setTeamInfo({
                 team_name: "",

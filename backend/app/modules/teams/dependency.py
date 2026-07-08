@@ -7,6 +7,6 @@ from .repository import TeamRepository
 def get_team_repository(db:Session=Depends(get_db)):
     return TeamRepository(db)
 
-def get_team_service(repository:TeamRepository=Depends(get_team_repository)):
+def get_team_service(db: Session = Depends(get_db),repository:TeamRepository=Depends(get_team_repository)):
     
-    return TeamService(repository)
+    return TeamService(db,repository)

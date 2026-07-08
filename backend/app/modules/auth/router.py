@@ -134,16 +134,16 @@ def login(
         key="access_token",
         value=result['access'],
         httponly=True,
-        secure=False,
-        samesite='lax'
+        secure=True,
+        samesite='none'
     )
 
     response.set_cookie(
         key="refresh_token",
         value=result['refresh'],
         httponly=True,
-        secure=False,
-        samesite='lax'
+        secure=True,
+        samesite='none'
     )
 
     return {

@@ -25,6 +25,8 @@ class Player(Base):
 
     created_at = Column(DateTime(timezone=True),default=lambda:datetime.now(UTC))
 
+    teams = relationship("TeamMember",back_populates="player",cascade="all, delete-orphan")
+
    
 
     

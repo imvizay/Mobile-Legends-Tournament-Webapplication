@@ -27,6 +27,7 @@ def register_middlewares(app):
     app.add_middleware(
         TrustedHostMiddleware,
         allowed_hosts = [
+            "localhost",
             '127.0.0.1'
         ]
     )
