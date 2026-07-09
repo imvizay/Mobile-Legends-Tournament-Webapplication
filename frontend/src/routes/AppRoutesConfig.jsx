@@ -32,10 +32,13 @@ import RequireTeam from './RequireTeam'
 import AdminTournamentLayout from '../pages/admin/pages/layouts/AdminTournamentLayout'
 import AdminTournamentOverview from '../pages/admin/pages/tournament/AdminTournamentOverview'
 import CreateTournament from '../pages/admin/pages/tournament/CreateTournament'
+
 import ProtectedRoutes from './ProtectedRoutes'
 
 import AdminUsersOverview from '../pages/admin/pages/users/AdminUsersOverview'
 import AdminUsersLayout from '../pages/admin/pages/layouts/AdminUsersLayout'
+
+import PlayerDashboard from '../pages/player/onboarding/PlayerDashboard'
 
 
 function AppRoutesConfig() {
@@ -59,8 +62,10 @@ function AppRoutesConfig() {
 
       {/* Player Dashboard */}
       <Route
-        path='/player/:id'
+        path='/player'
         element={<ProtectedRoutes role="player" />}>
+        
+        <Route index element = {<PlayerDashboard/>}/>
 
         <Route path='create' element={<TeamCreatePage />} />
         <Route path='discover' element={<DiscoverTeamPage />} />

@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import {
   X,
   Home,
@@ -9,277 +9,427 @@ import {
   Wallet,
   Gem,
   UserRound,
-  ArrowRight,
+  ChevronRight,
 } from "lucide-react";
 import ThemeToggle from "../button/ThemeToggle";
 
 function MobileNavbar() {
-    const [isOpen,setIsOpen] = useState(false) 
+  const [isOpen, setIsOpen] = useState(false);
+
   const navigationLinks = [
-    {
-      id: 1,
-      label: "Home",
-      icon: <Home size={18} />,
-    },
-    {
-      id: 2,
-      label: "Tournaments",
-      icon: <Trophy size={18} />,
-    },
-    {
-      id: 3,
-      label: "Teams",
-      icon: <Users size={18} />,
-    },
-    {
-      id: 4,
-      label: "Friends",
-      icon: <UserRound size={18} />,
-      badge: "NEW",
-    },
-    {
-      id: 5,
-      label: "Leaderboards",
-      icon: <BarChart3 size={18} />,
-    },
-    {
-      id: 6,
-      label: "Community",
-      icon: <MessageSquare size={18} />,
-    },
-    {
-      id: 7,
-      label: "Wallet",
-      icon: <Wallet size={18} />,
-    },
-    {
-      id: 8,
-      label: "Membership",
-      icon: <Gem size={18} />,
-    },
+    { id: 1, label: "Home", icon: Home },
+    { id: 2, label: "Tournaments", icon: Trophy },
+    { id: 3, label: "Teams", icon: Users },
+    { id: 4, label: "Friends", icon: UserRound, badge: "NEW" },
+    { id: 5, label: "Leaderboards", icon: BarChart3 },
+    { id: 6, label: "Community", icon: MessageSquare },
+    { id: 7, label: "Wallet", icon: Wallet },
+    { id: 8, label: "Membership", icon: Gem },
   ];
 
   return (
     <>
-      {/* Overlay */}
-    <header
-      className="
-      fixed top-2
-      left-1/2 -translate-x-1/2
-      z-50
-      md:mx-auto
-      min-w-[clamp(360px,90vw,980px)]
-      h-16
-      px-4
-      rounded-2xl
-      flex items-center justify-between
-      bg-[var(--glass-navbar)]
-      backdrop-blur-md
-      border border-[var(--border-default)]
-      "
-    >
-      <h1 className="
-        font-['Google_Sans']
-        font-black
-        text-xl
-        text-[var(--text-primary)]
-      ">
-        Gamix.
-      </h1>
-
-      <div className="flex items-center gap-3">
-
-        <ThemeToggle />
-
-        <button
-          onClick={() => setIsOpen(true)}
-          className="
-          h-10 w-10
+      {/* Mobile Navbar */}
+      <header
+        className="
+          fixed top-3 left-1/2 z-50
+          -translate-x-1/2
+          w-[calc(100%-24px)]
+          max-w-[980px]
+          h-[54px]
+          px-3
+          flex items-center justify-between
           rounded-xl
-
-          flex flex-col
-          items-center
-          justify-center
-          gap-1
-
-          bg-[var(--glass-surface)]
+          bg-[var(--glass-navbar)]
+          backdrop-blur-xl
           border border-[var(--border-default)]
-          "
-        >
-          <span className="w-5 h-[2px] bg-[var(--text-primary)]" />
-          <span className="w-5 h-[2px] bg-[var(--text-primary)]" />
-          <span className="w-5 h-[2px] bg-[var(--text-primary)]" />
-        </button>
+          shadow-[0_8px_30px_rgba(0,0,0,0.06)]
+        "
+      >
+        <div className="flex items-center gap-2.5">
+          <div
+            className="
+              h-7 w-7
+              rounded-lg
+              flex items-center justify-center
+              bg-[var(--action-primary-bg)]
+              text-[var(--action-primary-text)]
+              text-[11px]
+              font-black
+            "
+          >
+            G
+          </div>
 
-      </div>
-    </header>
+          <span
+            className="
+              font-['Google_Sans']
+              font-bold
+              text-[17px]
+              tracking-[-0.04em]
+              text-[var(--text-primary)]
+              whitespace-nowrap
+            "
+          >
+            Gamix.
+          </span>
+        </div>
 
+        <div className="flex items-center gap-1.5">
+          <ThemeToggle />
+
+          <button
+            onClick={() => setIsOpen(true)}
+            aria-label="Open navigation"
+            className="
+              h-9 w-9
+              rounded-lg
+              flex items-center justify-center
+              text-[var(--text-primary)]
+              border border-[var(--border-default)]
+              bg-[var(--glass-surface)]
+              transition-colors
+              hover:bg-[var(--bg-secondary)]
+            "
+          >
+            <div className="flex flex-col gap-[4px]">
+              <span className="w-[16px] h-[1.5px] rounded-full bg-current" />
+              <span className="w-[12px] h-[1.5px] rounded-full bg-current ml-auto" />
+              <span className="w-[16px] h-[1.5px] rounded-full bg-current" />
+            </div>
+          </button>
+        </div>
+      </header>
+
+      {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-[var(--bg-primary)] backdrop-blur-md z-[998]
-        transition-all duration-300
-        ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"}
-      `}
+        onClick={() => setIsOpen(false)}
+        className={`
+          fixed inset-0 z-[998]
+          bg-black/30
+          backdrop-blur-[2px]
+          transition-opacity duration-300
+          ${
+            isOpen
+              ? "visible opacity-100"
+              : "invisible pointer-events-none opacity-0"
+          }
+        `}
       />
 
-      {/* Sheet */}
-
+      {/* Navigation Drawer */}
       <aside
         className={`
-        fixed top-0 right-0
-        overflow-y-auto
-        
-        h-screen w-[88%] max-w-[380px]
-        z-[999]
-        bg-[var(--glass-navbar)]
-        backdrop-blur-2xl
-        border-l border-[var(--border-default)]
-        shadow-[-10px_0px_40px_rgba(0,0,0,0.08)]
-        transition-all duration-500 ease-out
-        
-        ${
-          isOpen
-            ? "translate-x-0"
-            : "translate-x-full"
-        }
-      `}
+          fixed top-0 right-0 z-[999]
+          h-dvh
+          w-[88%]
+          max-w-[390px]
+          bg-[var(--bg-primary)]
+          border-l border-[var(--border-default)]
+          shadow-[-20px_0_60px_rgba(0,0,0,0.12)]
+          transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)]
+          ${isOpen ? "translate-x-0" : "translate-x-full"}
+        `}
       >
-        <div className="h-full flex flex-col p-5">
-          {/* Header */}
+        <div className="flex h-full min-h-0 flex-col">
+          {/* Drawer Top */}
+          <div className="px-5 pt-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p
+                  className="
+                    text-[9px]
+                    uppercase
+                    tracking-[0.18em]
+                    font-semibold
+                    text-[var(--text-secondary)]
+                    whitespace-nowrap
+                  "
+                >
+                  Gamix Platform
+                </p>
 
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="font-bold font-[Inter] text-3xl text-[var(--text-primary)]">
-              Gamix.
-            </h1>
+                <h2
+                  className="
+                    mt-1
+                    text-[20px]
+                    leading-none
+                    font-bold
+                    tracking-[-0.035em]
+                    text-[var(--text-primary)]
+                    whitespace-nowrap
+                  "
+                >
+                  Welcome back.
+                </h2>
+              </div>
 
-            <button
-              onClick={() => setIsOpen(false)}
-              className="
-              h-12 w-12
-              rounded-xl
-              border border-[var(--border-default)]
-              flex items-center justify-center
-              "
-            >
-              <X className="text-[var(--text-primary)]" size={20} />
-            </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                aria-label="Close navigation"
+                className="
+                  h-9 w-9
+                  rounded-lg
+                  flex items-center justify-center
+                  border border-[var(--border-default)]
+                  text-[var(--text-secondary)]
+                  hover:text-[var(--text-primary)]
+                  transition-colors
+                "
+              >
+                <X size={17} />
+              </button>
+            </div>
           </div>
 
           {/* Navigation */}
-
-          <nav className="space-y-1">
-            {navigationLinks.map((item) => (
-              <button
-                key={item.id}
-                className="
-                w-full
-                flex items-center justify-between
-                px-4 py-4
-                rounded-2xl
-                hover:bg-black/[0.03]
-                text-[var(--text-secondary)]
-                transition-all duration-200
-                "
-              >
-                <div className="flex items-center gap-4">
-                  {item.icon}
-
-                  <span className="font-medium text-[15px]">
-                    {item.label}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {item.badge && (
-                    <span
-                      className="
-                      px-2 py-1
-                      rounded-full
-                      text-[10px]
-                      bg-green-100
-                      text-green-700
-                      "
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-
-                  <ArrowRight size={16} />
-                </div>
-              </button>
-            ))}
-          </nav>
-
-          {/* Tournament Card */}
-
-          <div
-            className="
-            mt-6
-            border border-[var(--border-default)]
-            rounded-3xl
-            p-4
-            "
-          >
+          <nav className="flex-1 min-h-0 overflow-y-auto px-3 pt-7">
             <p
               className="
-              uppercase
-              tracking-wide
-              text-xs
-              text-[var(--text-secondary)]
+                px-2
+                mb-2
+                text-[9px]
+                font-semibold
+                uppercase
+                tracking-[0.16em]
+                text-[var(--text-secondary)]
+                whitespace-nowrap
               "
             >
-              Active Tournament
+              Navigation
             </p>
 
-            <h3 className="mt-2 font-bold text-[var(--text-primary)] text-lg">
-              Champions Clash S2
-            </h3>
+            <div className="space-y-0.5">
+              {navigationLinks.map((item) => {
+                const Icon = item.icon;
 
-            <p className="text-[var(--text-secondary)] font-semibold mt-1">
-              Starts in 2 Days
-            </p>
+                return (
+                  <button
+                    key={item.id}
+                    className="
+                      group
+                      relative
+                      w-full
+                      h-[46px]
+                      px-3
+                      flex items-center
+                      rounded-lg
+                      text-left
+                      text-[var(--text-secondary)]
+                      transition-colors
+                      hover:bg-[var(--glass-surface)]
+                      hover:text-[var(--text-primary)]
+                    "
+                  >
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <Icon
+                        size={17}
+                        strokeWidth={1.8}
+                        className="shrink-0"
+                      />
 
-            <button
-              className="
-              mt-4
-              w-full
-              py-3
-              rounded-2xl
-              bg-[var(--action-primary-bg)]
-              text-[var(--action-primary-text)]
-              border border-[var(--action-primary-border)]
-              flex items-center justify-center gap-2
-              "
-            >
-              Join Tournament
-              <ArrowRight size={18} />
-            </button>
-          </div>
+                      <span
+                        className="
+                          text-[13px]
+                          font-medium
+                          whitespace-nowrap
+                        "
+                      >
+                        {item.label}
+                      </span>
 
-          {/* Bottom Actions */}
+                      {item.badge && (
+                        <span
+                          className="
+                            rounded-full
+                            px-1.5 py-[2px]
+                            text-[8px]
+                            leading-none
+                            font-bold
+                            tracking-[0.08em]
+                            bg-[var(--action-primary-bg)]
+                            text-[var(--action-primary-text)]
+                            whitespace-nowrap
+                          "
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
 
-          <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
-            <button
-              className="
-              py-3
-              rounded-2xl
-              text-[var(--text-primary)]
-              border border-[var(--border-default)]
-              "
-            >
-              Login
-            </button>
+                    <ChevronRight
+                      size={14}
+                      className="
+                        shrink-0
+                        opacity-0
+                        -translate-x-1
+                        transition-all
+                        group-hover:translate-x-0
+                        group-hover:opacity-50
+                      "
+                    />
+                  </button>
+                );
+              })}
+            </div>
 
-            <button
-              className="
-              py-3
-              rounded-2xl
-              bg-[var(--action-primary-bg)]
-              text-[var(--action-primary-text)]
-              border border-[var(--action-primary-border)]
-              "
-            >
-              Register
-            </button>
+            {/* Featured Tournament */}
+            <div className="mt-7">
+              <div className="flex items-center justify-between px-2 mb-2">
+                <p
+                  className="
+                    text-[9px]
+                    font-semibold
+                    uppercase
+                    tracking-[0.16em]
+                    text-[var(--text-secondary)]
+                    whitespace-nowrap
+                  "
+                >
+                  Featured
+                </p>
+
+                <span
+                  className="
+                    flex items-center gap-1
+                    text-[9px]
+                    font-medium
+                    text-[var(--text-secondary)]
+                    whitespace-nowrap
+                  "
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                  Live
+                </span>
+              </div>
+
+              <div
+                className="
+                  relative
+                  overflow-hidden
+                  rounded-xl
+                  border border-[var(--border-default)]
+                  bg-[var(--glass-surface)]
+                "
+              >
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p
+                        className="
+                          text-[9px]
+                          font-semibold
+                          uppercase
+                          tracking-[0.12em]
+                          text-[var(--text-secondary)]
+                          whitespace-nowrap
+                        "
+                      >
+                        Championship Series
+                      </p>
+
+                      <h3
+                        className="
+                          mt-1.5
+                          text-[15px]
+                          font-bold
+                          tracking-[-0.02em]
+                          text-[var(--text-primary)]
+                          whitespace-nowrap
+                          overflow-hidden
+                          text-ellipsis
+                        "
+                      >
+                        Champions Clash S2
+                      </h3>
+                    </div>
+
+                    <Trophy
+                      size={18}
+                      className="shrink-0 text-[var(--accent-gold)]"
+                    />
+                  </div>
+
+                  <div
+                    className="
+                      mt-3
+                      flex items-center justify-between
+                      border-t border-[var(--border-default)]
+                      pt-3
+                    "
+                  >
+                    <span
+                      className="
+                        text-[10px]
+                        font-medium
+                        text-[var(--text-secondary)]
+                        whitespace-nowrap
+                      "
+                    >
+                      Starts in 2 days
+                    </span>
+
+                    <button
+                      className="
+                        flex items-center gap-1
+                        text-[10px]
+                        font-semibold
+                        text-[var(--text-primary)]
+                        whitespace-nowrap
+                        hover:opacity-70
+                        transition-opacity
+                      "
+                    >
+                      View
+                      <ChevronRight size={12} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </nav>
+
+          {/* Footer */}
+          <div
+            className="
+              shrink-0
+              px-4
+              py-4
+              border-t border-[var(--border-default)]
+            "
+          >
+            <div className="flex items-center justify-between gap-3">
+              <button
+                className="
+                  text-[12px]
+                  font-semibold
+                  text-[var(--text-secondary)]
+                  whitespace-nowrap
+                  hover:text-[var(--text-primary)]
+                  transition-colors
+                "
+              >
+                Sign in
+              </button>
+
+              <button
+                className="
+                  h-9
+                  px-4
+                  rounded-lg
+                  text-[11px]
+                  font-semibold
+                  whitespace-nowrap
+                  bg-[var(--action-primary-bg)]
+                  text-[var(--action-primary-text)]
+                  border border-[var(--action-primary-border)]
+                  hover:opacity-90
+                  transition-opacity
+                "
+              >
+                Create account
+              </button>
+            </div>
           </div>
         </div>
       </aside>

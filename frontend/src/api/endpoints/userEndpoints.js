@@ -28,3 +28,16 @@ export const USER_TEAM_ENDPOINTS = {
     REGISTER_TEAM: "/player/team/register",
 
 };
+
+
+export const PLAYER_DASHBOARD_ENDPOINTS = {
+    GET_DASHBOARD: "/player/dashboard",
+    PLAYER_PROFILE: "/player/profile",
+    PLAYER_NOTIFICATION: "/player/notification",
+
+    FEATURED_TOURNAMENTS: "/tournaments/featured",
+    UPCOMING_TOURNAMENTS: "/tournaments/upcoming",
+    RECENT_MATCHES: "/player/matches/recent",
+    RECENT_WINNERS: "/tournaments/recent-winners",
+    LEADERBOARD: "/leaderboard",
+};
