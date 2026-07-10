@@ -1,4 +1,5 @@
 import { useState,useRef, useEffect } from "react";
+import { useNavigate } from 'react-router-dom'
 
 import { toast } from "react-toastify";
 import { ImagePlus, Upload, Shield , Globe,Link as LinkIcon } from "lucide-react";
@@ -32,6 +33,8 @@ function TeamCreatePage() {
 
     const [teamBgLogoFile,setTeamBgLogoFile] = useState(null) 
     const [bgImagePreview,setBgImagePreview] = useState(null)
+
+    const navigate  = useNavigate()
 
     const teamLogoInputRef = useRef(null)
     const teamLogoBgInputRef = useRef(null)
@@ -174,6 +177,7 @@ function TeamCreatePage() {
             setTeamLogoFile(null)
             setTeamBgLogoFile(null)
             setTeamErrors(null)
+            navigate('/player-dashboard/my-team')
         }
         catch(error){
             console.log("team creation api endpoint error",error)
@@ -193,7 +197,7 @@ function TeamCreatePage() {
 
             {/* Header */}
             <div className="mb-4">
-              <button className="text-xs text-[var(--text-secondary)]">
+              <button onClick={ () => navigate('/player-dashboard/no-team')} className="text-xs text-[var(--text-secondary)]">
                 ← Back to Teams
               </button>
 

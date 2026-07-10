@@ -1,6 +1,6 @@
 from typing import Annotated
 import re
-
+from datetime import datetime
 from fastapi import Form
 from decimal import Decimal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -71,32 +71,31 @@ class TeamCreateSchema(BaseModel):
 # Return Team Created Response
 class TeamWalletResponse(BaseModel):
     wallet_balance: Decimal 
-    team_id : int
+    status:str
     
 
 class TeamMemberResponse(BaseModel):
     player_role:str
-    player_id:int
     player_name:str
-
+    player_email:str
+    
 
 class TeamResponse(BaseModel):
 
-    team_id:int
     team_name:str
     team_bio:str
     team_tag:str
     team_logo_url:str | None
     team_banner_url:str | None
+    team_max_members:int
+    team_created_at:datetime
 
     team_country:str
     team_visibility:str
     
     team_wallet:TeamWalletResponse
-
     team_members : list [TeamMemberResponse]
    
     
-class CreatedTeamResponse(BaseModel):
-    message:str
+class TeamResponseOutput(BaseModel):
     team:TeamResponse

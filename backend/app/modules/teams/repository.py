@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Session
-from .models import Team,TeamMember,TeamWallet
+from sqlalchemy.orm import Session , joinedload , selectinload
+from .models import Team,TeamMember,TeamWallet,TeamMemberStatus
 from ..auth.models import Player
 from sqlalchemy import exists
 class TeamRepository:
@@ -8,6 +8,22 @@ class TeamRepository:
         self.db = db
 
     # check whether user is already associated with team as member or captain.
+    def get_team_by_player(self,current_user_id:int):
+        return (
+            self.db.query(Team)
+            .join(TeamMember)
+            .options(
+                joinedload(Team.wallet),
+                selectinload(Team.members).joinedload(TeamMember.player),
+            )
+            .filter(
+                TeamMember.player_id == current_user_id,
+                TeamMember.status == TeamMemberStatus.ACTIVE
+            )
+            .first()
+        )
+        
+
     def player_has_team(self, user_id: int) -> bool:
         return (
             self.db.query(TeamMember)

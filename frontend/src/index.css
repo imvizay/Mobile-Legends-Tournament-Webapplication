@@ -85,6 +85,25 @@ body {
   background: var(--accent-gold);
 }
 
+/* Skeleton Animations */
+@keyframes flash {
+  0% {
+    transform: translateX(-150%);
+  }
+
+  20% {
+    transform: translateX(700%);
+  }
+
+  100% {
+    transform: translateX(700%);
+  }
+}
+
+.animate-flash {
+  animation: flash 3s linear infinite;
+}
+
 
 /* LIGHT THEME */
 

@@ -32,7 +32,8 @@ EXCEPTION_DICT = {
     InvalidTokenException:invalid_token,
 
     ExceptionPlayerAlreadyHasTeam:player_already_in_team,
-    ExceptionTeamAlreadyExits:team_exists
+    ExceptionTeamAlreadyExits:team_exists,
+    NoTeamException:player_no_team
 
 
 }

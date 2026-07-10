@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-from .schemas import TeamCreateSchema , CreatedTeamResponse , TeamResponse , TeamWalletResponse , TeamMemberResponse
+from .schemas import TeamCreateSchema , TeamResponseOutput , TeamResponse , TeamWalletResponse , TeamMemberResponse
 from fastapi import UploadFile
 from .validators import validate_image 
-from app.core.exceptions.exceptions import ExceptionTeamAlreadyExits,ExceptionPlayerAlreadyHasTeam 
+from app.core.exceptions.exceptions import ExceptionTeamAlreadyExits,ExceptionPlayerAlreadyHasTeam,NoTeamException
 from ...modules.auth.models import Player
 from .repository import TeamRepository
 
@@ -14,6 +14,42 @@ class TeamService:
     def __init__(self,db:Session,repository:TeamRepository):
         self.db = db
         self.repository = repository
+
+    def get_my_team(self,current_user: Player):
+        team = self.repository.get_team_by_player(current_user.id)
+        if not team:
+           raise NoTeamException()
+        
+        print(team)
+
+        return( TeamResponseOutput (
+          team = TeamResponse(
+           team_name = team.name,
+           team_tag = team.tag,
+           team_max_members = team.max_members,
+           team_logo_url = team.logo_url,
+           team_banner_url = team.banner_url,
+           team_bio = team.description or "",
+           team_country = team.country,
+           team_visibility = team.visibility,
+           team_created_at = team.created_at,
+
+           team_wallet = TeamWalletResponse(
+              wallet_balance = team.wallet.balance,
+              status = team.wallet.status
+           ),
+
+           team_members = [
+              TeamMemberResponse(
+                 player_name = member.player.email.split("@")[0],
+                 player_email = member.player.email,
+                 player_role = member.role
+              )
+              for member in team.members
+           ]
+          )
+        ))
+    
 
     def create_team(
         self,
@@ -61,36 +97,11 @@ class TeamService:
             self.db.commit()
             self.db.refresh(team)
 
-            return CreatedTeamResponse(
-
-                message="Team created successfully",
-
-                team=TeamResponse(
-                    team_id = team.id,
-                    team_name=team.name, 
-                    team_bio=team.description or "",  
-                    team_tag=team.tag,    
-
-                    team_logo_url=team.logo_url, 
-                    team_banner_url=team.banner_url, 
-                    
-                    team_country=team.country,   
-                    
-                    team_visibility=team.visibility,
-                    team_wallet=TeamWalletResponse(
-                        wallet_balance=team_wallet.balance,
-                        team_id=team.id,
-                    ),
-
-                    team_members=[
-                        TeamMemberResponse(
-                            player_id=current_user.id, 
-                            player_name=current_user.email, 
-                            player_role="captain",
-                        )
-                    ]
-                )
-            )
+            return {
+               "message":"Team Created Successfully",
+               "status":200,
+               "team_id":team.id
+            }
         
         except:
          self.db.rollback()
