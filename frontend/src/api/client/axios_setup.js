@@ -14,8 +14,17 @@ axiosClient.interceptors.response.use(
         return response.data
     },
     async (error) => {
+
         const originalRequest = error.config;
         const isRefreshRequest = originalRequest.url === "/auth/refresh"
+
+        console.log("Interceptor Reached")
+        console.log("Status:", error.response?.status);
+        console.log("Retry:", originalRequest._retry);
+        console.log("URL:", originalRequest.url);
+        console.log("Is Refresh:", isRefreshRequest);
+
+       
 
         // network error
         if(!error.response){
@@ -24,12 +33,19 @@ axiosClient.interceptors.response.use(
         }
 
         // retry when token 401 error comes in reponse while avoid retries on refresh token endpoint
-        if(error.response.state === 401 && !originalReq._retry && !isRefreshRequest ){
-            originalReq._retry = true
+        if(error.response.status === 401 && !originalRequest._retry && !isRefreshRequest ){
+
+            console.log("Token Error")
+            console.log(error.code);
+            console.log(error.message);
+            console.log(error.response);
+            console.log(error.request);
+
+            originalRequest._retry = true
 
             try{
                 await axiosClient.post("/auth/refresh")
-                return axiosClient(originalReq)
+                return axiosClient(originalRequest)
             }
             catch(refreshError){
                 window.location.href = "/login"
