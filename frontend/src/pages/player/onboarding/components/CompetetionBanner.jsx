@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowRight, Plus, ShieldCheck, Swords, Users } from "lucide-react";
 
 const CompetitionBanner = ({ userTeam = null, onCreateTeam, onJoinTeam, onExploreTournaments, onViewTeam }) => {
+    
     const hasTeam = Boolean(userTeam);
 
     return (

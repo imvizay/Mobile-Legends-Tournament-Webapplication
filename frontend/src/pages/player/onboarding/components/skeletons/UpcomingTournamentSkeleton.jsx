@@ -127,33 +127,11 @@ function SkeletonStat({ last = false }) {
     );
 }
 
-/* ---------------------------------------- */
-/* Shimmer primitive */
-/* ---------------------------------------- */
-
 function Skeleton({ className = "" }) {
     return (
-        <div
-            className={`
-                relative
-                overflow-hidden
-                rounded
-                bg-black/[0.055]
-                animate-pulse
-                ${className}
-            `}
-        >
-            <div
-                className="
-                    absolute inset-0
-                    -translate-x-full
-                    animate-[skeleton-shimmer_1.6s_ease-in-out_infinite]
-                    bg-gradient-to-r
-                    from-transparent
-                    via-white/55
-                    to-transparent
-                "
-            />
+        <div className={` relative overflow-hidden rounded bg-black/[0.055] animate-pulse ${className} `} >
+            
+            <div className=" absolute inset-0 -translate-x-full animate-[skeleton-shimmer_1.6s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/55 to-transparent " />
         </div>
     );
 }
