@@ -4,7 +4,7 @@ export const TOURNAMENT_ENDPOINT = {
   GET_TOURNAMENTS: "/tournament/tournaments",
 
   GET_TOURNAMENT: (tournamentId) =>
-    `/tournament/${tournamentId}`,
+    `/player/tournament/${tournamentId}/detail`,
 
   UPDATE_TOURNAMENT: (tournamentId) =>
     `/tournament/${tournamentId}`,

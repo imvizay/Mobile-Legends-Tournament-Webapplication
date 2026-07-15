@@ -8,6 +8,21 @@ class TournamentRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
         
+    def get_tournament_detail(self, tournament_id):
+        detail = (
+            self.db.query(Tournament)
+            .filter(Tournament.id == tournament_id)
+            .one_or_none()
+        )
+
+        if detail is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Tournament not found"
+            )
+
+        return detail
+        
     def check_tournament_name(self,tournament_name:str):
         return (
             self.db.query(Tournament).

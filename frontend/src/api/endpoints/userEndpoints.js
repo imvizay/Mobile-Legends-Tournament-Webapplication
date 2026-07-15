@@ -1,5 +1,7 @@
 export const USER_TEAM_ENDPOINTS = {
 
+    TEAM_SUMMARY:'/player/team/summary',
+
     // Team
     CREATE_TEAM: "/player/team/create",
     GET_MY_TEAM: "/player/team/my-team",
@@ -35,9 +37,14 @@ export const PLAYER_DASHBOARD_ENDPOINTS = {
     PLAYER_PROFILE: "/player/profile",
     PLAYER_NOTIFICATION: "/player/notification",
 
-    FEATURED_TOURNAMENTS: "/tournaments/featured",
-    UPCOMING_TOURNAMENTS: "/tournaments/upcoming",
+    FEATURED_TOURNAMENTS: "/player/tournament/featured",
+    UPCOMING_TOURNAMENTS: "/player/tournament/upcoming",
     RECENT_MATCHES: "/player/matches/recent",
-    RECENT_WINNERS: "/tournaments/recent-winners",
-    LEADERBOARD: "/leaderboard",
+    RECENT_WINNERS: "/player/tournament/recent-winners",
+    LEADERBOARD: "/player/tournament/leaderboard",
 };
+
+
+export const TOURNAMENT_ENDPOINTS ={
+    REGISTER:'/player/register'
+}

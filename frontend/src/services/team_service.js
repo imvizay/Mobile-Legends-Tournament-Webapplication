@@ -3,6 +3,10 @@ import { USER_TEAM_ENDPOINTS } from "../api/endpoints/userEndpoints"
 
 export const teamService = {
 
+    getMyTeamSummary(){
+        return api.get(USER_TEAM_ENDPOINTS.TEAM_SUMMARY)
+    },
+
     createTeam(data){
         return api.post(
             USER_TEAM_ENDPOINTS.CREATE_TEAM,
@@ -44,6 +48,12 @@ export const teamService = {
         )
     }
 
+}
 
-
+export const teamTournamentService = {
+    teamTournamentRegistration(tournament_id){
+        return api.post(
+            `team/tournament/${tournament_id}/register`
+        )
+    }
 }

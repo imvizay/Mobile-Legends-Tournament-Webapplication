@@ -1,104 +1,126 @@
-import React from "react"
+import React, { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom"
+
 import FeaturedTournamentCard from "./components/FeaturedTournamentCard"
 import UpcomingTournamentGrid from "./components/UpcomingTournamentGrid"
-import TournamentBracket from "./components/TournamentBracket"
-import RecentWinnerHistory from "./components/RecentWinnerHistory"
 import Leaderboard from "./components/Leaderboard"
 import CompetitionBanner from "./components/CompetetionBanner"
+import TournamentRegistrationDrawer from "./components/registration/RegistrationDrawer"
 
-import { useQuery } from "@tanstack/react-query"
 import { playerService } from "../../../services/player/player-service"
 
 // Skeletons
-import TournamentBracketSkeleton from "./components/skeletons/TournamentBracketSkeleton"
-import RecentWinnerSkeleton from "./components/skeletons/RecentWinnerSkeleton"
-import LeaderboardSkeleton from "./components/skeletons/LeaderboardSkeleton"
 import FeaturedTournamentCardSkeleton from "./components/skeletons/FeatureTournamentSkeleton"
 import UpcomingTournamentGridSkeleton from "./components/skeletons/UpcomingTournamentSkeleton"
+import LeaderboardSkeleton from "./components/skeletons/LeaderboardSkeleton"
 
 // States
 import DashboardSectionError from "./components/error/DashboardError"
 import DashboardSectionEmpty from "./components/empty/DashboardEmptySection"
 
+import { useUserContext } from "../../../contexts/UserContext"
+import { useMutation } from "@tanstack/react-query"
+import { teamService, teamTournamentService } from "../../../services/team_service"
+
 function PlayerDashboard() {
+    const [registrationDrawer, setRegistrationDrawer] = useState({
+        open: false,
+        type: null,
+        tournament: null
+    })
+
+    const navigate = useNavigate()
+
+
+    const { user } = useUserContext()
+    const userId = user?.id
+
     const {
-        data: featuredTournaments,
-        isLoading: isFeaturedLoading,
-        isError: isFeaturedError,
-        refetch: refetchFeatured,
+        data: teamSummary,
+        isLoading: isTeamLoading,
+        isError: isTeamError
     } = useQuery({
-        queryKey: ["player-dashboard", "featured-tournaments"],
-        queryFn: playerService.getFeaturedTournaments,
+        queryKey: ["team-summary", userId],
+        queryFn: teamService.getMyTeamSummary,
+        staleTime: 5 * 60 * 1000,
+        enabled: !!userId
     })
 
     const {
-        data: upcomingTournaments,
-        isLoading: isUpcomingLoading,
-        isError: isUpcomingError,
-        refetch: refetchUpcoming,
+        data: playerDashboard,
+        isLoading,
+        isError,
+        refetch,
     } = useQuery({
-        queryKey: ["player-dashboard", "upcoming-tournaments"],
-        queryFn: playerService.getUpcomingTournaments,
+        queryKey: ["player-dashboard"],
+        queryFn: playerService.getDashboard,
     })
 
-    const {
-        data: tournamentBracket,
-        isLoading: isBracketLoading,
-        isError: isBracketError,
-        refetch: refetchBracket,
-    } = useQuery({
-        queryKey: ["player-dashboard", "tournament-bracket"],
-        queryFn: playerService.getRecentTournamentBracket,
+    const tournamentRegisterMutation = useMutation({
+        mutationKey: ['tournament-registration'],
+        mutationFn: teamTournamentService.teamTournamentRegistration
     })
 
-    const {
-        data: recentWinners,
-        isLoading: isWinnersLoading,
-        isError: isWinnersError,
-        refetch: refetchWinners,
-    } = useQuery({
-        queryKey: ["player-dashboard", "recent-winners"],
-        queryFn: playerService.getRecentWinners,
-    })
+    const featuredTournaments =
+        playerDashboard?.data?.featured_tournaments ?? []
 
-    const {
-        data: leaderboard,
-        isLoading: isLeaderboardLoading,
-        isError: isLeaderboardError,
-        refetch: refetchLeaderboard,
-    } = useQuery({
-        queryKey: ["player-dashboard", "leaderboard"],
-        queryFn: playerService.getLeaderboard,
-    })
+    const upcomingTournaments =
+        playerDashboard?.data?.upcoming_tournaments ?? []
+
+    const onRegisterTournament = (tournament) => {
+        if (isTeamLoading || isTeamError) return
+        if (!teamSummary?.has_team) return setRegistrationDrawer({
+            open: true,
+            type: "NO_TEAM",
+            tournament: featuredTournaments
+        })
+        const isCaptain = teamSummary.team.captain.id === userId
+        setRegistrationDrawer({ open: true, type: isCaptain ? "TEAM_CAPTAIN" : "TEAM_MEMBER", tournament: featuredTournaments })
+    }
+
+    const handleTeamRegister = async (tournament_id) => {
+        console.log(">>>>>>>>")
+        console.log("Registation function running...")
+        try {
+            if (tournamentRegisterMutation.isPending) return
+            const res = await tournamentRegisterMutation.mutateAsync(tournament_id)
+            console.log(res)
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
 
     return (
         <main className="w-full min-w-0 space-y-7">
 
             {/* Featured Tournament */}
             <section>
-                {isFeaturedLoading ? (
+                {isLoading ? (
                     <FeaturedTournamentCardSkeleton />
-                ) : isFeaturedError ? (
-                    <DashboardSectionError onRetry={refetchFeatured} />
-                ) : !featuredTournaments ? (
+                ) : isError ? (
+                    <DashboardSectionError onRetry={refetch} />
+                ) : !featuredTournaments.length ? (
                     <DashboardSectionEmpty
                         title="No featured tournament yet"
                         description="Featured tournaments will appear here once the next competition is announced."
                     />
                 ) : (
                     <FeaturedTournamentCard
-                        tournament={featuredTournaments}
+                        tournament={featuredTournaments[0]}
+                        onRegister={onRegisterTournament}
                     />
                 )}
             </section>
 
             {/* Upcoming Tournaments */}
             <section className="w-full min-w-0">
-                {isUpcomingLoading ? (
+                {isLoading ? (
                     <UpcomingTournamentGridSkeleton />
-                ) : isUpcomingError ? (
-                    <DashboardSectionError onRetry={refetchUpcoming} />
-                ) : !upcomingTournaments?.length ? (
+                ) : isError ? (
+                    <DashboardSectionError onRetry={refetch} />
+                ) : !upcomingTournaments.length ? (
                     <DashboardSectionEmpty
                         title="No upcoming tournaments"
                         description="There are no upcoming tournaments available right now. Check back soon."
@@ -112,26 +134,15 @@ function PlayerDashboard() {
 
             {/* Tournament Bracket */}
             <section>
-                {isBracketLoading ? (
-                    <TournamentBracketSkeleton />
-                ) : isBracketError ? (
-                    <DashboardSectionError onRetry={refetchBracket} />
-                ) : !tournamentBracket ? (
-                    <DashboardSectionEmpty
-                        title="No active tournament bracket"
-                        description="A tournament bracket will appear here once you are participating in an active tournament."
-                    />
-                ) : (
-                    <TournamentBracket
-                        tournament={tournamentBracket}
-                    />
-                )}
+                <DashboardSectionEmpty
+                    title="Brackets coming soon"
+                    description="Tournament brackets will appear here once you participate in an active competition."
+                />
             </section>
 
             {/* Tournament Legacy */}
             <section className="px-1 py-2">
 
-                {/* Section Header */}
                 <div className="mb-5 flex items-end justify-between sm:mb-6">
                     <div className="min-w-0">
 
@@ -154,7 +165,6 @@ function PlayerDashboard() {
                     </div>
                 </div>
 
-                {/* Content */}
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.35fr_1fr]">
 
                     {/* Recent Winners */}
@@ -172,22 +182,10 @@ function PlayerDashboard() {
 
                         <div className="min-w-0 overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--surface-base)] shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
 
-                            {isWinnersLoading ? (
-                                <RecentWinnerSkeleton />
-                            ) : isWinnersError ? (
-                                <DashboardSectionError
-                                    onRetry={refetchWinners}
-                                />
-                            ) : !recentWinners?.length ? (
-                                <DashboardSectionEmpty
-                                    title="No champions yet"
-                                    description="Tournament champions will appear here after the first competitions are completed."
-                                />
-                            ) : (
-                                <RecentWinnerHistory
-                                    tournaments={recentWinners}
-                                />
-                            )}
+                            <DashboardSectionEmpty
+                                title="No champions yet"
+                                description="Tournament champions will appear here after the first competitions are completed."
+                            />
 
                         </div>
 
@@ -208,22 +206,10 @@ function PlayerDashboard() {
 
                         <div className="min-w-0 overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--surface-base)] shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
 
-                            {isLeaderboardLoading ? (
-                                <LeaderboardSkeleton />
-                            ) : isLeaderboardError ? (
-                                <DashboardSectionError
-                                    onRetry={refetchLeaderboard}
-                                />
-                            ) : !leaderboard?.length ? (
-                                <DashboardSectionEmpty
-                                    title="Leaderboard is waiting"
-                                    description="Player rankings will appear here once the competition begins."
-                                />
-                            ) : (
-                                <Leaderboard
-                                    players={leaderboard}
-                                />
-                            )}
+                            <DashboardSectionEmpty
+                                title="Leaderboard is waiting"
+                                description="Player rankings will appear here once the competition begins."
+                            />
 
                         </div>
 
@@ -241,6 +227,20 @@ function PlayerDashboard() {
                     onJoinTeam={() => navigate("/teams/discover")}
                 />
             </section>
+
+            {/* Tournament Drawer */}
+            {registrationDrawer.open && (
+                <TournamentRegistrationDrawer
+                    type={registrationDrawer.type}
+                    team={teamSummary?.team}
+                    tournament={registrationDrawer?.tournament}
+                    onClose={() => setRegistrationDrawer({ open: false, type: null, tournament: null })}
+                    onExploreTeams={() => navigate("/player/team/discover")}
+                    onCreateTeam={() => navigate("/player/team/create")}
+                    onViewTeam={() => navigate("/player/team")}
+                    onRegister={handleTeamRegister}
+                />
+            )}
 
         </main>
     )

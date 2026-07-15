@@ -1,6 +1,7 @@
 import { api } from "../../api/client/request"
 import {
     PLAYER_DASHBOARD_ENDPOINTS as PENDP,
+    TOURNAMENT_ENDPOINTS,
 } from "../../api/endpoints/userEndpoints"
 
 export const playerService = {
@@ -35,4 +36,15 @@ export const playerService = {
     getLeaderboard() {
         return api.get(PENDP.LEADERBOARD)
     },
+}
+
+
+// Tournament Service
+
+export const tournamentService = {
+    registerTournament(tournament_id){
+        return api.post(TOURNAMENT_ENDPOINTS.REGISTER,{
+            tournament_id
+        })
+    }
 }

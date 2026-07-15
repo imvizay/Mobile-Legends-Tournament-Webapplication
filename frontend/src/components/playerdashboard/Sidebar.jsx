@@ -1,8 +1,12 @@
 import React from "react";
 import { ChevronRight, Home } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useUserContext } from "../../contexts/UserContext";
 
 function PlayerSidebar({ dashboardLinks }) {
+
+    const {user} = useUserContext()
+
     return (
         <aside className="flex h-screen w-[232px] shrink-0 flex-col border-r border-[var(--border-default)] bg-[var(--surface-base)]">
 
@@ -106,13 +110,13 @@ function PlayerSidebar({ dashboardLinks }) {
 
                     {/* Avatar */}
                     <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface-elevated)] text-[11px] font-semibold text-[var(--text-secondary)]">
-                        V
+                        {user?.email.charAt(0)}
                     </div>
 
                     {/* Player Info */}
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-[13px] font-medium text-[var(--text-primary)]">
-                            Vijay
+                            {user?.email.split('@')[0] || "Guest"}
                         </p>
 
                         <p className="mt-0.5 truncate text-[9px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]">
