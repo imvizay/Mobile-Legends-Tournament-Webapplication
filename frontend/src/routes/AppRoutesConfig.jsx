@@ -43,6 +43,9 @@ import PlayerDashboard from '../pages/player/onboarding/PlayerDashboard'
 =======
 import TeamDashboard from '../pages/player/team/dashboard/TeamDashboard'
 import TournamentDetail from '../pages/player/onboarding/components/TournamentDetail'
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 
@@ -183,6 +186,16 @@ function AppRoutesConfig() {
           onShare={() => console.log("Share")}
         />} />
 
+<<<<<<< Updated upstream
+=======
+        <Route path='tournament/:id/detail' element={<TournamentDetail
+          tournament={dummyTournament}
+          onBack={() => console.log("Back")}
+          onRegister={() => console.log("Register")}
+          onShare={() => console.log("Share")}
+        />} />
+
+>>>>>>> Stashed changes
 
         <Route path='team/create' element={<TeamCreatePage />} />
         <Route path='team/discover' element={<DiscoverTeamPage />} />
@@ -191,10 +204,14 @@ function AppRoutesConfig() {
         <Route path="team" element={<RequireTeam />}>
           <Route element={<TeamLayout />}>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             <Route index element={<Overview />} />
             <Route path="members" element={<TeamMembers />} />
             <Route path="application" element={<TeamApplication />} />
             {/* <Route path="settings" element={<Settings />} /> */}
+=======
+            <Route index element={<TeamDashboard />} />
+>>>>>>> Stashed changes
 =======
             <Route index element={<TeamDashboard />} />
 >>>>>>> Stashed changes

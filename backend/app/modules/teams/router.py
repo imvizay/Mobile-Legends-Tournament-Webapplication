@@ -11,11 +11,20 @@ router = APIRouter(
 )
 
 
+@router.get('/summary')
+def my_team_summary(
+    current_user:Player = Depends(get_current_user),
+    team_service:TeamService=Depends(get_team_service),
+):
+    
+    return team_service.get_my_team_summary(current_user=current_user)
+
+
 # GET MY TEAM 
 @router.get('/my-team')
 async def get_my_team(
+    current_user:Player = Depends(get_current_user),
     team_service:TeamService = Depends(get_team_service),
-    current_user:Player = Depends(get_current_user)
 ):
     
     return team_service.get_my_team(current_user)

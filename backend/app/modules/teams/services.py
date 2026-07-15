@@ -18,6 +18,9 @@ from .schemas import (
     DiscoverTeamResponse,
     DiscoverTeamOutput,
     JoinTeamResponse,
+    TeamSummaryResponse,
+    CaptainSummary,
+    TeamSummary
 )
 
 # Team Custom Exception
@@ -29,7 +32,7 @@ from .exceptions import *
 
 # Repository
 from .repository import TeamRepository
-
+import pprint 
 
 # Team Service Class
 class TeamService:
@@ -37,6 +40,31 @@ class TeamService:
     def __init__(self, db: Session, repository: TeamRepository):
         self.db = db
         self.repository = repository
+        
+    def get_my_team_summary(self,current_user:Player):
+        team_mem =  self.repository.team_summary(current_user=current_user.id)
+        
+        if not team_mem:
+            return{
+                "message":f"NOT_IN_TEAM {current_user.email.split("@")[0]}"
+            }
+                    
+        return TeamSummaryResponse(
+            has_team=True,
+            team=TeamSummary(
+                id=team_mem.id,
+                name=team_mem.team.name,
+                tag=team_mem.team.tag,
+                country=team_mem.team.country,
+                captain=CaptainSummary(
+                    id=team_mem.team.captain_id,
+                    captain_name=team_mem.team.captain.email.split("@")[0],
+                    role = "captain" if team_mem.role == "CAPTAIN" else 'player'
+                ),
+                members_count = len(team_mem.team.members)
+            )
+            
+        )
 
     def get_my_team(self, current_user: Player):
 

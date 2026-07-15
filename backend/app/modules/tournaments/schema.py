@@ -1,11 +1,7 @@
 from datetime import date, time,datetime
-from typing import Optional
-
 from fastapi import Form
-
-
+from decimal import Decimal
 from datetime import date, time
-
 from pydantic import BaseModel,model_validator,ConfigDict
 
 
@@ -87,14 +83,14 @@ class TournamentListResponse(BaseModel):
     max_teams: int
     
     # images
-    background_image_url:Optional[str] | None
-    banner_image_url:Optional[str] | None
+    background_image_url: str | None = None
+    banner_image_url:str | None = None
 
     description: str | None = None
 
-    platform_fee: str | None = None
-    winner_share: str | None = None
-    runner_up_share: str | None = None
+    platform_fee: Decimal | None = None
+    winner_share: Decimal | None = None
+    runner_up_share: Decimal | None = None
 
     reg_open_date: date
     reg_open_time: time
@@ -113,7 +109,7 @@ class TournamentListResponse(BaseModel):
     category: str | None = None
     competition_type: str | None = None
     seeding_method: str | None = None
-
+    
     entry_fee: int
     entry_type: str
 
@@ -135,3 +131,7 @@ class TournamentListResponse(BaseModel):
 class AdminTournamentRes(BaseModel):
     tournament:list[TournamentListResponse]
     
+
+class TournamentDetailResponse(BaseModel):
+    success:str
+    data:TournamentListResponse

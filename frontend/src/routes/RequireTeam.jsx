@@ -7,6 +7,7 @@ import TeamLayout from "../pages/player/layouts/TeamLayout"
 import EmptyTeamState from "../pages/player/team/EmptyTeam"
 import TeamPageSkeleton from "../skeletons/playerdash/my_team/TeamPageSkeleton"
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 import { Outlet } from "react-router-dom"
 
@@ -26,6 +27,10 @@ const RequireTeam = () => {
 =======
 import { useUserContext } from "../contexts/UserContext"
 const RequireTeam = () => {
+=======
+import { useUserContext } from "../contexts/UserContext"
+const RequireTeam = () => {
+>>>>>>> Stashed changes
     const {user} = useUserContext()
     const currentUserId = user?.id
     const {

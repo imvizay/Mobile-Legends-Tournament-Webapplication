@@ -3,7 +3,11 @@ import { Outlet } from "react-router-dom";
 
 // Desktop Navbar
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import PlayerSidebar from '../components/playerLayout/Sidebar';
+=======
+import PlayerSidebar from "../components/playerdashboard/Sidebar";
+>>>>>>> Stashed changes
 =======
 import PlayerSidebar from "../components/playerdashboard/Sidebar";
 >>>>>>> Stashed changes
@@ -17,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useUserContext } from "../contexts/UserContext";
 function PlayerLayout() {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
   
 
@@ -24,6 +29,9 @@ function PlayerLayout() {
 
 
 
+=======
+    
+>>>>>>> Stashed changes
 =======
     
 >>>>>>> Stashed changes
@@ -47,9 +55,12 @@ function PlayerLayout() {
                 </div>
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 pt-20 pb-6 md:px-6 lg:px-8 lg:pt-6">
                     <Outlet />
 =======
+=======
+>>>>>>> Stashed changes
 
                 {/* Dashboard Body */}
                 <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
@@ -60,6 +71,9 @@ function PlayerLayout() {
 
                     </div>
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                 </main>
 

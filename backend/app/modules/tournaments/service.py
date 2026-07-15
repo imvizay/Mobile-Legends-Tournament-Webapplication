@@ -1,16 +1,25 @@
 from fastapi import UploadFile
 from app.modules.auth.models import Player
-from app.modules.tournaments.models import Tournament
-from .schema import TournamentForm,AdminTournamentRes,TournamentListResponse
+from .repository import TournamentRepository
+from .schema import TournamentForm,AdminTournamentRes,TournamentDetailResponse,TournamentListResponse
 
 from ...core.cloudinary.cloudinary_services import cloud_service
 from .validators import validate_image
 
 
+
+
 class TournamentService:
 
-    def __init__(self, repository):
+    def __init__(self, repository:TournamentRepository):
         self.repository = repository
+        
+    def get_tournament_detail(self,tournament_id):
+        detail = self.repository.get_tournament_detail(tournament_id=tournament_id)
+        return TournamentDetailResponse(
+            success="DONE.",
+            data=TournamentListResponse.model_validate(detail)
+        )
         
     def get_tournaments(self,current_user:Player):
         
