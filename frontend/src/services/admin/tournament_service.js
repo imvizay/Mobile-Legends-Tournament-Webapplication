@@ -24,7 +24,6 @@ export const tournamentService = {
         const response = await api.get(
             TOURNAMENT_ENDPOINT.GET_TOURNAMENT(tournamentId)
         )
-
         return response
     },
 

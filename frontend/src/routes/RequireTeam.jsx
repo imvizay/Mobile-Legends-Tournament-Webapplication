@@ -6,6 +6,7 @@ import { teamService } from "../services/team_service"
 import TeamLayout from "../pages/player/layouts/TeamLayout"
 import EmptyTeamState from "../pages/player/team/EmptyTeam"
 import TeamPageSkeleton from "../skeletons/playerdash/my_team/TeamPageSkeleton"
+<<<<<<< Updated upstream
 
 import { Outlet } from "react-router-dom"
 
@@ -22,6 +23,22 @@ const RequireTeam = () => {
     queryFn: teamService.getMyTeam,
     staleTime: 1000 * 60 * 10, // Cache data for 10 minutes
   })
+=======
+import { useUserContext } from "../contexts/UserContext"
+const RequireTeam = () => {
+    const {user} = useUserContext()
+    const currentUserId = user?.id
+    const {
+        data,
+        isPending,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["my-team",currentUserId],
+        queryFn: teamService.getMyTeam,
+        staleTime: 1000 * 60 * 10,
+    })
+>>>>>>> Stashed changes
 
   // Show loading state while fetching
   if (isPending) {

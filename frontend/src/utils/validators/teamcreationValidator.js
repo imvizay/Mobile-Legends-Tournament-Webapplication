@@ -6,7 +6,8 @@ const ALLOWED_IMAGE_TYPES = [
     "image/jpg",
     "image/webp",
     "image/heic",
-    "image/heif"
+    "image/heif",
+    "image/avif"
 ];
 
 export const validateTeamDataAndImages = (data, images) => {
@@ -23,10 +24,10 @@ export const validateTeamDataAndImages = (data, images) => {
         team_tag
     } = data
 
-    const { team_logo, team_banner } = images
+    const { team_logo, team_banner } = images || {}
 
     // Team Name
-   
+
     if (!team_name.trim()) {
         errors.team_name = "Team name is required.";
     }
@@ -36,7 +37,7 @@ export const validateTeamDataAndImages = (data, images) => {
     }
 
     // Team Bio
-    
+
     if (!team_bio.trim()) {
         errors.team_bio = "Team bio is required.";
     }
