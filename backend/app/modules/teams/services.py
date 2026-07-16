@@ -33,7 +33,12 @@ from .exceptions import *
 
 # Repository
 from .repository import TeamRepository
-import pprint
+from .schemas import (
+    TeamRegisteredTournament,
+    TeamDashboardData,
+    TeamDashboardResponse,
+    TeamMembers,
+)
 
 
 # Team Service
@@ -42,6 +47,126 @@ class TeamService:
     def __init__(self, db: Session, repository: TeamRepository):
         self.db = db
         self.repository = repository
+
+    # Team dashboard stats
+    def get_teamdashboard(self, current_user: Player):
+
+        now = datetime.now(timezone.utc)
+        print("NOW:", now)
+
+        team = self.repository.get_team_by_player(current_user_id=current_user.id)
+
+        team_tournaments = self.repository.get_team_registered_tournaments(
+            team_id=team.id
+        )
+
+        team_members = self.repository.get_team_members(team_id=team.id)
+
+        # Current tournament
+        current_tournament = None
+
+        # Upcoming tournaments
+        upcoming_tournaments = []
+
+        for registration in team_tournaments:
+
+            tournament = registration.tournament
+
+            start = datetime.combine(
+                tournament.tournament_start_date, tournament.tournament_start_time
+            ).replace(tzinfo=timezone.utc)
+
+            end = datetime.combine(
+                tournament.tournament_end_date, tournament.tournament_end_time
+            ).replace(tzinfo=timezone.utc)
+
+            # Currently started tournament
+            if start <= now <= end:
+                current_tournament = registration
+
+            # Upcoming not started yet 
+            elif start > now:
+                current_tournament = registration
+                upcoming_tournaments.append(registration)
+                
+        
+            print("TOURNAMENT:", tournament.tournament_name)
+            print("START:", start)
+            print("END:", end)
+            print("RUNNING:", start <= now <= end)
+
+        # Nearest tournament first 
+        upcoming_tournaments.sort(
+            key=lambda registration: registration.tournament.tournament_start_date
+        )
+        
+        def make_tournament_response(registration):
+                
+            tournament = registration.tournament
+
+            return TeamRegisteredTournament(
+                tournament_id=tournament.id,
+                tournament_name=tournament.tournament_name,
+                server=tournament.server,
+                prize_pool=tournament.prize_pool if tournament.prize_pool is not None else None ,
+                entry_fee=tournament.entry_fee,
+                max_teams=tournament.max_teams,
+
+                registration_open_date=datetime.combine(
+                    tournament.reg_open_date,
+                    tournament.reg_open_time,
+                ).replace(tzinfo=timezone.utc),
+                
+                registration_end_date=datetime.combine(
+                    tournament.reg_close_date,
+                    tournament.reg_close_time,
+                ).replace(tzinfo=timezone.utc),
+
+                tournament_start_date=datetime.combine(
+                    tournament.tournament_start_date,
+                    tournament.tournament_start_time,
+                ).replace(tzinfo=timezone.utc),
+
+                tournament_end_date=datetime.combine(
+                    tournament.tournament_end_date,
+                    tournament.tournament_end_time,
+                ).replace(tzinfo=timezone.utc),
+
+                status=registration.status.value,
+                applied_at=registration.applied_at,
+            )
+            
+        def make_member_response(member):
+            return TeamMembers(
+                id=member.player.id,
+                email=member.player.email,
+                role=member.role,
+                status=member.status
+            )
+            
+        current_tournament = (
+            make_tournament_response(current_tournament)
+            if current_tournament
+            else None
+        )
+        
+        upcoming_tournaments = [
+            make_tournament_response(registration)
+            for registration in upcoming_tournaments
+        ]
+        
+        team_members = [
+            make_member_response(member) for member in team_members 
+        ]
+
+        return TeamDashboardResponse(
+            success=True,
+            data=TeamDashboardData(
+                current_tournament=current_tournament,
+                upcoming_tournament=upcoming_tournaments,
+                team_members=team_members,
+            ),
+        )
 
     def get_my_team_summary(self, current_user: Player):
         team_mem = self.repository.team_summary(current_user=current_user.id)
@@ -261,7 +386,7 @@ class TeamService:
 
 # Team Tournament Service
 from .repository import TeamTournamentRepository
-from .models import TeamRole,TournamentRegistrationStatus
+from .models import TeamRole, TournamentRegistrationStatus
 
 
 class TeamTournamentService:

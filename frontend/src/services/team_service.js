@@ -3,6 +3,10 @@ import { USER_TEAM_ENDPOINTS } from "../api/endpoints/userEndpoints"
 
 export const teamService = {
 
+    getTeamDashboard(){
+        return api.get('/player/team/dashboard')
+    },
+    
     getMyTeamSummary(){
         return api.get(USER_TEAM_ENDPOINTS.TEAM_SUMMARY)
     },

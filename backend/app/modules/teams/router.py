@@ -8,6 +8,16 @@ from .dependency import get_team_service, get_teamtournament_service
 router = APIRouter(prefix="/player/team", tags=["Team"])
 
 
+
+@router.get('/dashboard')
+def team_dashboard(
+    current_user: Player=Depends(get_current_user),
+    team_service:TeamService=Depends(get_team_service)
+):
+    return team_service.get_teamdashboard(current_user=current_user)
+
+
+
 @router.get("/summary")
 def my_team_summary(
     current_user: Player = Depends(get_current_user),

@@ -5,10 +5,23 @@ import TeamWallet from "../components/TeamWallet";
 import TournamentProgress from '../components/TournamentProgess'
 import MatchVerification from "../components/MatchVerification";
 import TeamRoster from "../components/RosterAndSubstitute";
+import { useQuery } from "@tanstack/react-query";
+import { teamService } from "../../../../services/team_service";
 // import TeamRoster from "../components/TeamRoster";
 
 export default function TeamDashboard() {
-    const { team } = useOutletContext();
+
+    const { team } = useOutletContext()
+
+    // Load Team Dashboard
+    const teamDashboardQuery = useQuery({
+        queryKey:['teamdashboard',team?.id],
+        queryFn:teamService.getTeamDashboard,
+        
+    })
+
+
+
 
     return (
         <div className="space-y-4">
