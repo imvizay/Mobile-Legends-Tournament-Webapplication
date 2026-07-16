@@ -71,8 +71,8 @@ export default function LoginPage() {
       const data = response.data;
       localStorage.setItem("MLBB_User", JSON.stringify(data));
       const redirectRoute = data.role;
-      navigate(`/${redirectRoute}`,{
-        replace:true
+      navigate(`/${redirectRoute}`, {
+        replace: true
       });
     }
     catch (e) {

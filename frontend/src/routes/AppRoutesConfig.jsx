@@ -21,9 +21,8 @@ import RegistrationSuccess from '../pages/common/RegistrationSuccess'
 // Teams
 
 
-import Overview from '../features/team/pages/Overview'
-import TeamApplication from '../features/team/pages/TeamApplication'
-import TeamMembers from '../features/team/pages/TeamMembers'
+
+
 import TeamLayout from '../pages/player/layouts/TeamLayout'
 import DiscoverTeamPage from '../pages/player/team/DiscoverTeamPage'
 import TeamCreatePage from '../pages/player/team/TeamCreatePage'
@@ -187,10 +186,7 @@ function AppRoutesConfig() {
         {/* Team Routes */}
         <Route path="team" element={<RequireTeam />}>
           <Route element={<TeamLayout />}>
-            <Route index element={<Overview />} />
-            <Route path="members" element={<TeamMembers />} />
-            <Route path="application" element={<TeamApplication />} />
-            {/* <Route path="settings" element={<Settings />} /> */}
+            <Route index element = {<TeamDashboard/>}/>
           </Route>
 
         </Route>

@@ -14,7 +14,8 @@ function ProtectedRoutes({ role }) {
         return <Navigate to="/login" replace />
     }
 
-    if (user.role !== role) {
+    if (user?.role !== role) {
+        console.log("Logged in role",user?.role)
         return <Navigate to="/unauthorized" replace />
     }
 

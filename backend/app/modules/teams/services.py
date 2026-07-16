@@ -1,5 +1,6 @@
-from fastapi import UploadFile
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone
+from fastapi import HTTPException, status, UploadFile
 
 # Auth User Model
 from ...modules.auth.models import Player
@@ -20,7 +21,7 @@ from .schemas import (
     JoinTeamResponse,
     TeamSummaryResponse,
     CaptainSummary,
-    TeamSummary
+    TeamSummary,
 )
 
 # Team Custom Exception
@@ -32,23 +33,22 @@ from .exceptions import *
 
 # Repository
 from .repository import TeamRepository
-import pprint 
+import pprint
 
-# Team Service Class
+
+# Team Service
 class TeamService:
 
     def __init__(self, db: Session, repository: TeamRepository):
         self.db = db
         self.repository = repository
-        
-    def get_my_team_summary(self,current_user:Player):
-        team_mem =  self.repository.team_summary(current_user=current_user.id)
-        
+
+    def get_my_team_summary(self, current_user: Player):
+        team_mem = self.repository.team_summary(current_user=current_user.id)
+
         if not team_mem:
-            return{
-                "message":f"NOT_IN_TEAM {current_user.email.split("@")[0]}"
-            }
-                    
+            return {"message": f"NOT_IN_TEAM {current_user.email.split("@")[0]}"}
+
         return TeamSummaryResponse(
             has_team=True,
             team=TeamSummary(
@@ -59,11 +59,10 @@ class TeamService:
                 captain=CaptainSummary(
                     id=team_mem.team.captain_id,
                     captain_name=team_mem.team.captain.email.split("@")[0],
-                    role = "captain" if team_mem.role == "CAPTAIN" else 'player'
+                    role="captain" if team_mem.role == "CAPTAIN" else "player",
                 ),
-                members_count = len(team_mem.team.members)
-            )
-            
+                members_count=len(team_mem.team.members),
+            ),
         )
 
     def get_my_team(self, current_user: Player):
@@ -258,3 +257,158 @@ class TeamService:
     # disbanned team if captain manually disband or all members leaves the team
     def disbanned_team(self, captain_id: int):
         pass
+
+
+# Team Tournament Service
+from .repository import TeamTournamentRepository
+from .models import TeamRole,TournamentRegistrationStatus
+
+
+class TeamTournamentService:
+
+    def __init__(self, repository: TeamTournamentRepository):
+        self.repository = repository
+
+    def register_team_tournament(
+        self,
+        tournament_id: int,
+        current_user: Player,
+    ):
+        # 1. Validate authenticated user
+        if not current_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unauthorized user.",
+            )
+
+        # 2. Validate user account
+        if current_user.is_banned:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Banned users cannot register a team.",
+            )
+
+        if not current_user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Inactive users cannot register a team.",
+            )
+
+        # 3. Get current user's team membership
+        membership = self.repository.get_player_team_membership(
+            player_id=current_user.id
+        )
+
+        if not membership:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You must be a member of a team to register.",
+            )
+
+        # 4. Only team captain can create tournament registration
+        if membership.role != TeamRole.CAPTAIN:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only the team captain can register the team.",
+            )
+
+        team = membership.team
+
+        # 5. Validate tournament
+        tournament = self.repository.get_tournament(tournament_id=tournament_id)
+
+        if not tournament:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Tournament with ID {tournament_id} does not exist.",
+            )
+
+        now = datetime.now(timezone.utc)
+
+        reg_open_datetime = datetime.combine(
+            tournament.reg_open_date,
+            tournament.reg_open_time,
+            tzinfo=timezone.utc,
+        )
+
+        registration_close_datetime = datetime.combine(
+            tournament.reg_close_date,
+            tournament.reg_close_time,
+            tzinfo=timezone.utc,
+        )
+
+        tournament_start_datetime = datetime.combine(
+            tournament.tournament_start_date,
+            tournament.tournament_start_time,
+            tzinfo=timezone.utc,
+        )
+
+        tournament_end_datetime = datetime.combine(
+            tournament.tournament_end_date,
+            tournament.tournament_end_time,
+            tzinfo=timezone.utc,
+        )
+
+        # 6. Registration must still be open
+        if now < reg_open_datetime:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tournament registration has not opened yet.",
+            )
+
+        if now >= registration_close_datetime:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tournament registration is closed.",
+            )
+
+        # 7. Tournament must not have started
+        if now >= tournament_start_datetime:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tournament has already started.",
+            )
+
+        # 8. Prevent duplicate team registration
+        existing_registration = self.repository.get_existing_registration(
+            team_id=team.id,
+            tournament_id=tournament.id,
+        )
+
+        if existing_registration:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Your team has already applied for this tournament.",
+            )
+
+        # 9. Prevent team from participating in overlapping tournaments
+        conflicting_tournament = self.repository.get_team_conflicting_tournament(
+            team_id=team.id,
+            start_at=tournament.tournament_start_date,
+            end_at=tournament.tournament_end_date,
+        )
+
+        if conflicting_tournament:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Your team is already registered for another "
+                    "tournament during this period."
+                ),
+            )
+
+        # 10. Create pending registration.
+        # A team can apply with only one member.
+        registration = self.repository.create_registration(
+            team_id=team.id,
+            tournament_id=tournament.id,
+            captain_id=current_user.id,
+        )
+
+        return {
+            "registration_id": registration.id,
+            "tournament_id": tournament.id,
+            "team_id": team.id,
+            "status": registration.status,
+            "message": ("Your team has successfully applied " "for the tournament."),
+        }

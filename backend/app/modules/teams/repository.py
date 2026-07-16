@@ -8,7 +8,10 @@ from .models import (
     TeamJoinRequestStatus,
 )
 from ..auth.models import Player
-from sqlalchemy import exists, func
+from sqlalchemy import exists, func, select
+from datetime import datetime, timezone
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class TeamRepository:
@@ -155,3 +158,184 @@ class TeamRepository:
         )
         self.db.add(wallet)
         return wallet
+
+
+# TEAM TOURNAMENT REPOSITORY
+
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from .models import TeamMemberStatus
+from ..tournaments.models import Tournament
+from .models import (
+    TeamTournamentRegistration,
+    TournamentRegistrationStatus,
+)
+
+
+class TeamTournamentRepository:
+
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    # Get the team membership of a player
+    def get_player_team_membership(self, player_id: int):
+        result =  self.db.execute(
+            select(TeamMember).where(
+                TeamMember.player_id == player_id,
+                TeamMember.status == TeamMemberStatus.ACTIVE,
+            )
+        )
+
+        return result.scalar_one_or_none()
+
+    # Get tournament by ID
+    def get_tournament(self, tournament_id: int):
+        result =  self.db.execute(
+            select(Tournament).where(Tournament.id == tournament_id)
+        )
+
+        return result.scalar_one_or_none()
+
+    # Check if team already applied for this tournament
+    def get_existing_registration(
+        self,
+        team_id: int,
+        tournament_id: int,
+    ):
+        result =  self.db.execute(
+            select(TeamTournamentRegistration).where(
+                TeamTournamentRegistration.team_id == team_id,
+                TeamTournamentRegistration.tournament_id == tournament_id,
+            )
+        )
+
+        return result.scalar_one_or_none()
+
+    # Create a new tournament registration
+    def create_registration(
+        self,
+        team_id: int,
+        tournament_id: int,
+        captain_id: int,
+    ):
+        registration = TeamTournamentRegistration(
+            team_id=team_id,
+            tournament_id=tournament_id,
+            captain_id=captain_id,
+            status=TournamentRegistrationStatus.PENDING,
+        )
+        
+        self.db.add(registration)
+        self.db.flush()
+        self.db.commit()
+
+        return registration
+
+    # Get all active registrations of a team
+    def get_team_registrations(self, team_id: int):
+        result =  self.db.execute(
+            select(TeamTournamentRegistration).where(
+                TeamTournamentRegistration.team_id == team_id,
+                TeamTournamentRegistration.status.in_(
+                    [
+                        TournamentRegistrationStatus.PENDING,
+                        TournamentRegistrationStatus.UNDER_REVIEW,
+                        TournamentRegistrationStatus.PAYMENT_PENDING,
+                        TournamentRegistrationStatus.APPROVED,
+                    ]
+                ),
+            )
+        )
+
+        return list(result.scalars().all())
+
+    # Check if the team is already registered for
+    # another tournament happening at the same time
+    def get_team_conflicting_tournament(
+        self,
+        team_id: int,
+        start_at: datetime,
+        end_at: datetime,
+    ):
+        result =  self.db.execute(
+            select(TeamTournamentRegistration)
+            .join(
+                Tournament,
+                Tournament.id == TeamTournamentRegistration.tournament_id,
+            )
+            .where(
+                TeamTournamentRegistration.team_id == team_id,
+                TeamTournamentRegistration.status.in_(
+                    [
+                        TournamentRegistrationStatus.PENDING,
+                        TournamentRegistrationStatus.UNDER_REVIEW,
+                        TournamentRegistrationStatus.PAYMENT_PENDING,
+                        TournamentRegistrationStatus.APPROVED,
+                    ]
+                ),
+            )
+        )
+
+        registrations = result.scalars().all()
+
+        for registration in registrations:
+
+            tournament =  self.get_tournament(registration.tournament_id)
+
+            if not tournament:
+                continue
+
+            existing_start = datetime.combine(
+                tournament.tournament_start_date,
+                tournament.tournament_start_time,
+                tzinfo=timezone.utc,
+            )
+
+            existing_end = datetime.combine(
+                tournament.tournament_end_date,
+                tournament.tournament_end_time,
+                tzinfo=timezone.utc,
+            )
+
+            # Check if the two tournament time periods overlap
+            if existing_start < new_end and existing_end > new_start:
+                return tournament
+
+        return None
+
+    # Get number of teams registered for a tournament
+    def get_registered_team_count(
+        self,
+        tournament_id: int,
+    ) -> int:
+        result =  self.db.execute(
+            select(func.count(TeamTournamentRegistration.id)).where(
+                TeamTournamentRegistration.tournament_id == tournament_id,
+                TeamTournamentRegistration.status.in_(
+                    [
+                        TournamentRegistrationStatus.PENDING,
+                        TournamentRegistrationStatus.UNDER_REVIEW,
+                        TournamentRegistrationStatus.PAYMENT_PENDING,
+                        TournamentRegistrationStatus.APPROVED,
+                    ]
+                ),
+            )
+        )
+
+        return result.scalar_one()
+
+    # Get pending registrations for a tournament
+    def get_pending_registrations(
+        self,
+        tournament_id: int,
+    ):
+        result =  self.db.execute(
+            select(TeamTournamentRegistration).where(
+                TeamTournamentRegistration.tournament_id == tournament_id,
+                TeamTournamentRegistration.status
+                == TournamentRegistrationStatus.PENDING,
+            )
+        )
+
+        return list(result.scalars().all())
