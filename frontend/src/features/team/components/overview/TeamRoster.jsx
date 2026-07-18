@@ -1,6 +1,6 @@
 import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { FiArrowRight } from "react-icons/fi";
-import PlayerRow from "./PlayerCard";
+import PlayerRow from "../../../../features/team/components/overview/PlayerCard";
 
 const players = [
   {

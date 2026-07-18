@@ -1,6 +1,8 @@
 # Email client for deployment.
 # will configured later
-import os 
+from app.core.config import settings
+import resend
 
-MAIL_FROM=os.getenv("MAIL_FROM")
-MAILTRAP_API_TOKEN = os.getenv("MAILTRAP_API_TOKEN")
+resend.api_key = settings.settings.RESEND_API_KEY
+
+client = resend

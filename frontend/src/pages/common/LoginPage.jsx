@@ -64,12 +64,14 @@ export default function LoginPage() {
     }
 
     try{
+      console.log("1 - Calling Login Endpoint")
       const data = await mutateAsync(formData) 
       console.log('Login Response:',data)
       navigate('/')
     }
     catch(e){
       console.log("LOGIN ERROR",e)
+      console.log(e.data)
     }
 
   }

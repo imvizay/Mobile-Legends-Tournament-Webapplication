@@ -1,7 +1,18 @@
 import { Home, User } from 'lucide-react';
-import React from 'react'
+import React,{useState} from 'react'
+import { useNavigate } from 'react-router-dom';
 
 function AsideSidebar({dashboardLinks}) {
+
+  const [navigationState,setNavigationState] = useState(false)
+  const navigate = useNavigate()
+
+  const navigating = (route) => {
+    if(navigationState) return
+    setNavigationState(true)
+    navigate(route)
+  }
+
   return (
     <>
     {/* Sidebar */}
@@ -46,6 +57,7 @@ function AsideSidebar({dashboardLinks}) {
                   return (
                     <button
                       key={link.path}
+                      onClick={ () => navigating(link.path)}
                       className=" flex items-center gap-3 w-full px-3 py-1.5 rounded-xl
                         transition-all
                         duration-200

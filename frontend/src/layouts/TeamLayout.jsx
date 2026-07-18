@@ -1,66 +1,44 @@
 import { useEffect, useState } from "react";
 
-import { Outlet } from "react-router-dom";
+import { Outlet, useOutlet } from "react-router-dom";
 
-import { useQuery } from "@tanstack/react-query";
+import { useOutletContext } from "react-router-dom";
 
 import { teamService } from "../services/team_service";
 
 // Team Components
-import TeamMetaData from "../pages/player/components/TeamMetaData";
-import TeamNavbar from "../pages/player/components/TeamNavbar";
+import TeamMetaData from "../features/team/components/common/TeamMetaData";
+import TeamNavbar from "../features/team/navigation/TeamNavbar";
 import TeamPageSkeleton from "../skeletons/playerdash/my_team/TeamPageSkeleton";
 
 // Icons
 import { LayoutDashboard, Users, Trophy, Inbox, Activity, Wallet, Settings, } from "lucide-react";
+import EmptyTeamState from "../pages/player/team/EmptyTeam";
 
 const TEAM_NAVIGATION_LINKS = [
-  {label: "Overview",path: "",icon: LayoutDashboard,},
-  {label: "Roster",path: "roster",icon: Users,},
-  {label: "Tournaments",path: "tournaments",icon: Trophy,},
-  {label: "Applications",path: "applications",icon: Inbox,},
-  {label: "Activity",path: "activity",icon: Activity,},
-  {label: "Finances",path: "finances",icon: Wallet,},
-  {label: "Settings",path: "settings",icon: Settings,},
+ 
+  { label: "Overview", path: "", icon: LayoutDashboard },
+  { label: "Members", path: "members", icon: Users },
+  { label: "Tournaments", path: "tournaments", icon: Trophy },
+  { label: "Applications", path: "applications", icon: Inbox },
+  { label: "Finances", path: "finances", icon: Wallet },
+  { label: "Settings", path: "settings", icon: Settings },
 ]
 
 function TeamLayout() {
+    const teamQuery = useOutletContext()
+   
     
-    const {
-        data:myTeamData,
-        isPending,
-        isError
-    } = useQuery({
-        queryKey:['my-team'],
-        queryFn:teamService.getMyTeam,
-        staleTime:1000*60*5, // no refetch for 5 minutes
-        gcTime:1000*60*10,   // cache for 10 minutes
-        refetchOnWindowFocus:false
-    })
-
-    if(isPending){
-        return <TeamPageSkeleton/>
-    }
-
-    if (isError) {
-        return (
-            <div className="rounded-xl border bg-red-50 p-6 text-red-600">
-                Failed to load team.
-            </div>
-        )
-    }
-
-
   return (
      <div className="h-screen space-y-4  md:space-y-5 lg:space-y-6 ">
 
-      <TeamMetaData team={myTeamData.team} />
+      <TeamMetaData team={teamQuery.team} />
 
       <TeamNavbar links={TEAM_NAVIGATION_LINKS} />
 
       <section className="min-h-[400px] md:min-h-[500px]">
 
-        <Outlet context={myTeamData.team.team_wallet} />
+        <Outlet context={teamQuery.team.team_wallet} />
       </section>
 
     </div>
