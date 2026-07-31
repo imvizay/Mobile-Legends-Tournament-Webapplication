@@ -18,12 +18,10 @@ function AsideSidebar({dashboardLinks}) {
     {/* Sidebar */}
       <aside className="flex flex-col h-screen border-r border-[var(--border-default)] bg-[var(--surface-base)]">
 
-        <div className="px-6 py-8">
-          <h1
-            className="text-3xl font-black tracking-tight text-[var(--text-primary)]"
-            style={{ fontFamily: "Google Sans" }}>
-            GAMIX.
-          </h1>
+        <div className="flex items-center  h-[100px] px-2 py-2">
+
+            <img  src="/logo/vyuha.png" alt="" />
+         
         </div>
 
         {/* Navigation */}

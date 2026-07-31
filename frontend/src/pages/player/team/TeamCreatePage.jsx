@@ -197,7 +197,7 @@ function TeamCreatePage() {
 
             {/* Header */}
             <div className="mb-4">
-              <button onClick={ () => navigate('/player-dashboard/no-team')} className="text-xs text-[var(--text-secondary)]">
+              <button onClick={ () => navigate(-1)} className="text-xs text-[var(--text-secondary)]">
                 ← Back to Teams
               </button>
 

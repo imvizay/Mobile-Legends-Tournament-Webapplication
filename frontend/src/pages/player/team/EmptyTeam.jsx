@@ -8,7 +8,12 @@ import {
   Compass,
 } from "lucide-react";
 
+import { useNavigate } from "react-router-dom";
+
 export default function EmptyTeamState() {
+
+  const navigate = useNavigate()
+
   return (
     <section className="relative  overflow-hidden rounded-3xl border border-[var(--border-default)] bg-[var(--surface-base)]">
 
@@ -39,13 +44,17 @@ export default function EmptyTeamState() {
 
             <div className="mt-8 lg:mt-10 flex flex-wrap gap-4">
 
-              <button className="inline-flex items-center rounded-2xl bg-[var(--action-primary-bg)] px-7 py-4 text-sm font-semibold text-[var(--action-primary-text)] shadow-[var(--shadow-md)] transition hover:scale-[1.02]">
+              <button  
+                onClick={() => navigate('/player/create')}
+                className="inline-flex items-center rounded-2xl bg-[var(--action-primary-bg)] px-7 py-4 text-sm font-semibold text-[var(--action-primary-text)] shadow-[var(--shadow-md)] transition hover:scale-[1.02]">
 
                 <Plus className="mr-2 h-5 w-5" />
                 Create Team
               </button>
 
-              <button className="inline-flex items-center rounded-2xl border border-[var(--action-secondary-border)] bg-[var(--action-secondary-bg)] px-7 py-4 text-sm font-semibold text-[var(--action-secondary-text)] transition hover:border-[var(--accent-gold)]">
+              <button
+                onClick={() => navigate("/player/discover")} 
+                className="inline-flex items-center rounded-2xl border border-[var(--action-secondary-border)] bg-[var(--action-secondary-bg)] px-7 py-4 text-sm font-semibold text-[var(--action-secondary-text)] transition hover:border-[var(--accent-gold)]">
 
                 <Compass className="mr-2 h-5 w-5" />
                 Discover Teams

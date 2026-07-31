@@ -115,6 +115,7 @@ async def player_no_team(request:requests,exception:NoTeamException):
         status_code=404,
         content={
             "code":"TEAM_NOT_FOUND",
-            "message":"You are not part of any team."
+            "message":"You are not part of any team.",
+            "has_team":False
         }
     )

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .schemas import TeamCreateSchema , TeamResponseOutput , TeamResponse , TeamWalletResponse , TeamMemberResponse
+from .schemas import TeamCreateSchema , TeamResponseOutput , TeamResponse , TeamWalletResponse , TeamMemberResponse,DiscoverTeamResponse,DiscoverTeamOutput
 from fastapi import UploadFile
 from .validators import validate_image 
 from app.core.exceptions.exceptions import ExceptionTeamAlreadyExits,ExceptionPlayerAlreadyHasTeam,NoTeamException
@@ -11,19 +11,20 @@ from ...core.cloudinary.cloudinary_services import cloud_service
 
 class TeamService:
 
-    def __init__(self,db:Session,repository:TeamRepository):
+   def __init__(self,db:Session,repository:TeamRepository):
         self.db = db
         self.repository = repository
 
-    def get_my_team(self,current_user: Player):
-        
-        team = self.repository.get_team_by_player(current_user.id)
+   
 
-        if not team:
-           raise NoTeamException()
+   def get_my_team(self,current_user: Player):
         
-        return( TeamResponseOutput (
-          team = TeamResponse(
+      team = self.repository.get_team_by_player(current_user.id)
+      if not team:
+           return TeamResponseOutput(team=None)
+        
+      return( TeamResponseOutput (
+         team = TeamResponse(
            team_name = team.name,
            team_tag = team.tag,
            team_max_members = team.max_members,
@@ -47,17 +48,17 @@ class TeamService:
               )
               for member in team.members
            ]
-          )
-        ))
+         )
+      ))
     
 
-    def create_team(
+   def create_team(
         self,
         payload: TeamCreateSchema,
         logo: UploadFile | None,
         banner: UploadFile | None,
         current_user: Player,
-    ):
+      ):
         
         validate_image(logo)
         validate_image(banner)
@@ -106,22 +107,58 @@ class TeamService:
         except:
          self.db.rollback()
          raise
-
-
-    def join_team(self,team_id:int,player_id:int):
-       pass
-    
-    # This service makes captain invite players and notifies player about invitation through notification. 
-    def invite_player(self,current_user:int,player_id:int):
         
-        # background task notify invited user about invitation 
-       pass
 
-    # remove specific player from team
-    def remove_player(self,player_id:int):
-       pass
-    
-    # disbanned team if captain manually disband or all members leaves the team 
-    def disbanned_team(self,captain_id:int):
-       pass
+   def discover_team(self,cursor:int,limit:int,current_user: Player,):
+            
+      teams = self.repository.load_all_active_teams(current_user,cursor,limit)
+
+      has_next = len(teams) > limit
+
+      if has_next:
+         next_cursor = teams[:-1].index
+         teams = teams[:limit]
+
+      else:
+         next_cursor = None
+
+      
+      return DiscoverTeamOutput(
+          has_next=has_next,
+          next_cursor=next_cursor,
+          items=[
+              DiscoverTeamResponse(
+                  id=team.id,
+                  name=team.name,
+                  tag=team.tag,
+                  description=team.description,
+                  logo_url=team.logo_url,
+                  banner_url=team.banner_url,
+                  country=team.country,
+                  created_at=team.created_at,
+                  max_members=team.max_members,
+                  members_count=members_count,
+              )
+              for team, members_count in teams
+          ]
+      )
+
+      
+      
+
+   def join_team(self,team_id:int,player_id:int):
+      pass
+      
+      # This service makes captain invite players and notifies player about invitation through notification. 
+   def invite_player(self,current_user:int,player_id:int):
+
+      # background task notify invited user about invitation 
+      pass  
+      # remove specific player from team
+   def remove_player(self,player_id:int):
+      pass
+      
+      # disbanned team if captain manually disband or all members leaves the team 
+   def disbanned_team(self,captain_id:int):
+      pass
        

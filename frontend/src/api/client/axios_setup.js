@@ -19,12 +19,14 @@ axiosClient.interceptors.response.use(
         const isRefreshRequest = originalRequest.url === "/auth/refresh"
 
         console.log("Interceptor Reached")
-        console.log("Status:", error.response?.status);
-        console.log("Retry:", originalRequest._retry);
+        
         console.log("URL:", originalRequest.url);
         console.log("Is Refresh:", isRefreshRequest);
 
-       
+       if(error.response.status === 404){
+        console.log(`ERROR 404 NOT FOUND AT ${originalRequest.url}`)
+        return
+       }
 
         // network error
         if(!error.response){
@@ -53,6 +55,7 @@ axiosClient.interceptors.response.use(
             }
         }
         return Promise.reject(error);
+
     }
 )
 

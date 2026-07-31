@@ -14,6 +14,7 @@ import TeamPageSkeleton from "../skeletons/playerdash/my_team/TeamPageSkeleton";
 // Icons
 import { LayoutDashboard, Users, Trophy, Inbox, Activity, Wallet, Settings, } from "lucide-react";
 import EmptyTeamState from "../pages/player/team/EmptyTeam";
+import { useQuery } from "@tanstack/react-query";
 
 const TEAM_NAVIGATION_LINKS = [
  
@@ -26,19 +27,29 @@ const TEAM_NAVIGATION_LINKS = [
 ]
 
 function TeamLayout() {
-    const teamQuery = useOutletContext()
-   
-    
+
+  const team = useOutletContext()
+
+  useEffect(()=>{
+    console.log("Team Layout Mounting...")
+    console.log("TEAAAAM : ",team)
+
+    return () => {
+      console.log("Team Layout Unmounting...")
+    }
+  },[])
+
+
   return (
      <div className="h-screen space-y-4  md:space-y-5 lg:space-y-6 ">
 
-      <TeamMetaData team={teamQuery.team} />
+      <TeamMetaData team={team} />
 
       <TeamNavbar links={TEAM_NAVIGATION_LINKS} />
 
       <section className="min-h-[400px] md:min-h-[500px]">
 
-        <Outlet context={teamQuery.team.team_wallet} />
+        <Outlet context={team} />
       </section>
 
     </div>

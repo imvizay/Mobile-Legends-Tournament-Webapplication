@@ -62,21 +62,6 @@ const PLAYER_DASHBOARD_NAVIGATION_LINKS = [
 
 function PlayerLayout() {
   
-  // Player Team Status
-  const{
-    data:teamQuery,
-    pending,
-    isError,
-    error
-  } = useQuery({
-    queryKey:['check-member'],
-    queryFn:teamService.getMyTeam,
-    staleTime:1000*60*5, // no refetch for 5 minutes
-    gcTime:1000*60*10,   // cache for 10 minutes
-    refetchOnWindowFocus:false
-  })
-
-
 
   return (
     <section className="h-fit lg:h-screen overflow-hidden bg-[var(--bg-canvas)] lg:grid lg:grid-cols-[220px_1fr]">
@@ -100,20 +85,8 @@ function PlayerLayout() {
             </div>
 
             <main
-                className="
-                flex-1
-                overflow-y-auto
-                px-4
-                pt-20
-                pb-6
-
-                md:px-6
-
-                lg:px-8
-                lg:pt-6
-                "
-            >
-                <Outlet context={teamQuery}/>
+              className="flex-1 overflow-y-auto px-4 pt-20 pb-6 md:px-6 lg:px-8 lg:pt-6 ">
+                <Outlet />
             </main>
 
         </div>

@@ -65,9 +65,10 @@ export default function LoginPage() {
 
     try{
       console.log("1 - Calling Login Endpoint")
-      const data = await mutateAsync(formData) 
-      console.log('Login Response:',data)
-      navigate('/')
+      const response = await mutateAsync(formData) 
+      const data = response.data
+      localStorage.setItem('MLBB_User',JSON.stringify(data))
+      navigate('/player')
     }
     catch(e){
       console.log("LOGIN ERROR",e)

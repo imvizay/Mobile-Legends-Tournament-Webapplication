@@ -18,5 +18,12 @@ export const teamService = {
         return api.get(
             USER_TEAM_ENDPOINTS.GET_MY_TEAM
         )
+    },
+
+    loadTeam(){
+        console.log("Load team is called.")
+        return api.get(
+            USER_TEAM_ENDPOINTS.DISCOVER_TEAMS
+        )
     }
 }
