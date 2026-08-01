@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { ArrowUpRight, Eye, Shield, Trophy, Users, Zap, Timer, } from "lucide-react";
-
-import FlipUnit from "./countdown/FlipUnit";
+import { ArrowUpRight, CalendarClock, ShieldCheck, Trophy, Users, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import FlipUnit from "./countdown/FlipUnit";
 
 function getTimeLeft(targetDate) {
     const difference = new Date(targetDate).getTime() - Date.now();
@@ -17,23 +16,15 @@ function getTimeLeft(targetDate) {
     };
 }
 
+export default function FeaturedTournamentCard({ tournament, onRegister }) {
+    const navigate = useNavigate();
 
-export default function FeaturedTournamentCard({
-    tournament,
-    onRegister,
-}) {
+    const registeredTeams = tournament.joined_teams ?? 0;
+    const prizePool = tournament.prize_pool ?? 2000;
 
-    const navigate = useNavigate()
-   
-    const registeredTeams = 0;
-    const prizePool = "₹2,000";
+    const tournamentStartDateTime = `${tournament.tournament_start_date}T${tournament.tournament_start_time}`;
 
-    const tournamentStartDateTime =
-        `${tournament.tournament_start_date}T${tournament.tournament_start_time}`;
-
-    const [timeLeft, setTimeLeft] = useState(() =>
-        getTimeLeft(tournamentStartDateTime)
-    );
+    const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(tournamentStartDateTime));
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -41,524 +32,189 @@ export default function FeaturedTournamentCard({
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [
-        tournament.tournament_start_date,
-        tournament.tournament_start_time,
-    ]);
+    }, [tournamentStartDateTime]);
 
-    /*
-     * Registration status comes directly from API.
-     */
-    const registrationOpen =
-        tournament.registration_status === "upcoming";
+    const registrationOpen = tournament.registration_status === "upcoming";
 
-    const teamPercentage =
-        tournament.max_teams > 0
-            ? Math.min(
-                  100,
-                  (registeredTeams / tournament.max_teams) * 100
-              )
-            : 0;
+    const teamPercentage = tournament.max_teams > 0 ? Math.min((registeredTeams / tournament.max_teams) * 100, 100) : 0;
 
     return (
         <section className="w-full">
-
-            {/* Section Heading */}
-            <div className="hidden sm:flex mb-4 items-end justify-between gap-3">
-                <div className="min-w-0">
-
-                    <div className="flex items-center gap-2">
-                        <span className="h-px w-6 shrink-0 bg-[var(--accent-gold)]" />
-
-                        <p className="whitespace-nowrap font-['Barlow_Condensed'] text-[8px] font-bold uppercase tracking-[0.22em] text-[var(--accent-gold)]">
-                            Featured
-                        </p>
-                    </div>
-
-                    <div className="mt-1 flex items-center gap-2">
-                        <h2 className="truncate font-['Rajdhani'] text-[20px] font-bold uppercase leading-none tracking-[-0.01em] text-[var(--text-primary)]">
-                            Featured Tournament
-                        </h2>
-
-                        <span className="hidden h-4 w-px bg-[var(--border-default)] sm:block" />
-
-                        <span className="hidden whitespace-nowrap font-['Barlow_Condensed'] text-[7px] font-semibold uppercase tracking-[0.15em] text-[var(--text-muted)] sm:block">
-                            Live Opportunity
-                        </span>
-                    </div>
-                </div>
-
-                <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
-                    <Eye
-                        className="size-3 text-[var(--text-muted)]"
-                        strokeWidth={1.7}
-                    />
-
-                    <span className="font-['Barlow_Condensed'] text-[7px] font-semibold uppercase tracking-[0.15em] text-[var(--text-muted)]">
-                        Featured Event
-                    </span>
-                </div>
-            </div>
-
-
-            {/* Featured Card */}
-            <article className="relative isolate min-h-fit overflow-hidden rounded-[22px] border border-[var(--border-default)] bg-white/60 text-[var(--text-primary)] shadow-[0_18px_60px_rgba(40,30,10,0.08)] backdrop-blur-2xl sm:min-h-[570px] md:h-[360px] md:min-h-0 md:rounded-[24px]">
+            <article className="group relative isolate overflow-hidden rounded-[18px] border border-[var(--border-default)] bg-[#090909] text-white sm:rounded-[22px] lg:rounded-[24px]">
 
                 {/* Background */}
-                <img
-                    src={tournament.background_image_url}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover opacity-[0.42]"
-                />
+                <div className="absolute inset-0">
+                    {tournament.background_image_url && <img src={tournament.background_image_url} alt="" className="h-full w-full object-cover object-[65%_center] opacity-[0.38] transition-transform duration-1000 ease-out sm:object-center sm:opacity-[0.52] lg:opacity-[0.62] lg:group-hover:scale-[1.02]" />}
 
-                {/* Soft Light Overlay */}
-                <div className="absolute inset-0 bg-[linear-gradient(105deg,rgba(255,255,255,.98)_0%,rgba(255,255,255,.94)_30%,rgba(255,255,255,.72)_56%,rgba(255,255,255,.34)_100%)]" />
+                    {/* Mobile overlay */}
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,7,7,.78)_0%,rgba(7,7,7,.88)_45%,rgba(7,7,7,.98)_100%)] sm:bg-[linear-gradient(100deg,rgba(6,6,6,.97)_0%,rgba(6,6,6,.88)_40%,rgba(6,6,6,.48)_100%)]" />
 
-                {/* Bottom Fade */}
-                <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-white/95 via-white/45 to-transparent" />
-
-                {/* Gold Ambient Light */}
-                <div className="absolute -right-28 top-1/2 size-[360px] -translate-y-1/2 rounded-full bg-[var(--accent-gold)]/[0.12] blur-[100px] sm:size-[400px]" />
-
-                {/* Decorative Grid */}
-                <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(80,65,35,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(80,65,35,.8)_1px,transparent_1px)] [background-size:34px_34px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
-
-                {/* Decorative Corner */}
-                <div className="pointer-events-none absolute right-[-80px] top-[-100px] size-[250px] rotate-45 border border-[var(--accent-gold)]/[0.10] sm:size-[280px]" />
-
-
-                <div className="relative flex h-full flex-col p-4 sm:p-6 md:p-7">
-
-                    {/* Top Row */}
-                    <div className="flex items-center justify-between gap-2.5">
-
-                        {/* Registration Status */}
-                        <div
-                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[7px] font-semibold uppercase tracking-[0.14em] backdrop-blur-xl sm:gap-2 sm:px-3 sm:text-[8px] ${
-                                registrationOpen
-                                    ? "border-[var(--accent-gold)]/30 bg-[var(--accent-gold)]/[0.10] text-[var(--accent-gold)]"
-                                    : "border-[var(--border-default)] bg-white/55 text-[var(--text-muted)]"
-                            }`}
-                        >
-                            {registrationOpen && (
-                                <span className="size-1.5 rounded-full bg-[var(--accent-gold)]" />
-                            )}
-
-                            {registrationOpen
-                                ? "Registration Open"
-                                : "Registration Closed"}
-                        </div>
-
-
-                        {/* Game */}
-                        <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-default)] bg-white/55 px-2.5 py-1.5 text-[7px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)] backdrop-blur-xl sm:gap-2 sm:px-3 sm:text-[8px]">
-                            <Shield
-                                className="size-3 text-[var(--accent-gold)]"
-                                strokeWidth={1.8}
-                            />
-
-                            MLBB 5V5
-                        </div>
-                    </div>
-
-
-                    {/* Main Content */}
-                    <div className="mt-9 max-w-[650px] md:mt-5 md:flex md:flex-1 md:flex-col md:justify-center">
-
-                        <div className="mb-2.5 flex items-center gap-2 sm:mb-3">
-                            <span className="h-px w-6 bg-[var(--accent-gold)] sm:w-7" />
-
-                            <p className="text-[7px] font-semibold uppercase tracking-[0.22em] text-[var(--accent-gold)] sm:text-[8px] sm:tracking-[0.25em]">
-                                Tactix Presents · Season 01
-                            </p>
-                        </div>
-
-
-                        {/* Tournament Name */}
-                        <h2 className="max-w-[650px] text-[31px] font-semibold uppercase leading-[0.92] tracking-[-0.035em] text-[var(--text-primary)] sm:text-[42px] md:text-[52px]">
-                            {tournament.tournament_name}
-                        </h2>
-
-
-                        {/* Description */}
-                        <p className="mt-3 max-w-[500px] text-[10px] leading-[1.6] text-[var(--text-secondary)] sm:mt-4 sm:text-[12px]">
-                            {tournament.game_name} ·{" "}
-                            {tournament.server?.toUpperCase()} Server
-                        </p>
-
-                    </div>
-
-
-                    {/* Mobile Stats */}
-                    <div className="mt-7 grid grid-cols-2 gap-2 sm:mt-8 md:hidden">
-
-                        {/* Registration Countdown */}
-                        <GlassMetric className="col-span-2">
-                            <MetricIcon>
-                                <Timer
-                                    className="size-4 text-[var(--accent-gold)]"
-                                    strokeWidth={1.8}
-                                />
-                            </MetricIcon>
-
-                            <div className="min-w-0">
-                                <MetricLabel>
-                                    Tournament Starts
-                                </MetricLabel>
-
-                                <div className="mt-1 flex items-end gap-0.5 overflow-hidden sm:gap-1">
-                                    <FlipUnit
-                                        value={timeLeft?.days ?? 0}
-                                        label="Days"
-                                    />
-
-                                    <span className="mb-4 text-[var(--text-muted)]">
-                                        :
-                                    </span>
-
-                                    <FlipUnit
-                                        value={timeLeft?.hours ?? 0}
-                                        label="Hrs"
-                                    />
-
-                                    <span className="mb-4 text-[var(--text-muted)]">
-                                        :
-                                    </span>
-
-                                    <FlipUnit
-                                        value={timeLeft?.minutes ?? 0}
-                                        label="Min"
-                                    />
-
-                                    <span className="mb-4 text-[var(--text-muted)]">
-                                        :
-                                    </span>
-
-                                    <FlipUnit
-                                        value={timeLeft?.seconds ?? 0}
-                                        label="Sec"
-                                    />
-                                </div>
-                            </div>
-                        </GlassMetric>
-
-
-                        {/* Prize Pool */}
-                        <GlassMetric>
-                            <MetricIcon>
-                                <Trophy
-                                    className="size-4 text-[var(--accent-gold)]"
-                                    strokeWidth={1.8}
-                                />
-                            </MetricIcon>
-
-                            <div className="min-w-0">
-                                <MetricLabel>
-                                    Prize Pool
-                                </MetricLabel>
-
-                                <p className="mt-1 truncate text-[18px] font-semibold leading-none text-[var(--text-primary)] sm:text-[20px]">
-                                    {prizePool}
-                                </p>
-                            </div>
-                        </GlassMetric>
-
-
-                        {/* Teams */}
-                        <GlassMetric>
-                            <MetricIcon>
-                                <Users
-                                    className="size-4 text-[var(--text-secondary)]"
-                                    strokeWidth={1.8}
-                                />
-                            </MetricIcon>
-
-                            <div className="min-w-0">
-                                <MetricLabel>
-                                    Teams
-                                </MetricLabel>
-
-                                <p className="mt-1 text-[18px] font-semibold leading-none text-[var(--text-primary)] sm:text-[20px]">
-                                    {registeredTeams}
-
-                                    <span className="text-[10px] text-[var(--text-muted)] sm:text-[11px]">
-                                        /{tournament.max_teams}
-                                    </span>
-                                </p>
-
-                                <div className="mt-2 h-[2px] w-full max-w-[75px] overflow-hidden rounded-full bg-black/[0.07]">
-                                    <div
-                                        className="h-full rounded-full bg-[var(--accent-gold)]"
-                                        style={{
-                                            width: `${teamPercentage}%`,
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        </GlassMetric>
-                    </div>
-
-
-                    {/* Mobile Actions */}
-                    <div className="mt-3 grid grid-cols-2 gap-2 md:hidden">
-
-                        <button
-                            type="button"
-                            disabled={!registrationOpen}
-                            onClick={()=>onRegister(tournament.id)}
-                            className={`group relative flex h-11 items-center justify-center gap-2 overflow-hidden rounded-xl text-[8px] font-semibold uppercase tracking-[0.12em] sm:text-[9px] sm:tracking-[0.14em] ${
-                                registrationOpen
-                                    ? "bg-[var(--accent-gold)] text-white"
-                                    : "cursor-not-allowed bg-black/[0.05] text-[var(--text-muted)]"
-                            }`}
-                        >
-                            {registrationOpen && (
-                                <span className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/30 opacity-0 transition-all duration-500 group-hover:left-[120%] group-hover:opacity-100" />
-                            )}
-
-                            <Zap
-                                className="relative size-3.5"
-                                fill="currentColor"
-                            />
-
-                            <span className="relative">
-                                {registrationOpen
-                                    ? "Join Battle"
-                                    : "Closed"}
-                            </span>
-                        </button>
-
-
-                        <button
-                            type="button"
-                            onClick={()=>navigate(`/tournament/${tournament.id}`)}
-                            className="flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border-default)] bg-white/55 text-[8px] font-semibold uppercase tracking-[0.12em] text-[var(--text-secondary)] backdrop-blur-xl sm:text-[9px] sm:tracking-[0.14em]"
-                        >
-                            Details
-
-                            <ArrowUpRight
-                                className="size-3.5"
-                                strokeWidth={1.8}
-                            />
-                        </button>
-
-                    </div>
-
-
-                    {/* Desktop Bottom Strip */}
-                    <div className="mt-auto hidden items-end justify-between gap-5 md:flex">
-
-                        <div className="flex items-center gap-2">
-
-                            {/* Join */}
-                            <button
-                                type="button"
-                                disabled={!registrationOpen}
-                                onClick={onRegister}
-                                className={`group relative inline-flex h-10 items-center gap-2 overflow-hidden rounded-xl px-5 text-[9px] font-semibold uppercase tracking-[0.14em] ${
-                                    registrationOpen
-                                        ? "bg-[var(--accent-gold)] text-white"
-                                        : "cursor-not-allowed bg-black/[0.05] text-[var(--text-muted)]"
-                                }`}
-                            >
-                                {registrationOpen && (
-                                    <span className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/30 opacity-0 transition-all duration-500 group-hover:left-[120%] group-hover:opacity-100" />
-                                )}
-
-                                <Zap
-                                    className="relative size-3.5"
-                                    fill="currentColor"
-                                />
-
-                                <span className="relative">
-                                    {registrationOpen
-                                        ? "Join Battle"
-                                        : "Closed"}
-                                </span>
-                            </button>
-
-
-                            {/* Details */}
-                            <button
-                                type="button"
-                                onClick={()=>navigate(`/player/tournament/${tournament.id}/detail`)}
-                                className="inline-flex h-10 items-center gap-2 rounded-xl border border-[var(--border-default)] bg-white/55 px-5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)] backdrop-blur-xl"
-                            >
-                                View Details
-
-                                <ArrowUpRight
-                                    className="size-3.5"
-                                    strokeWidth={1.8}
-                                />
-                            </button>
-
-                        </div>
-
-
-                        {/* Glass Information Strip */}
-                        <div className="flex h-[74px] overflow-hidden rounded-2xl border border-white/80 bg-white/55 shadow-[0_12px_40px_rgba(50,40,20,0.08)] backdrop-blur-2xl">
-
-                            {/* Countdown */}
-                            <div className="flex min-w-[245px] items-center gap-3 px-4">
-                                <MetricIcon>
-                                    <Timer
-                                        className="size-4 text-[var(--accent-gold)]"
-                                        strokeWidth={1.8}
-                                    />
-                                </MetricIcon>
-
-                                <div>
-                                    <MetricLabel>
-                                        Tournament Starts
-                                    </MetricLabel>
-
-                                    <div className="mt-1 flex items-end gap-1.5">
-                                        <FlipUnit
-                                            value={timeLeft?.days ?? 0}
-                                            label="Days"
-                                        />
-
-                                        <span className="mb-4 text-[var(--text-muted)]">
-                                            :
-                                        </span>
-
-                                        <FlipUnit
-                                            value={timeLeft?.hours ?? 0}
-                                            label="Hours"
-                                        />
-
-                                        <span className="mb-4 text-[var(--text-muted)]">
-                                            :
-                                        </span>
-
-                                        <FlipUnit
-                                            value={timeLeft?.minutes ?? 0}
-                                            label="Minutes"
-                                        />
-
-                                        <span className="mb-4 text-[var(--text-muted)]">
-                                            :
-                                        </span>
-
-                                        <FlipUnit
-                                            value={timeLeft?.seconds ?? 0}
-                                            label="Seconds"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <StatDivider />
-
-
-                            {/* Prize Pool */}
-                            <div className="flex min-w-[145px] items-center gap-3 px-4">
-                                <MetricIcon>
-                                    <Trophy
-                                        className="size-4 text-[var(--accent-gold)]"
-                                        strokeWidth={1.8}
-                                    />
-                                </MetricIcon>
-
-                                <div>
-                                    <MetricLabel>
-                                        Prize Pool
-                                    </MetricLabel>
-
-                                    <p className="mt-1 text-[21px] font-semibold leading-none text-[var(--text-primary)]">
-                                        {prizePool}
-                                    </p>
-                                </div>
-                            </div>
-
-
-                            <StatDivider />
-
-
-                            {/* Teams */}
-                            <div className="flex min-w-[140px] items-center gap-3 px-4">
-                                <MetricIcon>
-                                    <Users
-                                        className="size-4 text-[var(--text-secondary)]"
-                                        strokeWidth={1.8}
-                                    />
-                                </MetricIcon>
-
-                                <div>
-                                    <MetricLabel>
-                                        Teams
-                                    </MetricLabel>
-
-                                    <p className="mt-1 text-[21px] font-semibold leading-none text-[var(--text-primary)]">
-                                        {registeredTeams}
-
-                                        <span className="text-[11px] text-[var(--text-muted)]">
-                                            /{tournament.max_teams}
-                                        </span>
-                                    </p>
-
-                                    <div className="mt-2 h-[2px] w-[78px] overflow-hidden rounded-full bg-black/[0.07]">
-                                        <div
-                                            className="h-full rounded-full bg-[var(--accent-gold)]"
-                                            style={{
-                                                width: `${teamPercentage}%`,
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(255,255,255,.04),transparent_35%)]" />
                 </div>
 
+                {/* Ambient */}
+                <div className="pointer-events-none absolute -right-28 top-[35%] size-[260px] rounded-full bg-[var(--accent-gold)]/[0.08] blur-[100px] sm:-right-20 sm:size-[380px] lg:size-[480px]" />
 
-                {/* Accent Line */}
-                <div className="absolute bottom-0 left-0 h-[2px] w-[38%] bg-gradient-to-r from-[var(--accent-gold)] to-transparent" />
+                {/* Grid */}
+                <div className="pointer-events-none absolute inset-0 opacity-[0.02] [background-image:linear-gradient(rgba(255,255,255,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.8)_1px,transparent_1px)] [background-size:32px_32px] sm:opacity-[0.03] sm:[background-size:38px_38px]" />
+
+                <div className="relative flex min-h-[390px] flex-col px-3.5 py-3.5 sm:min-h-[440px] sm:p-5 md:min-h-[420px] md:p-6 lg:min-h-[430px] lg:p-7">
+
+                    {/* Top Row */}
+                    <div className="flex items-center justify-between gap-2">
+                        <div className={`inline-flex min-w-0 items-center gap-1.5 rounded-md border px-2 py-1.5 backdrop-blur-xl sm:gap-2 sm:px-2.5 ${registrationOpen ? "border-[var(--accent-gold)]/25 bg-[var(--accent-gold)]/[0.08]" : "border-white/[0.12] bg-black/20"}`}>
+                            <span className={`size-1.5 shrink-0 rounded-full ${registrationOpen ? "bg-[var(--accent-gold)]" : "bg-white/30"}`} />
+
+                            <span className={`truncate text-[6px] font-bold uppercase tracking-[0.13em] sm:text-[8px] sm:tracking-[0.16em] ${registrationOpen ? "text-[var(--accent-gold)]" : "text-white/50"}`}>
+                                {registrationOpen ? "Registration Open" : "Registration Closed"}
+                            </span>
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-1 text-[6px] font-bold uppercase tracking-[0.1em] text-white/40 sm:gap-1.5 sm:text-[8px] sm:tracking-[0.15em]">
+                            <ShieldCheck size={10} className="sm:size-3" />
+                            <span className="hidden xs:inline">{tournament.game_name || "MLBB"} · 5V5</span>
+                            <span className="xs:hidden">5V5</span>
+                        </div>
+                    </div>
+
+                    {/* Hero */}
+                    <div className="flex flex-1 flex-col justify-center py-6 sm:py-7 md:py-5">
+
+                        <div className="mb-2.5 flex items-center gap-2 sm:mb-3">
+                            <span className="h-px w-5 bg-[var(--accent-gold)] sm:w-8" />
+
+                            <span className="text-[6px] font-bold uppercase tracking-[0.18em] text-[var(--accent-gold)] sm:text-[8px] sm:tracking-[0.22em]">
+                                Featured Championship
+                            </span>
+                        </div>
+
+                        <h1 className="max-w-[820px] break-words font-['Rajdhani'] text-[clamp(32px,10vw,68px)] font-bold uppercase leading-[0.88] tracking-[-0.04em] sm:tracking-[-0.035em]">
+                            {tournament.tournament_name}
+                        </h1>
+
+                        {/* Metadata */}
+                        <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[7px] font-semibold uppercase tracking-[0.1em] text-white/50 sm:mt-4 sm:gap-x-3 sm:text-[9px] sm:tracking-[0.13em]">
+                            <span>{tournament.server?.toUpperCase() || "INDIA"} SERVER</span>
+
+                            <span className="size-1 rounded-full bg-[var(--accent-gold)]/70" />
+
+                            <span>{tournament.tournament_type || "Competitive Event"}</span>
+
+                            <span className="hidden size-1 rounded-full bg-[var(--accent-gold)]/70 xs:block" />
+
+                            <span className="hidden xs:inline">Season 01</span>
+                        </div>
+
+                        <p className="mt-3 max-w-[560px] text-[9px] leading-[1.65] text-white/55 sm:mt-4 sm:text-[11px] sm:leading-6">
+                            Compete against skilled teams, progress through the tournament bracket, and fight for championship rewards.
+                        </p>
+
+                        {/* Actions */}
+                        <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-6 sm:flex sm:flex-row sm:gap-2.5">
+
+                            <button type="button" disabled={!registrationOpen} onClick={() => onRegister?.(tournament.id)} className={`group/btn relative flex h-10 min-w-0 items-center justify-center gap-1.5 overflow-hidden rounded-lg px-3 text-[7px] font-bold uppercase tracking-[0.1em] transition-transform active:scale-[0.98] sm:h-11 sm:px-5 sm:text-[9px] sm:tracking-[0.14em] sm:hover:-translate-y-px ${registrationOpen ? "bg-[var(--accent-gold)] text-white" : "cursor-not-allowed bg-white/[0.08] text-white/35"}`}>
+                                {registrationOpen && <span className="absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/30 opacity-0 transition-all duration-500 group-hover/btn:left-[120%] group-hover/btn:opacity-100" />}
+
+                                <Zap size={11} className="shrink-0 sm:size-[13px]" fill="currentColor" />
+
+                                <span className="truncate">{registrationOpen ? "Join Now" : "Closed"}</span>
+                            </button>
+
+                            <button type="button" onClick={() => navigate(`/player/tournament/${tournament.id}/detail`)} className="flex h-10 min-w-0 items-center justify-center gap-1.5 rounded-lg border border-white/[0.14] bg-black/[0.22] px-3 text-[7px] font-bold uppercase tracking-[0.1em] text-white/70 backdrop-blur-xl transition-transform active:scale-[0.98] sm:h-11 sm:px-5 sm:text-[9px] sm:tracking-[0.14em] sm:hover:-translate-y-px">
+                                <span className="truncate">Details</span>
+                                <ArrowUpRight size={11} className="shrink-0 sm:size-[13px]" />
+                            </button>
+
+                        </div>
+                    </div>
+
+                    {/* Intelligence */}
+                    <div className="overflow-hidden rounded-xl border border-white/[0.10] bg-black/[0.32] backdrop-blur-xl">
+
+                        {/* Mobile + Desktop Stats */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3">
+
+                            {/* Countdown */}
+                            <div className="col-span-2 border-b border-white/[0.10] px-3 py-3 sm:col-span-1 sm:border-b-0 sm:border-r sm:px-4 sm:py-3.5">
+
+                                <div className="flex items-center gap-1.5 text-white/45 sm:gap-2">
+                                    <CalendarClock size={11} className="text-[var(--accent-gold)] sm:size-3" />
+
+                                    <span className="text-[6px] font-bold uppercase tracking-[0.13em] sm:text-[7px] sm:tracking-[0.15em]">
+                                        Starts In
+                                    </span>
+                                </div>
+
+                                <div className="mt-2 flex items-end justify-between gap-0.5 overflow-hidden sm:justify-start sm:gap-1">
+                                    <FlipUnit value={timeLeft?.days ?? 0} label="D" />
+
+                                    <span className="mb-3 text-[10px] text-white/25 sm:mb-4">:</span>
+
+                                    <FlipUnit value={timeLeft?.hours ?? 0} label="H" />
+
+                                    <span className="mb-3 text-[10px] text-white/25 sm:mb-4">:</span>
+
+                                    <FlipUnit value={timeLeft?.minutes ?? 0} label="M" />
+
+                                    <span className="mb-3 text-[10px] text-white/25 sm:mb-4">:</span>
+
+                                    <FlipUnit value={timeLeft?.seconds ?? 0} label="S" />
+                                </div>
+
+                            </div>
+
+                            {/* Prize */}
+                            <div className="border-r border-white/[0.10] px-3 py-3 sm:border-r sm:px-4 sm:py-3.5">
+
+                                <div className="flex items-center gap-1.5 text-white/45 sm:gap-2">
+                                    <Trophy size={11} className="text-[var(--accent-gold)] sm:size-3" />
+
+                                    <span className="text-[6px] font-bold uppercase tracking-[0.12em] sm:text-[7px] sm:tracking-[0.15em]">
+                                        Prize
+                                    </span>
+                                </div>
+
+                                <p className="mt-2 font-['Rajdhani'] text-[22px] font-bold leading-none tracking-tight text-[var(--accent-gold)] sm:text-[30px]">
+                                    ₹{Number(prizePool).toLocaleString("en-IN")}
+                                </p>
+
+                            </div>
+
+                            {/* Teams */}
+                            <div className="px-3 py-3 sm:px-4 sm:py-3.5">
+
+                                <div className="flex items-center gap-1.5 text-white/45 sm:gap-2">
+                                    <Users size={11} className="sm:size-3" />
+
+                                    <span className="text-[6px] font-bold uppercase tracking-[0.12em] sm:text-[7px] sm:tracking-[0.15em]">
+                                        Teams
+                                    </span>
+                                </div>
+
+                                <div className="mt-2 flex items-end gap-1">
+                                    <p className="font-['Rajdhani'] text-[22px] font-bold leading-none tracking-tight sm:text-[30px]">
+                                        {registeredTeams}
+                                    </p>
+
+                                    <span className="mb-0.5 text-[7px] text-white/35 sm:mb-1 sm:text-[9px]">
+                                        / {tournament.max_teams}
+                                    </span>
+                                </div>
+
+                                <div className="mt-2 h-[2px] w-full overflow-hidden bg-white/[0.08]">
+                                    <div className="h-full bg-[var(--accent-gold)] transition-all duration-700" style={{ width: `${teamPercentage}%` }} />
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                {/* Accent */}
+                <div className="absolute bottom-0 left-0 h-px w-[55%] bg-gradient-to-r from-[var(--accent-gold)] via-[var(--accent-gold)]/45 to-transparent sm:h-[2px] sm:w-[42%]" />
 
             </article>
         </section>
-    );
-}
-
-
-function GlassMetric({ children, className = "" }) {
-    return (
-        <div
-            className={`relative overflow-hidden rounded-xl border border-white/80 bg-white/50 px-3 py-3 backdrop-blur-xl ${className}`}
-        >
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/70 via-transparent to-transparent" />
-
-            <div className="relative flex items-center gap-3">
-                {children}
-            </div>
-        </div>
-    );
-}
-
-
-function MetricIcon({ children }) {
-    return (
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border-default)] bg-white/60">
-            {children}
-        </div>
-    );
-}
-
-
-function MetricLabel({ children }) {
-    return (
-        <p className="text-[7px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-            {children}
-        </p>
-    );
-}
-
-
-function StatDivider() {
-    return (
-        <div className="my-4 w-px bg-gradient-to-b from-transparent via-[var(--border-default)] to-transparent" />
     );
 }

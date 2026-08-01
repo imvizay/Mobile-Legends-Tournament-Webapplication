@@ -34,6 +34,9 @@ const RequireTeam = () => {
         return <EmptyTeamState />
     }
 
+    console.log("TEAM",team)
+    
+
     return <Outlet context={{ team }} />
 }
 
