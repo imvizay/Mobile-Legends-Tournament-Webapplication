@@ -1,45 +1,66 @@
-import React from "react";
-import { useOutletContext } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import React, { useEffect } from "react"
+import { useOutletContext } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 
-import { teamService } from "../../../../services/team_service";
+import { teamService, teamTournamentService } from "../../../../services/team_service"
 
-import RegisteredTournament from "../components/TeamRegisteredTournament";
-import EmptyRegisteredTournament from "../empty_states/EmptyRegisteredTournament";
-import TeamContribution from "../components/TeamContribution";
-import EmptyTeamContribution from "../empty_states/EmptyTeamContribution";
-import TournamentRoadmap from "../components/TournamentRoadmap";
-import TeamMembers from "../components/TeamMembers";
-import TeamMatches from "../components/TournamentMatches";
-import MatchProofUploads from "../components/MatchProofUploads";
+import RegisteredTournament from "../components/TeamRegisteredTournament"
+import EmptyRegisteredTournament from "../empty_states/EmptyRegisteredTournament"
+import TeamContribution from "../components/TeamContribution"
+import EmptyTeamContribution from "../empty_states/EmptyTeamContribution"
+import TournamentRoadmap from "../components/TournamentRoadmap"
+import TeamMembers from "../components/TeamMembers"
+import TeamMatches from "../components/TournamentMatches"
+import MatchProofUploads from "../components/MatchProofUploads"
 
-import TeamPageSkeleton from "../../../../skeletons/playerdash/my_team/TeamPageSkeleton";
+import TeamPageSkeleton from "../../../../skeletons/playerdash/my_team/TeamPageSkeleton"
+
+import { useMutation } from "@tanstack/react-query"
+import { useUserContext } from "../../../../contexts/UserContext"
 
 export default function TeamDashboard() {
-    const { team } = useOutletContext();
+    const { team } = useOutletContext()
+    const { user } = useUserContext()
 
-    const teamId = team?.id;
-    console.group("TEAM DASHBOARD")
-    console.log("[1]-TeamID",teamId)
+    const teamId = team?.id
+
+
+    const addRosterMutation = useMutation({
+        mutationKey: ['tournament-addRoster', team?.id],
+        mutationFn: ({ tournamentId, playerId }) =>
+            teamTournamentService.addPlayerToRoster(
+                tournamentId, playerId
+            )
+    })
+
+    const removeRosterMutation = useMutation({
+        mutationKey: ['tournament-removeRoster', team?.id],
+        mutationFn: ({ tournamentId, playerId }) =>
+            teamTournamentService.removePlayerFromRoster(
+                tournamentId, playerId
+            )
+    })
+
     const {
-        data:dashboard,
+        data: dashboard,
         isPending,
         isError,
         error,
+        isSuccess,
         refetch,
     } = useQuery({
         queryKey: ["teamdashboard", teamId],
         queryFn: () => teamService.getTeamDashboard(teamId),
         enabled: !!teamId,
         staleTime: 1000 * 60 * 5,
-    });
+    })
 
     if (isPending) {
-        return <TeamPageSkeleton />;
+        return <TeamPageSkeleton />
     }
 
     if (isError) {
-        console.error("TEAM DASHBOARD ERROR:", error);
+        console.error("TEAM DASHBOARD ERROR:", error)
 
         return (
             <div className="flex min-h-[400px] items-center justify-center">
@@ -50,29 +71,57 @@ export default function TeamDashboard() {
                     </button>
                 </div>
             </div>
-        );
+        )
     }
 
     if (!dashboard?.data) {
-        return null;
+        return null
     }
 
-    console.log("[2]- DATA",dashboard?.data)
-    
-    const currentTournament = dashboard?.data?.current_tournament ?? null;
-    const feeContribution = dashboard?.data?.fee_contribution ?? null;
-    const teamMembers = dashboard?.data?.team_members ?? [];
-    const scheduledMatches = dashboard?.data?.scheduled_matches ?? [];
 
-    const hasRegisteredTournament = !!currentTournament;
+    const currentTournament = dashboard?.data?.current_tournament ?? null
+    const feeContribution = dashboard?.data?.fee_contribution ?? null
+    const teamMembers = dashboard?.data?.team_members ?? []
+    const scheduledMatches = dashboard?.data?.scheduled_matches ?? []
+    const isLoggedUserCaptain = teamMembers?.some((el) => (el.id == user?.id && el.role.toLowerCase() == "captain"))
 
-    const hasContribution = !!feeContribution;
+    const hasRegisteredTournament = !!currentTournament
 
-    const hasScheduledMatch = scheduledMatches.length > 0;
+    const hasContribution = !!feeContribution
 
-    console.group('[3]- Registered Tournament',currentTournament)
+    const hasScheduledMatch = scheduledMatches.length > 0
 
-    console.groupEnd()
+    const tournamentId = currentTournament?.tournament_id
+
+
+
+
+    const addRoster = async (member) => {
+
+        const playerId = member?.id
+
+        if (isNaN(playerId) || !tournamentId) return;
+
+        try {
+            const res = await addRosterMutation.mutateAsync({ tournamentId, playerId })
+        } catch (error) {
+            console.log(`Adding Player ID:${playerId} To Roster Failed Due To : ${error} `)
+            alert("Try Again! Adding Player To Roster Gets Failed.")
+        }
+    }
+
+    const removeRoster = async (member) => {
+        const playerId = Number(member?.id)
+        if (isNaN(playerId)) return
+        try {
+            const res = await removeRosterMutation.mutateAsync({ tournamentId, playerId })
+            console.log("Removed Roster")
+        }
+        catch (error) {
+            console.log(`Removing Player ID:${playerId} From Roster Failed,Try Again!.`)
+            alert(`Failed Removing Player Id ${playerId} From Roster , Try Again!.`)
+        }
+    }
 
     return (
         <section className="w-full space-y-8 pb-8">
@@ -119,7 +168,14 @@ export default function TeamDashboard() {
             ========================================================== */}
 
             <section className="min-w-0">
-                <TeamMembers members={teamMembers} />
+
+                <TeamMembers
+                    members={teamMembers}
+                    isCaptain={isLoggedUserCaptain}
+                    isRosterLocked={false}
+                    onMakeRoster={addRoster}
+                    onRemoveRoster={removeRoster}
+                />
                 {/* <TeamMembers  /> */}
 
             </section>
@@ -139,5 +195,5 @@ export default function TeamDashboard() {
             )}
 
         </section>
-    );
+    )
 }

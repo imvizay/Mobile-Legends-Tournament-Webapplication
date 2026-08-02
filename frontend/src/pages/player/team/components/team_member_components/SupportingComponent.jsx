@@ -1,3 +1,5 @@
+import { Plus, UserPlus } from "lucide-react";
+
 export function SectionHeader({ title, description, count }) {
     return (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

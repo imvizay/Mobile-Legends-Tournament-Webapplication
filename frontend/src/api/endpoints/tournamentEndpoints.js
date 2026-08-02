@@ -14,4 +14,22 @@ export const TOURNAMENT_ENDPOINT = {
 
   CANCEL_TOURNAMENT: (tournamentId) =>
     `/tournament/${tournamentId}/cancel`,
+
 };
+
+export const TOURNAMENT_ROSTER = {
+  ADD_ROSTER_PLAYER: "/tournaments/roster/player/add",
+  REMOVE_ROSTER_PLAYER: "/tournaments/roster/player/remove",
+
+  ADD_SUBSTITUTE: "/tournaments/roster/substitute/add",
+  REMOVE_SUBSTITUTE: "/tournaments/roster/substitute/remove",
+
+  LOCK_ROSTER: "/tournaments/roster/lock",
+
+}
+
+export const TOURNAMENT_CONTRIBUTION = {
+
+  
+
+}

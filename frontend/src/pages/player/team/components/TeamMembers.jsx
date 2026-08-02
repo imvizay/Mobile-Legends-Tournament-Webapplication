@@ -5,16 +5,19 @@ import { EmptyMemberCard, HeaderStat, SectionHeader } from "./team_member_compon
 import RosterSection from "./team_member_components/RosterSection";
 import { LockKeyhole, ShieldCheck } from "lucide-react";
 
-// const dummyMembers = [
-//     { id: 1, username: "VIZAY", email: "vijay.meena@example.com", role: "captain", status: "active", tournament_role: "roster", tournament_ready: true, mlbb_id: "812345678", mlbb_server: "2314" },
-//     { id: 2, username: "ARJUN", email: "arjun.sharma@example.com", role: "player", status: "active", tournament_role:null, tournament_ready: true, mlbb_id: "823456789", mlbb_server: "2314" },
-//     { id: 3, username: "RAHUL", email: "rahul.verma@example.com", role: "player", status: "active", tournament_role: null, tournament_ready: true, mlbb_id: "834567890", mlbb_server: "2314" },
-//     { id: 4, username: "AMAN", email: "aman.khan@example.com", role: "player", status: "active", tournament_role: null, tournament_ready: false, mlbb_id: "845678901", mlbb_server: "2314" },
-//     { id: 5, username: "KARAN", email: "karan.singh@example.com", role: "player", status: "active", tournament_role: null, tournament_ready: false, mlbb_id: "856789012", mlbb_server: "2314" },
-//     { id: 6, username: "ROHIT", email: "rohit.yadav@example.com", role: "player", status: "active", tournament_role: null, tournament_ready: false, mlbb_id: "867890123", mlbb_server: "2314" },
-// ];
 
-export default function TeamMembers({ members = [], isCaptain = true, isRosterLocked = false, onInvite, onViewProfile, onMakeRoster, onRemoveRoster, onMakeSubstitute, onRemindPayment }) {
+export default function TeamMembers({
+    members = [],
+    isCaptain = false,
+    isRosterLocked = false,
+    onInvite,
+    onViewProfile,
+    onMakeRoster,
+    onRemoveRoster,
+    onMakeSubstitute,
+    onRemindPayment
+}) {
+
     const [activeMenu, setActiveMenu] = useState(null);
 
     const activeMembers = members.filter((member) => member.status === "active");
@@ -66,7 +69,19 @@ export default function TeamMembers({ members = [], isCaptain = true, isRosterLo
                     {regularMembers.length > 0 || activeMembers.length < 5 ? (
                         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                             {regularMembers.map((member, index) => (
-                                <PlayerCard key={member.id} member={member} number={index + 1} isCaptain={isCaptain} isRosterLocked={isRosterLocked} menuOpen={activeMenu === member.id} onToggleMenu={() => setActiveMenu(activeMenu === member.id ? null : member.id)} onViewProfile={() => onViewProfile?.(member)} onMakeRoster={() => onMakeRoster?.(member)} onRemoveRoster={() => onRemoveRoster?.(member)} onMakeSubstitute={() => onMakeSubstitute?.(member)} onRemindPayment={() => onRemindPayment?.(member)} />
+                                <PlayerCard
+                                    key={member.id}
+                                    member={member}
+                                    number={index + 1}
+                                    isCaptain={isCaptain}
+                                    isRosterLocked={isRosterLocked}
+                                    menuOpen={activeMenu === member.id}
+                                    onToggleMenu={() => setActiveMenu(activeMenu === member.id ? null : member.id)}
+                                    onViewProfile={() => onViewProfile?.(member)}
+                                    onMakeRoster={onMakeRoster}
+                                    onRemoveRoster={onRemoveRoster}
+                                    onMakeSubstitute={() => onMakeSubstitute?.(member)} onRemindPayment={() => onRemindPayment?.(member)}
+                                />
                             ))}
 
                             {activeMembers.length < 5 && Array.from({ length: 5 - activeMembers.length }).map((_, index) => (
