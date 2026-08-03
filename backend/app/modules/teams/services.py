@@ -14,7 +14,6 @@ from .schemas import (
     TeamCreateSchema,
     TeamResponseOutput,
     TeamResponse,
-    TeamWalletResponse,
     TeamMemberResponse,
     DiscoverTeamResponse,
     DiscoverTeamOutput,
@@ -39,6 +38,9 @@ from .schemas import (
     TeamDashboardResponse,
     TeamMembers,
 )
+from .models import TournamentRoster, TournamentRosterStatus
+
+from .helpers import make_member_response, make_tournament_response ,make_recent_most_tournament_roster_response,make_roster_player_response
 
 
 # Team Service
@@ -52,8 +54,7 @@ class TeamService:
     def get_teamdashboard(self, current_user: Player):
 
         now = datetime.now(timezone.utc)
-        print("NOW:", now)
-
+    
         team = self.repository.get_team_by_player(current_user_id=current_user.id)
 
         team_tournaments = self.repository.get_team_registered_tournaments(
@@ -84,74 +85,31 @@ class TeamService:
             if start <= now <= end:
                 current_tournament = registration
 
-            # Upcoming not started yet 
+            # Upcoming not started yet
             elif start > now:
-                current_tournament = registration
                 upcoming_tournaments.append(registration)
+
+        # Current Registered Tournament Roster.
         
-        # Nearest tournament first 
+        roster_players = self.repository.get_selected_roster(
+            registration_id=current_tournament.id
+        )
+
+        # Nearest tournament first
         upcoming_tournaments.sort(
             key=lambda registration: registration.tournament.tournament_start_date
         )
-        
-        def make_tournament_response(registration):
-                
-            tournament = registration.tournament
 
-            return TeamRegisteredTournament(
-                tournament_id=tournament.id,
-                tournament_name=tournament.tournament_name,
-                server=tournament.server,
-                prize_pool=tournament.prize_pool if tournament.prize_pool is not None else None ,
-                entry_fee=tournament.entry_fee,
-                max_teams=tournament.max_teams,
-
-                registration_open_date=datetime.combine(
-                    tournament.reg_open_date,
-                    tournament.reg_open_time,
-                ).replace(tzinfo=timezone.utc),
-                
-                registration_end_date=datetime.combine(
-                    tournament.reg_close_date,
-                    tournament.reg_close_time,
-                ).replace(tzinfo=timezone.utc),
-
-                tournament_start_date=datetime.combine(
-                    tournament.tournament_start_date,
-                    tournament.tournament_start_time,
-                ).replace(tzinfo=timezone.utc),
-
-                tournament_end_date=datetime.combine(
-                    tournament.tournament_end_date,
-                    tournament.tournament_end_time,
-                ).replace(tzinfo=timezone.utc),
-
-                status=registration.status.value,
-                applied_at=registration.applied_at,
-            )
-            
-        def make_member_response(member):
-            return TeamMembers(
-                id=member.player.id,
-                email=member.player.email,
-                role=member.role,
-                status=member.status
-            )
-            
         current_tournament = (
-            make_tournament_response(current_tournament)
-            if current_tournament
-            else None
+            make_recent_most_tournament_roster_response(current_tournament,roster_players) if current_tournament else None
         )
-        
+
         upcoming_tournaments = [
             make_tournament_response(registration)
             for registration in upcoming_tournaments
         ]
-        
-        team_members = [
-            make_member_response(member) for member in team_members 
-        ]
+
+        team_members = [make_member_response(member) for member in team_members]
 
         return TeamDashboardResponse(
             success=True,
@@ -202,9 +160,6 @@ class TeamService:
                 team_country=team.country,
                 team_visibility=team.visibility,
                 team_created_at=team.created_at,
-                team_wallet=TeamWalletResponse(
-                    wallet_balance=team.wallet.balance, status=team.wallet.status
-                ),
                 team_members=[
                     TeamMemberResponse(
                         player_name=member.player.email.split("@")[0],
@@ -394,27 +349,27 @@ class TeamTournamentService:
         tournament_id: int,
         current_user: Player,
     ):
-        # 1. Validate authenticated user
+        # Validate authenticated user
         if not current_user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Unauthorized user.",
             )
 
-        # 2. Validate user account
+        # Validate user account
         if current_user.is_banned:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Banned users cannot register a team.",
             )
 
-        if not current_user.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Inactive users cannot register a team.",
-            )
+        # if not current_user.is_active:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_403_FORBIDDEN,
+        #         detail="Inactive users cannot register a team.",
+        #     )
 
-        # 3. Get current user's team membership
+        # Get current user's team membership
         membership = self.repository.get_player_team_membership(
             player_id=current_user.id
         )
@@ -425,7 +380,7 @@ class TeamTournamentService:
                 detail="You must be a member of a team to register.",
             )
 
-        # 4. Only team captain can create tournament registration
+        # Only team captain can create tournament registration
         if membership.role != TeamRole.CAPTAIN:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -434,7 +389,7 @@ class TeamTournamentService:
 
         team = membership.team
 
-        # 5. Validate tournament
+        # Validate tournament
         tournament = self.repository.get_tournament(tournament_id=tournament_id)
 
         if not tournament:
@@ -469,7 +424,7 @@ class TeamTournamentService:
             tzinfo=timezone.utc,
         )
 
-        # 6. Registration must still be open
+        # Registration must still be open
         if now < reg_open_datetime:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -482,14 +437,14 @@ class TeamTournamentService:
                 detail="Tournament registration is closed.",
             )
 
-        # 7. Tournament must not have started
+        # Tournament must not have started
         if now >= tournament_start_datetime:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Tournament has already started.",
             )
 
-        # 8. Prevent duplicate team registration
+        # Prevent duplicate team registration
         existing_registration = self.repository.get_existing_registration(
             team_id=team.id,
             tournament_id=tournament.id,
@@ -501,7 +456,7 @@ class TeamTournamentService:
                 detail="Your team has already applied for this tournament.",
             )
 
-        # 9. Prevent team from participating in overlapping tournaments
+        # Prevent team from participating in overlapping tournaments
         conflicting_tournament = self.repository.get_team_conflicting_tournament(
             team_id=team.id,
             start_at=tournament.tournament_start_date,
@@ -517,7 +472,7 @@ class TeamTournamentService:
                 ),
             )
 
-        # 10. Create pending registration.
+        # Create pending registration.
         # A team can apply with only one member.
         registration = self.repository.create_registration(
             team_id=team.id,
@@ -525,10 +480,97 @@ class TeamTournamentService:
             captain_id=current_user.id,
         )
 
+        # Tournament Roster
+        roster = self.repository.make_roster(
+            team_id=registration.team_id,
+            registration_id=registration.id,
+            tournament_id=registration.tournament_id,
+        )
+
         return {
             "registration_id": registration.id,
+            "roster_id": roster.id,
             "tournament_id": tournament.id,
             "team_id": team.id,
             "status": registration.status,
-            "message": ("Your team has successfully applied " "for the tournament."),
+            "message": ("Your team has successfully appliedfor the tournament."),
+        }
+
+    # ================================================
+    # ADD TEAM MEMBER AS TOURNAMENT ROSTER PLAYER
+    # ================================================
+
+    def add_roster_player(
+        self,
+        tournament_id: int,
+        player_id: int,
+        captain: Player,
+    ):
+
+        roster = self.repository.get_captain_tournament_roster(
+            captain_id=captain.player_id,
+            tournament_id=tournament_id,
+        )
+
+        if not roster:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tournament roster not found.",
+            )
+
+        # Roster modification status
+        if roster.status != TournamentRosterStatus.SELECTING:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Roster can no longer be modified.",
+            )
+
+        # Make sure player belongs to this team
+        team_member = self.repository.get_active_team_member(
+            team_id=roster.team_id,
+            player_id=player_id,
+        )
+
+        if not team_member:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Player is not an active member of this team.",
+            )
+
+        # Prevent duplicate player
+        existing_player = self.repository.get_roster_player(
+            roster_id=roster.id,
+            player_id=player_id,
+        )
+
+        if existing_player:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Player is already in the tournament roster.",
+            )
+
+        # Maximum 5 players
+        roster_count = self.repository.count_roster_players(
+            roster_id=roster.id,
+        )
+
+        if roster_count >= 5:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Roster already contains the maximum of 5 players.",
+            )
+
+        #  Add player
+        roster_player = self.repository.add_roster_player(
+            roster_id=roster.id,
+            roster_player_id=player_id,
+        )
+
+        self.repository.db.commit()
+
+        return {
+            "message": "Player added to tournament roster.",
+            "roster_id": roster.id,
+            "player_id": roster_player.player_id,
+            "roster_size": roster_count + 1,
         }

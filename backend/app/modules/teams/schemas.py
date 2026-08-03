@@ -69,11 +69,6 @@ class TeamCreateSchema(BaseModel):
         )
 
 
-# Return Team Created Response
-class TeamWalletResponse(BaseModel):
-    wallet_balance: Decimal
-    status: str
-
 
 class TeamMemberResponse(BaseModel):
     player_role: str
@@ -95,8 +90,6 @@ class TeamResponse(BaseModel):
 
     team_country: str
     team_visibility: str
-
-    team_wallet: TeamWalletResponse
     team_members: list[TeamMemberResponse]
 
 
@@ -153,6 +146,26 @@ class TeamSummaryResponse(BaseModel):
 
  
 # REGISTERED TOURNAMENT DASHBOARD RESPONSE
+
+
+# ROSTER PLAYER
+class RosterPlayer(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    mlbb_id: str | None = None
+    mlbb_server: str | None = None
+    tournament_readiness:str
+    status: str
+
+
+class TeamRosterPlayer(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    is_roster_locked: str
+    roster: list[RosterPlayer] = []
+    
+
 class TeamRegisteredTournament(BaseModel):
     model_config=ConfigDict(from_attributes=True)
     tournament_id: int
@@ -170,6 +183,7 @@ class TeamRegisteredTournament(BaseModel):
     tournament_end_date: datetime
 
     status: str
+    roster: TeamRosterPlayer
     applied_at: datetime
     
 class TeamMembers(BaseModel):
@@ -193,3 +207,4 @@ class TeamDashboardData(BaseModel):
 class TeamDashboardResponse(BaseModel):
     success: bool
     data: TeamDashboardData | None = None
+

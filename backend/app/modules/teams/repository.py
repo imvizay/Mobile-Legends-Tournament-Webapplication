@@ -2,10 +2,11 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from .models import (
     Team,
     TeamMember,
-    TeamWallet,
     TeamMemberStatus,
     TeamJoinRequest,
     TeamJoinRequestStatus,
+    TeamRole,
+    TournamentRosterPlayer,
 )
 from ..auth.models import Player
 from sqlalchemy import exists, func, select
@@ -19,27 +20,47 @@ class TeamRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_team_registered_tournaments(self, team_id: int):
-        
-        tournaments = (
-            self.db.query(TeamTournamentRegistration).
-            options(joinedload(TeamTournamentRegistration.tournament)).
-            filter(TeamTournamentRegistration.team_id == team_id).
-            all()
+    # ================== ROSTER ======================
+    def get_selected_roster(self, registration_id: int):
+        return (
+            self.db.query(TournamentRosterPlayer)
+            .join(TournamentRosterPlayer.roster)
+            .options(
+                joinedload(TournamentRosterPlayer.player),
+            )
+            .filter(TournamentRoster.registration_id == registration_id)
+            .all()
         )
-        
+
+    # ================== TEAM =====================
+    def get_team_captain(self, player_id: int):
+        return (
+            self.db.query(TeamMember)
+            .filter(
+                TeamMember.player_id == player_id, TeamMember.role == TeamRole.CAPTAIN
+            )
+            .first()
+        )
+
+    def get_team_registered_tournaments(self, team_id: int):
+
+        tournaments = (
+            self.db.query(TeamTournamentRegistration)
+            .options(joinedload(TeamTournamentRegistration.tournament))
+            .filter(TeamTournamentRegistration.team_id == team_id)
+            .all()
+        )
+
         return tournaments
-        
+
     def get_team_members(self, team_id: int):
         members = (
-            self.db.query(TeamMember).
-            options(joinedload(TeamMember.player)).
-            filter(TeamMember.team_id == team_id).
-            all()
+            self.db.query(TeamMember)
+            .options(joinedload(TeamMember.player))
+            .filter(TeamMember.team_id == team_id)
+            .all()
         )
         return members
-    
-    
 
     def team_summary(self, current_user):
         return (
@@ -110,7 +131,6 @@ class TeamRepository:
             self.db.query(Team)
             .join(TeamMember)
             .options(
-                joinedload(Team.wallet),
                 selectinload(Team.members).joinedload(TeamMember.player),
             )
             .filter(
@@ -173,14 +193,6 @@ class TeamRepository:
         self.db.refresh(team_member)
         return team_member
 
-    def create_team_wallet(self, team_id: int):
-
-        wallet = TeamWallet(
-            team_id=team_id,
-        )
-        self.db.add(wallet)
-        return wallet
-
 
 # TEAM TOURNAMENT REPOSITORY
 
@@ -192,6 +204,8 @@ from ..tournaments.models import Tournament
 from .models import (
     TeamTournamentRegistration,
     TournamentRegistrationStatus,
+    TournamentRoster,
+    TournamentRosterStatus,
 )
 
 
@@ -321,7 +335,7 @@ class TeamTournamentRepository:
             )
 
             # Check if the two tournament time periods overlap
-            if existing_start < new_end and existing_end > new_start:
+            if existing_start < end_at and existing_end > start_at:
                 return tournament
 
         return None
@@ -361,3 +375,103 @@ class TeamTournamentRepository:
         )
 
         return list(result.scalars().all())
+
+    # =========================
+    # TOURNAMENT ROSTER
+    # =========================
+
+    def get_captain_tournament_roster(
+        self,
+        captain_id: int,
+        tournament_id: int,
+    ):
+        return (
+            self.db.query(TournamentRoster)
+            .join(
+                TeamMember,
+                TeamMember.team_id == TournamentRoster.team_id,
+            )
+            .filter(
+                TeamMember.player_id == captain_id,
+                TeamMember.role == TeamRole.CAPTAIN,
+                TeamMember.status == TeamMemberStatus.ACTIVE,
+                TournamentRoster.tournament_id == tournament_id,
+            )
+            .with_for_update()
+            .first()
+        )
+
+    def make_roster(
+        self,
+        team_id: int,
+        tournament_id: int,
+        registration_id: int,
+    ):
+        roster = TournamentRoster(
+            team_id=team_id,
+            tournament_id=tournament_id,
+            registration_id=registration_id,
+            status=TournamentRosterStatus.SELECTING,
+        )
+
+        self.db.add(roster)
+        self.db.commit()
+        self.db.refresh(roster)
+
+        return roster
+
+    def get_active_team_member(
+        self,
+        team_id: int,
+        player_id: int,
+    ):
+        return (
+            self.db.query(TeamMember)
+            .filter(
+                TeamMember.team_id == team_id,
+                TeamMember.player_id == player_id,
+                TeamMember.status == TeamMemberStatus.ACTIVE,
+            )
+            .first()
+        )
+
+    def get_roster_player(
+        self,
+        roster_id: int,
+        player_id: int,
+    ):
+        return (
+            self.db.query(TournamentRosterPlayer)
+            .filter(
+                TournamentRosterPlayer.roster_id == roster_id,
+                TournamentRosterPlayer.player_id == player_id,
+            )
+            .first()
+        )
+
+    def count_roster_players(
+        self,
+        roster_id: int,
+    ) -> int:
+        return (
+            self.db.query(TournamentRosterPlayer)
+            .filter(
+                TournamentRosterPlayer.roster_id == roster_id,
+            )
+            .count()
+        )
+
+    def add_roster_player(
+        self,
+        roster_id: int,
+        roster_player_id: int,
+    ):
+        roster_player = TournamentRosterPlayer(
+            roster_id=roster_id,
+            player_id=roster_player_id,
+        )
+
+        self.db.add(roster_player)
+        self.db.flush()
+
+        return roster_player

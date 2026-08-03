@@ -150,7 +150,7 @@ class Team(Base):
     members = relationship(
         "TeamMember", back_populates="team", cascade="all, delete-orphan"
     )
-    wallet = relationship("TeamWallet", back_populates="team", uselist=False)
+
     # tournaments = relationship(TournamentRegistration,back_populates="team")
 
     __table_args__ = (
@@ -159,39 +159,7 @@ class Team(Base):
     )
 
 
-class WalletStatus(str, Enum):
-    ACTIVE = "active"
-    FROZEN = "frozen"
-    CLOSED = "closed"
-
-
 from sqlalchemy import Numeric
-
-
-class TeamWallet(Base):
-
-    __tablename__ = "team_wallets"
-
-    id = Column(Integer, primary_key=True)
-    team_id = Column(
-        Integer,
-        ForeignKey("teams.id", ondelete="CASCADE"),
-        unique=True,
-        nullable=False,
-    )
-
-    balance = Column(Numeric(12, 2), nullable=False, default=0)
-    total_deposit = Column(Numeric(12, 2), nullable=False, default=0)
-    total_withdraw = Column(Numeric(12, 2), nullable=False, default=0)
-
-    status = Column(SQLEnum(WalletStatus), nullable=False, default=WalletStatus.ACTIVE)
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
-
-    team = relationship("Team", back_populates="wallet")
 
 
 # SEND REQ TO JOIN A TEAM
@@ -229,7 +197,8 @@ class TeamJoinRequest(Base):
 
 
 # TOURNAMENT
-from ..tournaments.models import Tournament
+
+
 class TournamentRegistrationStatus(str, Enum):
     PENDING = "pending"
     UNDER_REVIEW = "under_review"
@@ -291,5 +260,219 @@ class TeamTournamentRegistration(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
+    tournament = relationship("Tournament", back_populates="team_registrations")
+    roster = relationship(
+        "TournamentRoster",
+        back_populates="registration",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+
+# Roster
+class TournamentRosterStatus(str, Enum):
+    SELECTING = "selecting"
+    CONFIRMED = "confirmed"  # soft lock by captain can be updated by admin only if request by captain
+    LOCKED = "locked"  # final lock by admin
+
+
+class TournamentRoster(Base):
+    __tablename__ = "tournament_roster"
+
+    id = Column(Integer, primary_key=True)
     
-    tournament = relationship("Tournament",back_populates="team_registrations")
+    team_id = Column(
+        Integer,
+        ForeignKey("teams.id",ondelete="CASCADE",),nullable=False,
+    )
+    tournament_id = Column(
+        Integer,ForeignKey("tournaments.id",ondelete="CASCADE"),nullable=False
+    )
+    registration_id = Column(
+        Integer,
+        ForeignKey("team_tournament_registration.id",ondelete="CASCADE",),
+        nullable=False,
+        unique=True,
+    )
+
+    status = Column(
+        SQLEnum(TournamentRosterStatus),
+        default=TournamentRosterStatus.SELECTING,
+        nullable=False,
+    )
+
+    confirmed_at = Column(
+        DateTime(timezone=True), nullable=True
+    )  # datetime when captain confirm the roster
+
+    locked_at = Column(
+        DateTime(timezone=True), nullable=True
+    )  # admin locks it when team confirms the roster
+
+    locked_by = Column(
+        Integer,
+        ForeignKey("players.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    registration = relationship(
+        "TeamTournamentRegistration",
+        back_populates="roster",
+    )
+
+    players = relationship(
+        "TournamentRosterPlayer",
+        back_populates="roster",
+        cascade="all, delete-orphan",
+    )
+
+    locked_by_player = relationship(
+        "Player",
+        foreign_keys=[locked_by],
+    )
+
+
+class TournamentRosterPlayerStatus(str, Enum):
+    SELECTED = "selected"
+    REMOVED = "removed"
+
+
+class TournamentReadiness(str, Enum):
+    NOT_READY = "not_ready"
+    READY = "ready"
+
+
+class TournamentRosterPlayer(Base):
+
+    __tablename__ = "tournament_roster_player"
+
+    id = Column(Integer, primary_key=True)
+
+    roster_id = Column(
+        Integer,
+        ForeignKey(
+            "tournament_roster.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    player_id = Column(
+        Integer,
+        ForeignKey(
+            "players.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    status = Column(
+        SQLEnum(TournamentRosterPlayerStatus),
+        default=TournamentRosterPlayerStatus.SELECTED,
+        nullable=False,
+    )
+
+    tournament_readiness = Column(
+        SQLEnum(TournamentReadiness),
+        default=TournamentReadiness.NOT_READY,
+        nullable=False,
+    )
+
+    roster = relationship(
+        "TournamentRoster",
+        back_populates="players",
+    )
+
+    player = relationship(
+        "Player",
+    )
+
+    contribution = relationship(
+        "TeamTournamentContribution",
+        back_populates="roster_player",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "roster_id",
+            "player_id",
+            name="uq_roster_player",
+        ),
+    )
+
+
+class TeamTournamentContributionStatus(str, Enum):
+    PENDING = "pending"
+    PAID = "paid"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+
+
+class TeamTournamentContribution(Base):
+
+    __tablename__ = "team_tournament_contribution"
+
+    id = Column(Integer, primary_key=True)
+
+    roster_player_id = Column(
+        Integer,
+        ForeignKey(
+            "tournament_roster_player.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
+    amount = Column(
+        Numeric(10, 2),
+        nullable=False,
+    )
+
+    status = Column(
+        SQLEnum(TeamTournamentContributionStatus),
+        default=TeamTournamentContributionStatus.PENDING,
+        nullable=False,
+    )
+
+    paid_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    roster_player = relationship(
+        "TournamentRosterPlayer",
+        back_populates="contribution",
+    )
