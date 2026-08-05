@@ -2,18 +2,18 @@ import { Check, Clock3, Crown, MoreHorizontal, UserRoundPlus } from "lucide-reac
 import { getDisplayName, PlayerMeta, StatusBadge } from "./SupportingComponent";
 import PlayerActionMenu from "./PlayerActionMenu";
 
-function PlayerCard({
-    member,
-    number,
-    substitute = false,
-    isCaptain,
-    menuOpen,
-    onToggleMenu,
-    onViewProfile,
-    onMakeRoster,
-    onRemoveRoster,
-    onMakeSubstitute,
-    onRemindPayment
+function PlayerCard({ 
+    member, 
+    number, 
+    substitute = false, 
+    isCaptain, 
+    menuOpen, 
+    onToggleMenu, 
+    onViewProfile, 
+    onMakeRoster, 
+    onRemoveRoster, 
+    onMakeSubstitute, 
+    onRemindPayment 
 }) {
 
     const isRoster = member.tournament_role === "roster";
@@ -59,14 +59,14 @@ function PlayerCard({
                             </button>
 
                             {menuOpen && (
-                                <PlayerActionMenu
-                                    member={member}
-                                    isRoster={isRoster}
-                                    onViewProfile={onViewProfile}
-                                    onMakeRoster={onMakeRoster}
-                                    onRemoveRoster={onRemoveRoster}
-                                    onMakeSubstitute={onMakeSubstitute}
-                                    onRemindPayment={onRemindPayment}
+                                <PlayerActionMenu 
+                                member={member} 
+                                isRoster={isRoster} 
+                                onViewProfile={onViewProfile} 
+                                onMakeRoster={onMakeRoster} 
+                                onRemoveRoster={onRemoveRoster} 
+                                onMakeSubstitute={onMakeSubstitute} 
+                                onRemindPayment={onRemindPayment} 
                                 />
                             )}
                         </>

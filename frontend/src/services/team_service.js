@@ -92,9 +92,9 @@ export const teamTournamentService = {
         )
     },
 
-    lockRoster(tournamentId) {
+    lockRoster(registrationId) {
         return api.patch(
-            `/player/team/tournament/${tournamentId}/roster/lock`
+            `/player/team/tournament/${registrationId}/roster/lock`
         )
     },
 

@@ -41,6 +41,11 @@ export default function TeamDashboard() {
             )
     })
 
+    const confirmRosterMutation = useMutation({
+        mutationKey:['confirm-roster',teamId],
+        mutationFn: (registrationId) => teamTournamentService.lockRoster(registrationId)
+    })
+
     const {
         data: dashboard,
         isPending,
@@ -81,6 +86,8 @@ export default function TeamDashboard() {
 
     const currentTournament = dashboard?.data?.current_tournament ?? null
     const feeContribution = dashboard?.data?.fee_contribution ?? null
+
+    const roster = dashboard?.data?.current_tournament?.roster ?? null 
     const teamMembers = dashboard?.data?.team_members ?? []
     const scheduledMatches = dashboard?.data?.scheduled_matches ?? []
     const isLoggedUserCaptain = teamMembers?.some((el) => (el.id == user?.id && el.role.toLowerCase() == "captain"))
@@ -92,8 +99,6 @@ export default function TeamDashboard() {
     const hasScheduledMatch = scheduledMatches.length > 0
 
     const tournamentId = currentTournament?.tournament_id
-
-
 
 
     const addRoster = async (member) => {
@@ -122,6 +127,21 @@ export default function TeamDashboard() {
             alert(`Failed Removing Player Id ${playerId} From Roster , Try Again!.`)
         }
     }
+
+    const handleConfirmRoster = async () => {
+
+        const registrationId = currentTournament?.tournament_id
+
+        console.log("ID TOUR",registrationId)
+
+        try{
+            await confirmRosterMutation.mutateAsync(registrationId)
+        }catch(error){
+            console.log("ERROR CONFIRMING ROSTER",error)
+        }
+
+    }
+
 
     return (
         <section className="w-full space-y-8 pb-8">
@@ -171,8 +191,10 @@ export default function TeamDashboard() {
 
                 <TeamMembers
                     members={teamMembers}
+                    selected_rosters={roster?.roster_players}
                     isCaptain={isLoggedUserCaptain}
-                    isRosterLocked={false}
+                    isRosterLocked={roster?.is_roster_locked === "selecting" ? false : true}
+                    onConfirmRoster={handleConfirmRoster}
                     onMakeRoster={addRoster}
                     onRemoveRoster={removeRoster}
                 />
