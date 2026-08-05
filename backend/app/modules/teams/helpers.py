@@ -13,8 +13,8 @@ def make_roster_player_response(roster_player):
         return None
 
     return TeamRosterPlayer(
-        
-        is_roster_locked=roster_player[0].roster.status,
+        roster_status=roster_player[0].roster.status,
+        is_roster_locked= True if roster_player[0].roster.status == "confirmed" else False,
         roster_players=[
             RosterPlayer(
                 id=roster.player.id,

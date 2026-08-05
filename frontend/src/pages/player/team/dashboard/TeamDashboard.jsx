@@ -42,7 +42,7 @@ export default function TeamDashboard() {
     })
 
     const confirmRosterMutation = useMutation({
-        mutationKey:['confirm-roster',teamId],
+        mutationKey: ['confirm-roster', teamId],
         mutationFn: (registrationId) => teamTournamentService.lockRoster(registrationId)
     })
 
@@ -87,7 +87,7 @@ export default function TeamDashboard() {
     const currentTournament = dashboard?.data?.current_tournament ?? null
     const feeContribution = dashboard?.data?.fee_contribution ?? null
 
-    const roster = dashboard?.data?.current_tournament?.roster ?? null 
+    const roster = dashboard?.data?.current_tournament?.roster ?? null
     const teamMembers = dashboard?.data?.team_members ?? []
     const scheduledMatches = dashboard?.data?.scheduled_matches ?? []
     const isLoggedUserCaptain = teamMembers?.some((el) => (el.id == user?.id && el.role.toLowerCase() == "captain"))
@@ -129,17 +129,12 @@ export default function TeamDashboard() {
     }
 
     const handleConfirmRoster = async () => {
-
         const registrationId = currentTournament?.tournament_id
-
-        console.log("ID TOUR",registrationId)
-
-        try{
+        try {
             await confirmRosterMutation.mutateAsync(registrationId)
-        }catch(error){
-            console.log("ERROR CONFIRMING ROSTER",error)
+        } catch (error) {
+            console.log("ERROR CONFIRMING ROSTER", error)
         }
-
     }
 
 
@@ -164,7 +159,11 @@ export default function TeamDashboard() {
                         {hasContribution ? (
                             <TeamContribution data={feeContribution} />
                         ) : (
-                            <EmptyTeamContribution />
+                            <EmptyTeamContribution
+                                rosterCount={roster?.roster_players?.length}
+                                rosterLocked={currentTournament?.roster?.is_roster_locked}
+
+                            />
                         )}
                     </div>
                 )}

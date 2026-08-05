@@ -1,9 +1,16 @@
 import React from "react";
 import { Check, IndianRupee, LockKeyhole, ShieldCheck, UsersRound } from "lucide-react";
 
-export default function EmptyTeamContribution({ rosterCount = 0, rosterRequired = 5, rosterLocked = false, registrationClosingAt }) {
+export default function EmptyTeamContribution({
+    rosterCount = 0,
+    rosterRequired = 5,
+    rosterLocked = false,
+    registrationClosingAt
+}) {
     const rosterComplete = rosterCount >= rosterRequired;
     const contributionAvailable = rosterComplete && rosterLocked;
+
+    console.log()
 
     const steps = [
         {

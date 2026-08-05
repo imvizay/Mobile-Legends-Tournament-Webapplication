@@ -593,7 +593,7 @@ class TeamTournamentService:
     def confirm_roster(self, registration_id: int, captain: Player):
 
         roster = self.repository.confirm_roster(
-            registration_id=registration_id, captain=captain
+            registration_id=registration_id, member=captain
         )
 
         if not roster:
@@ -618,9 +618,6 @@ class TeamTournamentService:
         roster.status = TournamentRosterStatus.CONFIRMED
         roster.confirmed_at = datetime.now(timezone.utc)
 
-        for player in roster.players:
-            if player.status == TournamentRosterPlayerStatus.SELECTED:
-                player.status = TournamentRosterPlayerStatus.CONFIRMED
 
         self.repository.db.commit()
         self.repository.db.refresh(roster)

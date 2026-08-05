@@ -149,6 +149,7 @@ class TeamSummaryResponse(BaseModel):
 
 
 # ROSTER PLAYER
+
 class RosterPlayer(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -157,11 +158,13 @@ class RosterPlayer(BaseModel):
     mlbb_server: str | None = None
     tournament_readiness:str
     status: str
-
+    
 
 class TeamRosterPlayer(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    is_roster_locked: str
+    
+    roster_status:str
+    is_roster_locked: bool
     roster_players: list[RosterPlayer] = []
     
 

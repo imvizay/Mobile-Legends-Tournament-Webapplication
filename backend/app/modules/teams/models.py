@@ -364,8 +364,7 @@ class TournamentRoster(Base):
 class TournamentRosterPlayerStatus(str, Enum):
     SELECTED = "selected"
     REMOVED = "removed"
-    CONFIRMED = 'confirmed'
-    LOCKED = "locked"
+    
     SUBSTITUTE = "substitute"
 
 
