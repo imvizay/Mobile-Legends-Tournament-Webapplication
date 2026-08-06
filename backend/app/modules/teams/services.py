@@ -1,21 +1,42 @@
-from sqlalchemy.orm import Session
-from .schemas import TeamCreateSchema , TeamResponseOutput , TeamResponse , TeamWalletResponse , TeamMemberResponse,DiscoverTeamResponse,DiscoverTeamOutput
+
 from fastapi import UploadFile
-from .validators import validate_image 
-from app.core.exceptions.exceptions import ExceptionTeamAlreadyExits,ExceptionPlayerAlreadyHasTeam,NoTeamException
+from sqlalchemy.orm import Session
+
+# Auth User Model
 from ...modules.auth.models import Player
+
+# CLOUDINARY SERVICE 
+from ...core.cloudinary.cloudinary_services import cloud_service 
+from .validators import validate_image 
+
+# Team Request & Response Schemas
+from .schemas import( 
+   TeamCreateSchema, 
+   TeamResponseOutput, 
+   TeamResponse, 
+   TeamWalletResponse, 
+   TeamMemberResponse,
+   DiscoverTeamResponse,
+   DiscoverTeamOutput, 
+   JoinTeamResponse
+)
+
+# Team Custom Exception
+from app.core.exceptions.exceptions import(
+   ExceptionTeamAlreadyExits,
+   ExceptionPlayerAlreadyHasTeam
+)
+from .exceptions import *
+
+# Repository
 from .repository import TeamRepository
 
-# upload image to cloudinary 
-from ...core.cloudinary.cloudinary_services import cloud_service 
-
+# Team Service Class
 class TeamService:
 
    def __init__(self,db:Session,repository:TeamRepository):
         self.db = db
         self.repository = repository
-
-   
 
    def get_my_team(self,current_user: Player):
         
@@ -50,8 +71,8 @@ class TeamService:
            ]
          )
       ))
-    
 
+    
    def create_team(
         self,
         payload: TeamCreateSchema,
@@ -74,9 +95,6 @@ class TeamService:
         if team_exists:
            raise ExceptionTeamAlreadyExits()
         
-        print("LOGO:",logo)
-        print("BANNER:",banner)
-
         # upload image to cloudinary helper
         logo = cloud_service.upload_image(logo,folder="teams/logo")
         banner = cloud_service.upload_image(banner,folder="teams/banner")
@@ -107,10 +125,14 @@ class TeamService:
         except:
          self.db.rollback()
          raise
-        
 
+        
    def discover_team(self,cursor:int,limit:int,current_user: Player,):
-            
+
+      team_member = self.repository.player_has_team(user_id=current_user.id)
+
+      my_team_id = team_member.team_id if team_member else None
+
       teams = self.repository.load_all_active_teams(current_user,cursor,limit)
 
       has_next = len(teams) > limit
@@ -124,6 +146,7 @@ class TeamService:
 
       
       return DiscoverTeamOutput(
+          my_team_id=my_team_id,
           has_next=has_next,
           next_cursor=next_cursor,
           items=[
@@ -132,6 +155,7 @@ class TeamService:
                   name=team.name,
                   tag=team.tag,
                   description=team.description,
+                  visibility=team.visibility,
                   logo_url=team.logo_url,
                   banner_url=team.banner_url,
                   country=team.country,
@@ -143,22 +167,80 @@ class TeamService:
           ]
       )
 
-      
-      
+   
+   def join_team(self,team_id:int,current_user:Player):
 
-   def join_team(self,team_id:int,player_id:int):
-      pass
+      if current_user.is_banned:
+         raise UserIsBlockedOrInactive()
+
+      is_already_member = self.repository.player_has_team(current_user.id)
+
+      if is_already_member:
+         raise UserInTeam()
+
+      team = self.repository.get_team_by_id(team_id)
+
+      if not team:
+         raise TeamNotFound()
+
+      members_inside_team = len(team.members)
+
+      if members_inside_team >= 7:
+         raise TeamFullException()   
       
-      # This service makes captain invite players and notifies player about invitation through notification. 
+      if team.visibility == "public":
+         self.repository.join_team(
+                  team_id=team_id,
+                  player_id=current_user.id,
+                  player_role="player"
+               )
+         return JoinTeamResponse(
+                  success=True,
+                  status=200,
+                  message="Team Joined Successfully."
+               ) 
+
+      already_applied = self.repository.has_pending_application(
+                           team_id=team_id,
+                           player_id=current_user.id
+                        )
+
+      if already_applied:
+         raise PendingApplicationException()
+
+      # Check pending application for private team
+      pending_request = (
+         self.repository.has_pending_request_count(
+                  team_id=team_id,
+                  player_id=current_user.id
+               )
+            )
+
+      if pending_request >=10:
+         raise MaximumJoinRequestException()
+      
+      self.repository.create_join_request(
+         team_id=team_id,
+         player_id=current_user.id
+      )
+
+      return JoinTeamResponse(
+         success=True,
+         status=200,
+         message="Joining Request Sent Successfully"
+      )
+
+      
+   # This service makes captain invite players and notifies player about invitation through notification. 
    def invite_player(self,current_user:int,player_id:int):
 
-      # background task notify invited user about invitation 
+   # background task notify invited user about invitation 
       pass  
       # remove specific player from team
    def remove_player(self,player_id:int):
       pass
       
-      # disbanned team if captain manually disband or all members leaves the team 
+   # disbanned team if captain manually disband or all members leaves the team 
    def disbanned_team(self,captain_id:int):
       pass
        

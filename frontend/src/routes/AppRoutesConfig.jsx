@@ -29,6 +29,8 @@ import EmptyTeamState from '../pages/player/team/EmptyTeam'
 import TeamCreatePage from '../pages/player/team/TeamCreatePage'
 import RequireTeam from './RequireTeam'
 import DiscoverTeamPage from '../pages/player/team/DiscoverTeamPage'
+import TeamApplication from '../features/team/pages/TeamApplication'
+import TeamMembers from '../features/team/pages/TeamMembers'
 
 
 function AppRoutesConfig() {
@@ -61,9 +63,9 @@ function AppRoutesConfig() {
 
             <Route element={<TeamLayout />}>
                 <Route index element={<Overview />} />       
-                {/* <Route path="members" element={<Members />} />
-                <Route path="applications" element={<Applications />} />
-                <Route path="settings" element={<Settings />} /> */}
+                <Route path="members" element={<TeamMembers/>} />
+                <Route path="application" element={<TeamApplication />} />
+                {/* <Route path="settings" element={<Settings />} /> */}
             </Route>
 
         </Route>

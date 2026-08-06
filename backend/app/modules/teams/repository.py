@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session , joinedload , selectinload
-from .models import Team,TeamMember,TeamWallet,TeamMemberStatus
+from .models import Team,TeamMember,TeamWallet,TeamMemberStatus,TeamJoinRequest,TeamJoinRequestStatus
 from ..auth.models import Player
 from sqlalchemy import exists,func
 
@@ -9,8 +9,53 @@ class TeamRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    def create_join_application(self,team_id:int,player_id:int):
+        join_application = TeamJoinRequest(
+            team_id=team_id,
+            player_id=player_id
+        )
+
+        self.db.add(join_application)
+        self.db.commit()
+        self.db.refresh()
+
+        return join_application
+
+
+    def has_pending_request_count(self,player_id:int):
+        query = (
+            self.db.query(TeamJoinRequest).
+            filter(
+                TeamJoinRequest.player_id == player_id,
+                TeamJoinRequest.status == TeamJoinRequestStatus.PENDING
+            )
+            .count()
+        )
+        return query
     
-    def load_all_active_teams(self, current_user: Player, cursor: int | None, limit: int):
+    def has_pending_application(self,team_id:int,player_id:int):
+        query = (
+            self.db.query(TeamJoinRequest).
+            filter(
+                TeamJoinRequest.team_id == team_id,
+                TeamJoinRequest.player_id == player_id,
+                TeamJoinRequest.status == TeamJoinRequestStatus.PENDING
+            )
+            .first() 
+            is not None
+        )
+        return query
+
+    def get_team_by_id(self,team_id:int):
+        query = (
+            self.db.query(Team).
+            filter(Team.id == team_id).
+            first()
+        )
+        return query
+
+    
+    def load_all_active_teams(self, current_user: int, cursor: int | None, limit: int):
 
         query = (
             self.db.query(Team,func.count(TeamMember.id).label("members_count"))
@@ -45,17 +90,16 @@ class TeamRepository:
             .first()
         )
         
-
-    def player_has_team(self, user_id: int) -> bool:
+    # User Already has team
+    def player_has_team(self, user_id: int):
         return (
             self.db.query(TeamMember)
             .filter(TeamMember.player_id == user_id)
             .first()
-            is not None
         )
         
 
-    # get team_name already exist
+    # Team Already Exits
     def get_team_by_name(self,team_name:str):
         return (
             self.db.query(Team)
@@ -63,8 +107,7 @@ class TeamRepository:
             .first()
         )
 
-    # generate team
-
+    # Create Team
     def create_team(self,current_user:str,payload:Team,logo: dict,banner:dict):
         
         logo_public_id = None
@@ -118,6 +161,8 @@ class TeamRepository:
         )
 
         self.db.add(team_member)
+        self.db.commit()
+        self.db.refresh(team_member)
         return team_member
     
     def create_team_wallet(self,team_id:int):

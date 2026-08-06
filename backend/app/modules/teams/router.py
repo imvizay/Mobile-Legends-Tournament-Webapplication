@@ -55,4 +55,14 @@ async def discover_team(
         current_user=current_user
     )
 
-    
+
+@router.post("/{team_id}/join")
+async def join_team(
+    team_id : int,
+    current_user : Player = Depends(get_current_user),
+    team_service : TeamService = Depends(get_team_service),
+):
+   
+    return team_service.join_team(team_id,current_user)
+
+ 

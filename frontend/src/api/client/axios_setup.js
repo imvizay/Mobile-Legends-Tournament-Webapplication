@@ -23,7 +23,7 @@ axiosClient.interceptors.response.use(
         console.log("URL:", originalRequest.url);
         console.log("Is Refresh:", isRefreshRequest);
 
-       if(error.response.status === 404){
+       if(error.response?.status === 404){
         console.log(`ERROR 404 NOT FOUND AT ${originalRequest.url}`)
         return
        }

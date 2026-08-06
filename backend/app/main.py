@@ -5,6 +5,9 @@ from app.modules.auth.router import router as auth_router
 from app.modules.teams.router import router as team_router
 
 # Exceptions
+from app.modules.teams.exceptions import *
+from app.modules.teams.handlers import * 
+
 from app.core.exceptions.exceptions import *
 from app.core.exceptions.handlers import * 
 
@@ -31,12 +34,18 @@ EXCEPTION_DICT = {
     InvalidTokenException:invalid_credentials,
     TokenExpiredException:invalid_token,
 
+    # TEAM EXCEPTION
     ExceptionPlayerAlreadyHasTeam:player_already_in_team,
     ExceptionTeamAlreadyExits:team_exists,
-    NoTeamException:player_no_team
+    NoTeamException:player_no_team,
+    UserIsBlockedOrInactive:user_is_blocked_or_inactive,
+    UserInTeam:user_in_team,
+    TeamFullException:team_full,
+    TeamNotFound:team_not_found,
+    PendingApplicationException:team_pending_application,
+    MaximumJoinRequestException:maximum_join_request_exceed
+}   
 
-
-}
 for exception,handler in EXCEPTION_DICT.items():
     app.add_exception_handler(exception,handler) 
 

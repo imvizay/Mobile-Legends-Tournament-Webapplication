@@ -5,6 +5,7 @@ from sqlalchemy import (Column,Integer,String,Text,Boolean,DateTime,
     Enum as SQLEnum,
     ForeignKey,
     Index,
+    UniqueConstraint
 ) 
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -146,4 +147,27 @@ class TeamWallet(Base):
 
     team = relationship("Team",back_populates="wallet")
 
-    
+
+class TeamJoinRequestStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    CANCELLED = "cancelled"
+    EXPIRED = "expired"
+
+class TeamJoinRequest(Base):
+
+    __tablename__="join_request"
+
+    id = Column(Integer,primary_key=True)
+    team_id = Column(Integer,ForeignKey("teams.id",ondelete="CASCADE"),nullable=False)
+    player_id = Column(Integer,ForeignKey("players.id",ondelete="CASCADE"),nullable=False)
+    status = Column(SQLEnum(TeamJoinRequestStatus),default=TeamJoinRequestStatus.PENDING,nullable=False)
+    message = Column(Text,nullable=True)
+    rejection_reason = Column(Text,nullable=True)
+    created_at = Column(DateTime(timezone=True),server_default=func.now())
+
+
+    __table_args__ = (
+        UniqueConstraint("team_id","player_id",name="uq_team_player_request"),
+    )
