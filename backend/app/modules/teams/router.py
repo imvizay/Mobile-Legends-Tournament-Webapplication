@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 
-# GET MY TEAM ENDPOINT
+# GET MY TEAM 
 @router.get('/my-team')
 async def get_my_team(
     team_service:TeamService = Depends(get_team_service),
@@ -21,7 +21,7 @@ async def get_my_team(
     return team_service.get_my_team(current_user)
     
 
-# CREATE TEAM ENDPOINT
+# CREATE TEAM 
 @router.post('/create')
 async def create_team(
     payload: TeamCreateSchema = Depends(TeamCreateSchema.as_form),
@@ -40,7 +40,7 @@ async def create_team(
     )
 
 
-
+# Search teams 
 @router.get("/discover")
 async def discover_team( 
         cursor:int |None=None,
@@ -55,7 +55,11 @@ async def discover_team(
         current_user=current_user
     )
 
+<<<<<<< Updated upstream
 
+=======
+# Join team
+>>>>>>> Stashed changes
 @router.post("/{team_id}/join")
 async def join_team(
     team_id : int,

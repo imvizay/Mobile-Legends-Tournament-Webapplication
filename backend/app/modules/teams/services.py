@@ -65,7 +65,8 @@ class TeamService:
               TeamMemberResponse(
                  player_name = member.player.email.split("@")[0],
                  player_email = member.player.email,
-                 player_role = member.role
+                 player_role = member.role,
+                 
               )
               for member in team.members
            ]
