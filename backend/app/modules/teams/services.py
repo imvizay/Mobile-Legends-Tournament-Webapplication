@@ -38,9 +38,18 @@ from .schemas import (
     TeamDashboardResponse,
     TeamMembers,
 )
-from .models import TournamentRoster, TournamentRosterStatus
+from .models import (
+    TournamentRoster,
+    TournamentRosterStatus,
+    TournamentRosterPlayerStatus,
+)
 
-from .helpers import make_member_response, make_tournament_response ,make_recent_most_tournament_roster_response,make_roster_player_response
+from .helpers import (
+    make_member_response,
+    make_tournament_response,
+    make_recent_most_tournament_roster_response,
+    make_roster_player_response,
+)
 
 
 # Team Service
@@ -54,7 +63,7 @@ class TeamService:
     def get_teamdashboard(self, current_user: Player):
 
         now = datetime.now(timezone.utc)
-    
+
         team = self.repository.get_team_by_player(current_user_id=current_user.id)
 
         team_tournaments = self.repository.get_team_registered_tournaments(
@@ -90,10 +99,11 @@ class TeamService:
                 upcoming_tournaments.append(registration)
 
         # Current Registered Tournament Roster.
-        
-        roster_players = self.repository.get_selected_roster(
-            registration_id=current_tournament.id
-        )
+        roster_players = []
+        if current_tournament:
+            roster_players = self.repository.get_selected_roster(
+                registration_id=current_tournament.id
+            )
 
         # Nearest tournament first
         upcoming_tournaments.sort(
@@ -101,7 +111,11 @@ class TeamService:
         )
 
         current_tournament = (
-            make_recent_most_tournament_roster_response(current_tournament,roster_players) if current_tournament else None
+            make_recent_most_tournament_roster_response(
+                current_tournament, roster_players
+            )
+            if current_tournament
+            else None
         )
 
         upcoming_tournaments = [
@@ -574,3 +588,41 @@ class TeamTournamentService:
             "player_id": roster_player.player_id,
             "roster_size": roster_count + 1,
         }
+
+    # Confirm Roster
+    def confirm_roster(self, registration_id: int, captain: Player):
+
+        roster = self.repository.confirm_roster(
+            registration_id=registration_id, captain=captain
+        )
+
+        if not roster:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tournament Roster Not Found.",
+            )
+
+        if roster.status != TournamentRosterStatus.SELECTING:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Roster has already been confirmed or locked.",
+            )
+
+        if roster.selected_roster_count != 5:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Roster must contain exactly 5 selected players. "
+                f"Currently selected: {roster.selected_player_count}.",
+            )
+
+        roster.status = TournamentRosterStatus.CONFIRMED
+        roster.confirmed_at = datetime.now(timezone.utc)
+
+        for player in roster.players:
+            if player.status == TournamentRosterPlayerStatus.SELECTED:
+                player.status = TournamentRosterPlayerStatus.CONFIRMED
+
+        self.repository.db.commit()
+        self.repository.db.refresh(roster)
+
+        return {"message": "Done.", "data": {"roster": roster}}

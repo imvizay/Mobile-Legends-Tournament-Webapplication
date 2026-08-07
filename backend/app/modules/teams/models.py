@@ -281,17 +281,24 @@ class TournamentRoster(Base):
     __tablename__ = "tournament_roster"
 
     id = Column(Integer, primary_key=True)
-    
+
     team_id = Column(
         Integer,
-        ForeignKey("teams.id",ondelete="CASCADE",),nullable=False,
+        ForeignKey(
+            "teams.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
     )
     tournament_id = Column(
-        Integer,ForeignKey("tournaments.id",ondelete="CASCADE"),nullable=False
+        Integer, ForeignKey("tournaments.id", ondelete="CASCADE"), nullable=False
     )
     registration_id = Column(
         Integer,
-        ForeignKey("team_tournament_registration.id",ondelete="CASCADE",),
+        ForeignKey(
+            "team_tournament_registration.id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
         unique=True,
     )
@@ -345,10 +352,21 @@ class TournamentRoster(Base):
         foreign_keys=[locked_by],
     )
 
+    @property
+    def selected_roster_count(self):
+        return sum(
+            1
+            for player in self.players
+            if player.status == TournamentRosterPlayerStatus.SELECTED
+        )
+
 
 class TournamentRosterPlayerStatus(str, Enum):
     SELECTED = "selected"
     REMOVED = "removed"
+    CONFIRMED = 'confirmed'
+    LOCKED = "locked"
+    SUBSTITUTE = "substitute"
 
 
 class TournamentReadiness(str, Enum):
