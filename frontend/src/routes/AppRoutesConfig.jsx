@@ -37,6 +37,8 @@ import PlayerDashboard from '../pages/player/onboarding/PlayerDashboard'
 import TeamDashboard from '../pages/player/team/dashboard/TeamDashboard'
 import TournamentDetail from '../pages/player/onboarding/components/TournamentDetail'
 import TournamentPage from '../pages/player/team/components/TournamentDetailPage'
+import PublishedTournament from '../pages/admin/pages/tournament/published/PublishedTournament'
+import TournamentContributionPreviewPage from '../pages/player/onboarding/components/TournamentContributionPreviewPage'
 
 
 export const dummyTournament = {
@@ -169,12 +171,10 @@ function AppRoutesConfig() {
       <Route
         path='/player'
         element={<ProtectedRoutes role="player" />}>
-        
-        <Route index element = {<PlayerDashboard/>}/>
-        
-        <Route path='tournament/:id/detail' element={<TournamentPage
-    
-        />} />
+
+        <Route index element={<PlayerDashboard />} />
+
+        {/* <Route path='tournament/:id/detail' element={<TournamentPage />} /> */}
 
         {/* =============================================== */}
         {/* TEAM */}
@@ -186,16 +186,24 @@ function AppRoutesConfig() {
         {/* Team Routes */}
         <Route path="team" element={<RequireTeam />}>
           <Route element={<TeamLayout />}>
-            <Route index element = {<TeamDashboard/>}/>
+            <Route index element={<TeamDashboard />} />
           </Route>
+        </Route>
 
+        {/* Tournaments Detail and Payment Flow */}
+        <Route path='tournament/:id'>
+          <Route path='detail' element={<TournamentPage/>} />
+          <Route path='review-contribution' element={<TournamentContributionPreviewPage/>} />
+          <Route path='paymethod-wallet'/>
+          <Route path='verify-payment' />
+          <Route path='payment-success' />
         </Route>
 
       </Route>
 
-        {/* ======================================== */}
-        {/* ADMIN ROUTES */}
-        {/* ======================================== */}
+      {/* ======================================== */}
+      {/* ADMIN ROUTES */}
+      {/* ======================================== */}
 
       <Route
         path="/admin"
@@ -205,12 +213,13 @@ function AppRoutesConfig() {
         <Route path='users' element={<AdminUsersLayout />}>
           <Route index element={<AdminUsersOverview />} />
         </Route>
-        
+
         {/* Tournaments */}
         <Route path="tournaments" element={<AdminTournamentLayout />}>
           {/* Index Component */}
           <Route index element={<AdminTournamentOverview />} />
           <Route path='create' element={<CreateTournament />} />
+          <Route path='published' element={<PublishedTournament />} />
         </Route>
 
       </Route>
