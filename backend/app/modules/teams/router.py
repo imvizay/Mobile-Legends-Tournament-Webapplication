@@ -122,9 +122,6 @@ def confirm_roster(
     )
 
 
-"GET /api/player/team/tournament/1/contribution HTTP/1.1"
-
-
 @router.get("/tournament/{registration_id}/team/{team_id}/contribution")
 def team_contribution(
     registration_id: int,
