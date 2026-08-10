@@ -20,11 +20,9 @@ function TournamentDetail() {
         refetchOnWindowFocus: false,
     })
 
-    return (
-        <div>
-            
-        </div>
+    return(
+        <>
+        
+        </>
     )
 }
-
-export default TournamentDetail

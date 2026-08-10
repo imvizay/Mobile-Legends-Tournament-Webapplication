@@ -18,9 +18,11 @@ import TeamPageSkeleton from "../../../../skeletons/playerdash/my_team/TeamPageS
 import { useMutation } from "@tanstack/react-query"
 import { useUserContext } from "../../../../contexts/UserContext"
 
+
 export default function TeamDashboard() {
     const { team } = useOutletContext()
     const { user } = useUserContext()
+    
 
     const teamId = team?.id
 
@@ -46,6 +48,7 @@ export default function TeamDashboard() {
         mutationFn: (registrationId) => teamTournamentService.lockRoster(registrationId)
     })
 
+    // REGISTERED TOURNAMENT & TEAM MEMBERS
     const {
         data: dashboard,
         isPending,
@@ -88,6 +91,7 @@ export default function TeamDashboard() {
     const feeContribution = dashboard?.data?.fee_contribution ?? null
 
     const roster = dashboard?.data?.current_tournament?.roster ?? null
+
     const teamMembers = dashboard?.data?.team_members ?? []
     const scheduledMatches = dashboard?.data?.scheduled_matches ?? []
     const isLoggedUserCaptain = teamMembers?.some((el) => (el.id == user?.id && el.role.toLowerCase() == "captain"))
@@ -99,6 +103,8 @@ export default function TeamDashboard() {
     const hasScheduledMatch = scheduledMatches.length > 0
 
     const tournamentId = currentTournament?.tournament_id
+    const isRosterLocked = currentTournament?.roster?.is_roster_locked
+    const isCurrentUserInRoster = roster?.roster_players?.some(el => el.id == user.id)
 
 
     const addRoster = async (member) => {
@@ -110,7 +116,7 @@ export default function TeamDashboard() {
         try {
             const res = await addRosterMutation.mutateAsync({ tournamentId, playerId })
         } catch (error) {
-            console.log(`Adding Player ID:${playerId} To Roster Failed Due To : ${error} `)
+           
             alert("Try Again! Adding Player To Roster Gets Failed.")
         }
     }
@@ -120,10 +126,8 @@ export default function TeamDashboard() {
         if (isNaN(playerId)) return
         try {
             const res = await removeRosterMutation.mutateAsync({ tournamentId, playerId })
-            console.log("Removed Roster")
         }
         catch (error) {
-            console.log(`Removing Player ID:${playerId} From Roster Failed,Try Again!.`)
             alert(`Failed Removing Player Id ${playerId} From Roster , Try Again!.`)
         }
     }
@@ -148,7 +152,21 @@ export default function TeamDashboard() {
             <section className={`grid min-w-0 gap-5 ${hasRegisteredTournament ? "lg:grid-cols-[minmax(0,1.7fr)_300px] xl:grid-cols-[minmax(0,1.7fr)_320px]" : "grid-cols-1"}`}>
                 <div className="min-w-0">
                     {hasRegisteredTournament ? (
-                        <RegisteredTournament tournament={currentTournament} />
+                        <RegisteredTournament
+                            tournament={currentTournament}
+                            isRosterLocked={isRosterLocked}
+                            isCurrentUserInRoster={isCurrentUserInRoster}
+                            // isPlayerPaid={isPlayerPaid}
+                            // isCheckInOpen={isCheckInOpen}
+                            // isPlayerCheckIn={isPlayerCheckIn}
+                            // isTournamentLive={isTournamentLive}
+                            // isPlayerInRoster={isPlayerInRoster}
+                            // isPlayerSubstitute={isPlayerSubstitute}
+                            // roomDetails={roomDetails}
+                            // onPayment={onPayment}
+                            // onCheckIn={onCheckIn}
+                            // onRoomDetails={onRoomDetails}
+                        />
                     ) : (
                         <EmptyRegisteredTournament />
                     )}
@@ -156,8 +174,8 @@ export default function TeamDashboard() {
 
                 {hasRegisteredTournament && (
                     <div className="min-w-0">
-                        {hasContribution ? (
-                            <TeamContribution data={feeContribution} />
+                        {isRosterLocked ? (
+                            <TeamContribution registrationId={tournamentId} teamId={teamId} />
                         ) : (
                             <EmptyTeamContribution
                                 rosterCount={roster?.roster_players?.length}
@@ -190,9 +208,9 @@ export default function TeamDashboard() {
 
                 <TeamMembers
                     members={teamMembers}
-                    selected_rosters={roster?.roster_players}
+                    selectedRosters={roster?.roster_players}
                     isCaptain={isLoggedUserCaptain}
-                    isRosterLocked={roster?.is_roster_locked === "selecting" ? false : true}
+                    isRosterLocked={isRosterLocked}
                     onConfirmRoster={handleConfirmRoster}
                     onMakeRoster={addRoster}
                     onRemoveRoster={removeRoster}

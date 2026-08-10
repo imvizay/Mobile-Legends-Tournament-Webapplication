@@ -18,10 +18,6 @@ import RegistrationSuccess from '../pages/common/RegistrationSuccess'
 // Default Home page component.
 
 /* PlayerDashboard Components */
-// Teams
-
-
-
 
 import TeamLayout from '../pages/player/layouts/TeamLayout'
 import DiscoverTeamPage from '../pages/player/team/DiscoverTeamPage'
@@ -40,6 +36,7 @@ import AdminUsersLayout from '../pages/admin/pages/layouts/AdminUsersLayout'
 import PlayerDashboard from '../pages/player/onboarding/PlayerDashboard'
 import TeamDashboard from '../pages/player/team/dashboard/TeamDashboard'
 import TournamentDetail from '../pages/player/onboarding/components/TournamentDetail'
+import TournamentPage from '../pages/player/team/components/TournamentDetailPage'
 
 
 export const dummyTournament = {
@@ -165,20 +162,23 @@ function AppRoutesConfig() {
 
       </Route>
 
-      {/* Player Dashboard */}
+      {/* =================================================== */}
+      {/* PLAYER DASHBOARD */}
+      {/* =================================================== */}
+
       <Route
         path='/player'
         element={<ProtectedRoutes role="player" />}>
         
         <Route index element = {<PlayerDashboard/>}/>
-
-        <Route path='tournament/:id/detail' element={<TournamentDetail
-          tournament={dummyTournament}
-          onBack={() => console.log("Back")}
-          onRegister={() => console.log("Register")}
-          onShare={() => console.log("Share")}
+        
+        <Route path='tournament/:id/detail' element={<TournamentPage
+    
         />} />
 
+        {/* =============================================== */}
+        {/* TEAM */}
+        {/* =============================================== */}
 
         <Route path='team/create' element={<TeamCreatePage />} />
         <Route path='team/discover' element={<DiscoverTeamPage />} />
@@ -193,8 +193,10 @@ function AppRoutesConfig() {
 
       </Route>
 
+        {/* ======================================== */}
+        {/* ADMIN ROUTES */}
+        {/* ======================================== */}
 
-      {/* Admin Routes */}
       <Route
         path="/admin"
         element={<ProtectedRoutes role="admin" />}>

@@ -52,13 +52,7 @@ export default function EmptyTeamContribution({
                     </p>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                    <span className={`size-1.5 rounded-full ${contributionAvailable ? "bg-[var(--accent-gold)]" : "bg-[var(--text-muted)]"}`} />
-
-                    <span className="text-[7px] font-bold uppercase tracking-[0.1em]" style={{ color: contributionAvailable ? "var(--accent-gold)" : "var(--text-muted)" }}>
-                        {contributionAvailable ? "Contribution Available" : "Preparation Required"}
-                    </span>
-                </div>
+                
             </div>
 
             <article className="relative overflow-hidden rounded-[18px] border" style={{ background: "var(--surface-elevated)", borderColor: "var(--border-default)" }}>
@@ -72,10 +66,7 @@ export default function EmptyTeamContribution({
                         </div>
 
                         <div className="min-w-0">
-                            <p className="text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: "var(--accent-gold)" }}>
-                                Contribution Process
-                            </p>
-
+                    
                             <h3 className="mt-1 text-[14px] font-bold tracking-[-0.02em]" style={{ color: "var(--text-primary)" }}>
                                 {contributionAvailable ? "Your roster is ready for contribution." : "Complete the roster requirements first."}
                             </h3>
