@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLogin } from "../../hooks/auth/useLogin";
 import { validLoginCredentials } from "../../utils/validators/loginValidator";
 import { toast } from "react-toastify";
+import { useUserContext } from "../../contexts/UserContext";
 
 
 export default function LoginPage() {
@@ -16,6 +17,8 @@ export default function LoginPage() {
     email:'',
     password:''
   })
+
+  const {setUser} = useUserContext()
 
   const navigate = useNavigate()
 
@@ -68,7 +71,10 @@ export default function LoginPage() {
       const response = await mutateAsync(formData) 
       const data = response.data
       localStorage.setItem('MLBB_User',JSON.stringify(data))
-      navigate('/player')
+     
+      const redirectRoute = response.data.role  
+
+      navigate(`/${redirectRoute}/${data.id}`)
     }
     catch(e){
       console.log("LOGIN ERROR",e)
