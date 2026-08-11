@@ -1,278 +1,248 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { CloudUpload, ImagePlus, Trophy, WalletCards, Upload } from "lucide-react"
 
-const TournamentMedia = () => {
+const TournamentMedia = ({ data, setData }) => {
+
+    const [backgroundPreview, setBgImgUrl] = useState(null)
+    const [bannerPreview, setBannerImgUrl] = useState(null)
+
+    useEffect(() => {
+
+        return () => {
+            if (backgroundPreview) URL.revokeObjectURL(backgroundPreview)
+            if (bannerPreview) URL.revokeObjectURL(bannerPreview)
+        }
+
+    }, [backgroundPreview, bannerPreview])
+
+
+    const handleInputChange = (e) => {
+
+        const { name, value, files } = e.target
+
+        if (files?.[0]) {
+            const previewURL = URL.createObjectURL(files[0])
+            if (name == "background_image") {
+                setBgImgUrl(prev => {
+                    if (prev) URL.revokeObjectURL(prev)
+                    return previewURL
+                })
+            }
+            if (name == "banner_image") {
+                setBannerImgUrl(prev => {
+                    if (prev) URL.revokeObjectURL(prev)
+                    return previewURL
+                })
+            }
+        }
+
+        setData((prev) => ({
+            ...prev, [name]: files?.length ? files?.[0] : value
+        }))
+    }
+
     return (
         <div className="space-y-4">
 
             {/* Tournament Media */}
             <section className="overflow-hidden rounded-xl border" style={{ background: "var(--surface-base)", borderColor: "var(--border-default)" }}>
-
-                {/* Section Header */}
                 <div className="flex items-start gap-3 border-b px-4 py-4 sm:px-5" style={{ borderColor: "var(--border-subtle)" }}>
-
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md" style={{ background: "rgba(200,176,122,0.12)", color: "var(--accent-gold)" }}>
                         <ImagePlus size={14} strokeWidth={1.7} />
                     </div>
 
                     <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                            <h2 className="text-[13px] font-semibold tracking-[-0.1px]" style={{ color: "var(--text-primary)" }}>
-                                Tournament Media
-                            </h2>
-
-                            <span className="hidden rounded-full border px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wider sm:inline-flex" style={{ borderColor: "var(--border-subtle)", color: "var(--text-muted)" }}>
-                                Visuals
-                            </span>
+                            <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-primary)" }}>Tournament Media</h2>
+                            <span className="hidden rounded-full border px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wider sm:inline-flex" style={{ borderColor: "var(--border-subtle)", color: "var(--text-muted)" }}>Visuals</span>
                         </div>
 
-                        <p className="mt-0.5 text-[11px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                            Add the visual assets players will see across the platform.
-                        </p>
+                        <p className="mt-0.5 text-[11px]" style={{ color: "var(--text-muted)" }}>Add the images players will see on the tournament page.</p>
                     </div>
-
                 </div>
 
-                {/* Media Content */}
-                <div className="space-y-5 p-4 sm:p-5">
+                <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-2">
 
                     {/* Background */}
-                    <div>
-
-                        <div className="mb-3 flex items-center gap-2">
-                            <span className="h-px w-4" style={{ background: "var(--accent-gold)" }} />
-
-                            <span className="text-[9px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>
-                                Tournament Background
-                            </span>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>
+                                Background Image <span style={{ color: "var(--accent-gold)" }}>*</span>
+                            </label>
+                            <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>1920 × 1080</span>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.35fr_0.65fr]">
-
-                            {/* Background Upload */}
-                            <div className="space-y-1.5">
-
-                                <label className="flex items-center gap-1 text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>
-                                    Background Image
-                                    <span style={{ color: "var(--accent-gold)" }}>*</span>
-                                </label>
-
-                                <label className="group flex min-h-[126px] cursor-pointer items-center gap-4 rounded-lg border border-dashed px-4 transition-colors hover:border-[var(--accent-gold)]" style={{ background: "var(--surface-elevated)", borderColor: "var(--border-default)" }}>
-
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg" style={{ background: "rgba(200,176,122,0.10)", color: "var(--accent-gold)" }}>
-                                        <CloudUpload size={18} strokeWidth={1.6} />
+                        <label className="group relative flex h-40 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed transition-colors hover:border-[var(--accent-gold)]" style={{ background: "var(--surface-elevated)", borderColor: "var(--border-default)" }}>
+                            {backgroundPreview ? (
+                                <>
+                                    <img src={backgroundPreview} alt="Tournament background" className="absolute inset-0 h-full w-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100" />
+                                    <div className="relative rounded-md border px-3 py-1.5 text-[9px] font-medium opacity-0 transition-opacity group-hover:opacity-100" style={{ background: "var(--surface-base)", borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                        Change image
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center">
+                                    <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: "rgba(200,176,122,0.10)", color: "var(--accent-gold)" }}>
+                                        <CloudUpload size={17} strokeWidth={1.6} />
                                     </div>
 
-                                    <div className="min-w-0">
+                                    <p className="mt-2 text-xs font-semibold" style={{ color: "var(--text-primary)" }}>Upload background</p>
+                                    <p className="mt-1 text-[9px]" style={{ color: "var(--text-muted)" }}>PNG, JPG or WEBP · Max 5MB</p>
+                                </div>
+                            )}
 
-                                        <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
-                                            Upload background image
-                                        </p>
-
-                                        <p className="mt-1 text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                                            Use a high-quality image that represents the tournament atmosphere.
-                                        </p>
-
-                                        <p className="mt-2 text-[9px] font-medium" style={{ color: "var(--text-secondary)" }}>
-                                            PNG · JPG · WEBP · Max 5MB
-                                        </p>
-
-                                    </div>
-
-                                    <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" />
-
-                                </label>
-
-                            </div>
-
-                            {/* Background Recommendation */}
-                            <div className="hidden rounded-lg border px-4 py-3 lg:block" style={{ background: "var(--surface-elevated)", borderColor: "var(--border-subtle)" }}>
-
-                                <p className="text-[9px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-muted)" }}>
-                                    Recommended
-                                </p>
-
-                                <p className="mt-2 text-xs font-medium" style={{ color: "var(--text-primary)" }}>
-                                    1920 × 1080px
-                                </p>
-
-                                <p className="mt-1 text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                                    Landscape images work best for tournament pages and promotional surfaces.
-                                </p>
-
-                            </div>
-
-                        </div>
-
+                            <input name="background_image" onChange={handleInputChange} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" />
+                        </label>
                     </div>
 
                     {/* Banner */}
-                    <div>
-
-                        <div className="mb-3 flex items-center gap-2">
-                            <span className="h-px w-4" style={{ background: "var(--accent-gold)" }} />
-
-                            <span className="text-[9px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>
                                 Tournament Banner
-                            </span>
+                            </label>
+                            <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>Optional · 1200 × 628</span>
                         </div>
 
-                        <div className="space-y-1.5">
+                        <label className="group relative flex h-40 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed transition-colors hover:border-[var(--accent-gold)]" style={{ background: "var(--surface-elevated)", borderColor: "var(--border-default)" }}>
+                            {bannerPreview ? (
+                                <>
+                                    <img src={bannerPreview} alt="Tournament banner" className="absolute inset-0 h-full w-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100" />
+                                    <div className="relative rounded-md border px-3 py-1.5 text-[9px] font-medium opacity-0 transition-opacity group-hover:opacity-100" style={{ background: "var(--surface-base)", borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                        Change banner
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center">
+                                    <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: "var(--surface-base)", color: "var(--text-muted)" }}>
+                                        <Upload size={16} strokeWidth={1.6} />
+                                    </div>
 
-                            <label className="flex items-center gap-2 text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>
-                                Banner / Thumbnail
-
-                                <span className="text-[9px] font-normal" style={{ color: "var(--text-muted)" }}>
-                                    Optional
-                                </span>
-                            </label>
-
-                            <label className="flex min-h-[96px] cursor-pointer items-center gap-4 rounded-lg border border-dashed px-4 transition-colors hover:border-[var(--accent-gold)]" style={{ background: "var(--surface-elevated)", borderColor: "var(--border-default)" }}>
-
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: "var(--surface-base)", color: "var(--text-muted)" }}>
-                                    <Upload size={16} strokeWidth={1.6} />
+                                    <p className="mt-2 text-xs font-semibold" style={{ color: "var(--text-primary)" }}>Upload banner</p>
+                                    <p className="mt-1 text-[9px]" style={{ color: "var(--text-muted)" }}>PNG, JPG or WEBP · Max 5MB</p>
                                 </div>
+                            )}
 
-                                <div className="min-w-0 flex-1">
-
-                                    <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
-                                        Upload promotional banner
-                                    </p>
-
-                                    <p className="mt-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
-                                        Recommended 1200 × 628px · JPG, PNG or WEBP
-                                    </p>
-
-                                </div>
-
-                                <span className="hidden rounded-md border px-2.5 py-1.5 text-[9px] font-medium sm:inline-flex" style={{ background: "var(--surface-base)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>
-                                    Browse
-                                </span>
-
-                                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" />
-
-                            </label>
-
-                        </div>
-
+                            <input type="file" name="banner_image" onChange={handleInputChange} accept="image/png,image/jpeg,image/webp" className="hidden" />
+                        </label>
                     </div>
 
                 </div>
-
             </section>
 
 
-            {/* Prize & Rewards */}
+            {/* Prize & Platform */}
             <section className="overflow-hidden rounded-xl border" style={{ background: "var(--surface-base)", borderColor: "var(--border-default)" }}>
-
-                {/* Section Header */}
                 <div className="flex items-start gap-3 border-b px-4 py-4 sm:px-5" style={{ borderColor: "var(--border-subtle)" }}>
-
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md" style={{ background: "rgba(200,176,122,0.12)", color: "var(--accent-gold)" }}>
                         <Trophy size={14} strokeWidth={1.7} />
                     </div>
 
-                    <div className="min-w-0">
-
-                        <div className="flex items-center gap-2">
-
-                            <h2 className="text-[13px] font-semibold tracking-[-0.1px]" style={{ color: "var(--text-primary)" }}>
-                                Prize & Rewards
-                            </h2>
-
-                            <span className="hidden rounded-full border px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wider sm:inline-flex" style={{ borderColor: "var(--border-subtle)", color: "var(--text-muted)" }}>
-                                Rewards
-                            </span>
-
-                        </div>
-
-                        <p className="mt-0.5 text-[11px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                            Define the prize pool and how rewards will be distributed.
-                        </p>
-
+                    <div>
+                        <h2 className="text-[13px] font-semibold" style={{ color: "var(--text-primary)" }}>Prize & Platform</h2>
+                        <p className="mt-0.5 text-[11px]" style={{ color: "var(--text-muted)" }}>Set the entry fee and prize distribution.</p>
                     </div>
-
                 </div>
 
-                {/* Prize Content */}
                 <div className="space-y-5 p-4 sm:p-5">
 
-                    {/* Prize Summary */}
+                    {/* Platform Fee */}
                     <div>
-
                         <div className="mb-3 flex items-center gap-2">
                             <span className="h-px w-4" style={{ background: "var(--accent-gold)" }} />
-
-                            <span className="text-[9px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>
-                                Prize Distribution
-                            </span>
+                            <span className="text-[9px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>Tournament Fees</span>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>
+                                    Platform Fee
+                                    <span className="ml-1" style={{ color: "var(--accent-gold)" }}>*</span>
+                                </label>
 
-                            {[
-                                ["Total Prize Pool", "50,000"],
-                                ["Winner", "30,000"],
-                                ["Runner-up", "12,000"],
-                            ].map(([label, value]) => (
-
-                                <div key={label} className="space-y-1.5">
-
-                                    <label className="flex items-center gap-1 text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>
-                                        {label}
-
-                                        {label === "Total Prize Pool" && (
-                                            <span style={{ color: "var(--accent-gold)" }}>*</span>
-                                        )}
-                                    </label>
-
-                                    <div className="relative">
-
-                                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-                                            ₹
-                                        </span>
-
-                                        <input
-                                            type="number"
-                                            defaultValue={value}
-                                            className="h-9 w-full rounded-lg border bg-transparent pl-8 pr-3 text-xs font-medium outline-none transition-colors focus:border-[var(--accent-gold)]"
-                                            style={{
-                                                borderColor: "var(--border-default)",
-                                                color: "var(--text-primary)",
-                                            }}
-                                        />
-
-                                    </div>
-
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        name="platform_fee_percent"
+                                        value={data.platform_fee_percent || ""}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        max="100"
+                                        placeholder="10"
+                                        className="h-9 w-full rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none focus:border-[var(--accent-gold)]"
+                                        style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}
+                                    />
+                                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: "var(--text-muted)" }}>%</span>
                                 </div>
-
-                            ))}
-
+                            </div>
                         </div>
-
                     </div>
 
-                    {/* Reward Note */}
-                    <div className="flex items-start gap-3 rounded-lg border px-3.5 py-3" style={{ background: "var(--surface-elevated)", borderColor: "var(--border-subtle)" }}>
-
-                        <WalletCards size={15} strokeWidth={1.6} className="mt-0.5 shrink-0" style={{ color: "var(--accent-gold)" }} />
-
-                        <div>
-
-                            <p className="text-[10px] font-semibold" style={{ color: "var(--text-primary)" }}>
-                                Prize distribution
-                            </p>
-
-                            <p className="mt-0.5 text-[9px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                                Make sure the distributed rewards do not exceed the total prize pool.
-                            </p>
-
+                    {/* Prize Distribution */}
+                    <div>
+                        <div className="mb-3 flex items-center gap-2">
+                            <span className="h-px w-4" style={{ background: "var(--accent-gold)" }} />
+                            <span className="text-[9px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--text-muted)" }}>Prize Distribution</span>
                         </div>
 
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>Winner Share</label>
+
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        name="winner_percent"
+                                        value={data.winner_percent || ""}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        max="100"
+                                        placeholder="70"
+                                        className="h-9 w-full rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none focus:border-[var(--accent-gold)]"
+                                        style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}
+                                    />
+                                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: "var(--text-muted)" }}>%</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>Runner-up Share</label>
+
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        name="runner_up_percent"
+                                        value={data.runner_up_percent || ""}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        max="100"
+                                        placeholder="30"
+                                        className="h-9 w-full rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none focus:border-[var(--accent-gold)]"
+                                        style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}
+                                    />
+                                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: "var(--text-muted)" }}>%</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {/* Explanation */}
+                    <div className="flex items-start gap-3 rounded-lg border px-3.5 py-3" style={{ background: "var(--surface-elevated)", borderColor: "var(--border-subtle)" }}>
+                        <WalletCards size={15} className="mt-0.5 shrink-0" style={{ color: "var(--accent-gold)" }} />
+
+                        <div>
+                            <p className="text-[10px] font-semibold" style={{ color: "var(--text-primary)" }}>Prize pool is calculated automatically</p>
+                            <p className="mt-0.5 text-[9px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                                The final prize depends on paid registrations. Platform fees and applicable charges are deducted before distributing the remaining pool.
+                            </p>
+                        </div>
                     </div>
 
                 </div>
-
             </section>
 
         </div>

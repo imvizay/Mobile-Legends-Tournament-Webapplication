@@ -1,8 +1,16 @@
 import React from "react"
 import { ChevronDown, ShieldCheck } from "lucide-react"
 
-const TournamentRules = ({ }) => {
+const TournamentRules = ({ data,setData }) => {
 
+    const handleInputChange = (e) => {
+        const {name,value} = e.target
+
+        setData(prev=>({
+            ...prev,[name]:value
+        }))
+
+    }
 
     return (
         <section className="overflow-hidden rounded-xl border" style={{ background: "var(--surface-base)", borderColor: "var(--border-default)" }}>
@@ -41,7 +49,9 @@ const TournamentRules = ({ }) => {
                             </label>
 
                             <div className="relative">
-                                <select name="category" value={data?.category || ""} onChange={(e) => updateField("category", e.target.value)} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                <select name="category" 
+                                value={data?.category || ""} 
+                                onChange={handleInputChange} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
                                     <option value="">Select category</option>
                                     <option value="weekly">Weekly Tournament</option>
                                     <option value="monthly">Monthly Tournament</option>
@@ -60,7 +70,12 @@ const TournamentRules = ({ }) => {
                             </label>
 
                             <div className="relative">
-                                <select name="competition_type" value={data?.competition_type || ""} onChange={(e) => updateField("competition_type", e.target.value)} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                <select 
+                                name="competition_type" 
+                                value={data?.competition_type || ""} 
+                                onChange={handleInputChange} 
+
+                                className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
                                     <option value="">Select type</option>
                                     <option value="competitive">Competitive</option>
                                     <option value="casual">Casual</option>
@@ -78,7 +93,11 @@ const TournamentRules = ({ }) => {
                             </label>
 
                             <div className="relative">
-                                <select name="registration_access" value={data?.registration_access || ""} onChange={(e) => updateField("registration_access", e.target.value)} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                <select 
+                                name="registration_access" 
+                                value={data?.registration_access || ""} 
+                                onChange={handleInputChange} 
+                                className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
                                     <option value="">Select access</option>
                                     <option value="open">Open Registration</option>
                                     <option value="invite_only">Invite Only</option>
@@ -93,7 +112,11 @@ const TournamentRules = ({ }) => {
                             <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>Registration Approval</label>
 
                             <div className="relative">
-                                <select name="registration_approval" value={data?.registration_approval || "automatic"} onChange={(e) => updateField("registration_approval", e.target.value)} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                <select 
+                                name="registration_approval" 
+                                value={data?.registration_approval || "automatic"} 
+                                onChange={handleInputChange} 
+                                className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
                                     <option value="automatic">Automatic Approval</option>
                                     <option value="admin">Admin Approval</option>
                                 </select>
@@ -123,10 +146,16 @@ const TournamentRules = ({ }) => {
                             </label>
 
                             <div className="relative">
-                                <select name="entry_type" value={data?.entry_type || ""} onChange={(e) => updateField("entry_type", e.target.value)} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                <select 
+                                name="entry_type" 
+                                value={data?.entry_type || ""} 
+                                onChange={handleInputChange} 
+                                className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
                                     <option value="">Select entry type</option>
                                     <option value="free">Free Entry</option>
                                     <option value="paid">Paid Entry</option>
+                                    <option value="invitee_only">Invitee Only</option>
+
                                 </select>
 
                                 <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
@@ -138,7 +167,11 @@ const TournamentRules = ({ }) => {
                             <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>Currency</label>
 
                             <div className="relative">
-                                <select name="currency" value={data?.currency || "INR"} onChange={(e) => updateField("currency", e.target.value)} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                <select 
+                                name="currency" 
+                                value={data?.currency || "INR"} 
+                                onChange={handleInputChange} 
+                                className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
                                     <option value="INR">INR (₹)</option>
                                     <option value="USD">USD ($)</option>
                                 </select>
@@ -154,7 +187,12 @@ const TournamentRules = ({ }) => {
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: "var(--text-muted)" }}>₹</span>
 
-                                <input type="number" name="entry_fee" min="0" value={data?.entry_fee || ""} onChange={(e) => updateField("entry_fee", e.target.value)} disabled={data?.entry_type !== "paid"} placeholder="0.00" className="h-9 w-full rounded-lg border bg-transparent pl-8 pr-3 text-xs outline-none transition-colors focus:border-[var(--accent-gold)] disabled:cursor-not-allowed disabled:opacity-50" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }} />
+                                <input type="number" name="entry_fee" min="0" 
+                                value={data?.entry_fee || ""} 
+                                onChange={handleInputChange} 
+                                disabled={data?.entry_type !== "paid"} 
+                                placeholder="0.00" 
+                                className="h-9 w-full rounded-lg border bg-transparent pl-8 pr-3 text-xs outline-none transition-colors focus:border-[var(--accent-gold)] disabled:cursor-not-allowed disabled:opacity-50" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }} />
                             </div>
                         </div>
 
@@ -165,7 +203,11 @@ const TournamentRules = ({ }) => {
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: "var(--text-muted)" }}>₹</span>
 
-                                <input type="number" name="prize_pool" min="0" value={data?.prize_pool || ""} onChange={(e) => updateField("prize_pool", e.target.value)} placeholder="0.00" className="h-9 w-full rounded-lg border bg-transparent pl-8 pr-3 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }} />
+                                <input 
+                                type="number" 
+                                name="prize_pool" min="0" 
+                                value={data?.prize_pool || ""} 
+                                onChange={handleInputChange} placeholder="0.00" className="h-9 w-full rounded-lg border bg-transparent pl-8 pr-3 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }} />
                             </div>
                         </div>
 
@@ -188,7 +230,11 @@ const TournamentRules = ({ }) => {
                             <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>Minimum Rank</label>
 
                             <div className="relative">
-                                <select name="minimum_rank" value={data?.minimum_rank || ""} onChange={(e) => updateField("minimum_rank", e.target.value)} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                <select 
+                                name="minimum_rank" 
+                                value={data?.minimum_rank || ""} 
+                                onChange={handleInputChange} 
+                                className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
                                     <option value="">Any Rank</option>
                                     <option value="epic">Epic or Above</option>
                                     <option value="legend">Legend or Above</option>
@@ -205,7 +251,13 @@ const TournamentRules = ({ }) => {
                         <div className="space-y-1.5">
                             <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>Minimum Account Level</label>
 
-                            <input type="number" name="minimum_account_level" min="1" value={data?.minimum_account_level || ""} onChange={(e) => updateField("minimum_account_level", e.target.value)} placeholder="e.g. 20" className="h-9 w-full rounded-lg border bg-transparent px-3 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }} />
+                            <input 
+                            type="number" 
+                            name="minimum_account_level" min="1" 
+                            value={data?.minimum_account_level || ""} 
+                            onChange={handleInputChange} 
+                            placeholder="e.g. 20" 
+                            className="h-9 w-full rounded-lg border bg-transparent px-3 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }} />
                         </div>
 
                         {/* Server */}
@@ -213,7 +265,11 @@ const TournamentRules = ({ }) => {
                             <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>Server / Region</label>
 
                             <div className="relative">
-                                <select name="server" value={data?.server || ""} onChange={(e) => updateField("server", e.target.value)} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                <select 
+                                name="server" 
+                                value={data?.server || ""} 
+                                onChange={handleInputChange} 
+                                className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
                                     <option value="">Any Server</option>
                                     <option value="india">India</option>
                                     <option value="singapore">Singapore</option>
@@ -245,7 +301,11 @@ const TournamentRules = ({ }) => {
                             </label>
 
                             <div className="relative">
-                                <select name="bracket_format" value={data?.bracket_format || ""} onChange={(e) => updateField("bracket_format", e.target.value)} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                <select 
+                                name="bracket_format" 
+                                value={data?.bracket_format || ""} 
+                                onChange={handleInputChange} 
+                                className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
                                     <option value="">Select bracket</option>
                                     <option value="single_elimination">Single Elimination</option>
                                     <option value="double_elimination">Double Elimination</option>
@@ -261,7 +321,11 @@ const TournamentRules = ({ }) => {
                             <label className="text-[11px] font-medium" style={{ color: "var(--text-primary)" }}>Seeding Method</label>
 
                             <div className="relative">
-                                <select name="seeding_method" value={data?.seeding_method || ""} onChange={(e) => updateField("seeding_method", e.target.value)} className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                                <select 
+                                name="seeding_method" 
+                                value={data?.seeding_method || ""}
+                                onChange={handleInputChange} 
+                                className="h-9 w-full appearance-none rounded-lg border bg-transparent px-3 pr-8 text-xs outline-none transition-colors focus:border-[var(--accent-gold)]" style={{ borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
                                     <option value="">Select method</option>
                                     <option value="random">Random Draw</option>
                                     <option value="rank_based">Rank Based</option>

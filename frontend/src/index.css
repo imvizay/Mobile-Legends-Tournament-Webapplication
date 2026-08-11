@@ -353,3 +353,19 @@ body {
   --accent-gold-light: #d7c08a;
 
 }
+
+
+
+/* admin */
+/* error animation */
+@keyframes slideDown {
+  from {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
