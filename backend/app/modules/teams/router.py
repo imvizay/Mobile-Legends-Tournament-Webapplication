@@ -106,14 +106,33 @@ def add_roster(
     return tournament_service.add_roster_player(
         tournament_id=tournament_id, player_id=player_id, captain=captain
     )
-    
+
+
 # CONFIRM ROSTER
 
-@router.patch('/tournament/{registration_id}/roster/lock')
-def confirm_roster(
-    registration_id:int,
-    captain: Player = Depends(get_team_captain),
-    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),    
-):
-    return tournament_service.confirm_roster(registration_id=registration_id,captain=captain)
 
+@router.patch("/tournament/{registration_id}/roster/lock")
+def confirm_roster(
+    registration_id: int,
+    captain: Player = Depends(get_team_captain),
+    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+):
+    return tournament_service.confirm_roster(
+        registration_id=registration_id, captain=captain
+    )
+
+
+"GET /api/player/team/tournament/1/contribution HTTP/1.1"
+
+
+@router.get("/tournament/{registration_id}/team/{team_id}/contribution")
+def team_contribution(
+    registration_id: int,
+    team_id: int,
+    current_user: Player = Depends(get_current_user),
+    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+):
+
+    return tournament_service.contribution_stats(
+        registration_id=registration_id, team_id=team_id, current_user=current_user
+    )
