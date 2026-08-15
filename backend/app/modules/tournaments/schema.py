@@ -6,7 +6,7 @@ from fastapi import Form
 
 from datetime import date, time
 
-from pydantic import BaseModel,model_validator
+from pydantic import BaseModel,model_validator,ConfigDict
 
 
 class TournamentForm(BaseModel):
@@ -73,6 +73,56 @@ class TournamentForm(BaseModel):
         
         return self
         
+ 
         
-        
+# Admin List tournament
+class TournamentListResponse(BaseModel):
+
+    tournament_name: str
+    game_name: str
+    tournament_type: str
+    team_format: str 
+    min_teams: int
+    max_teams: int
+
+    description: str | None = None
+
+    platform_fee: str | None = None
+    winner_share: str | None = None
+    runner_up_share: str | None = None
+
+    reg_open_date: date
+    reg_open_time: time
+    reg_close_date: date
+    reg_close_time: time
+
+    tournament_start_date: date
+    tournament_start_time: time
+    tournament_end_date: date
+    tournament_end_time: time
+
+    check_in: str | None = None
+    grace_period: str | None = None
+
+    bracket_format: str | None = None
+    category: str | None = None
+    competition_type: str | None = None
+    seeding_method: str | None = None
+
+    entry_fee: int
+    entry_type: str
+
+    minimum_account_level: int | None = None
+    minimum_rank: str | None = None
+
+    registration_access: str | None = None
+    registration_approval: str | None = None
+
+    server: str
+    
+    model_config= ConfigDict(from_attributes=True)
+    
+    
+class AdminTournamentRes(BaseModel):
+    tournament:list[TournamentListResponse]
     

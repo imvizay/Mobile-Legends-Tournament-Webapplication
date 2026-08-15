@@ -3,6 +3,7 @@ from app.modules.auth.models import Player
 from .dependency import get_tournament_service,get_tournament_form
 from .service import TournamentService
 from app.dependencies.roles import get_current_admin
+from app.dependencies.auth import get_current_user
 from .schema import TournamentForm
 
 router  = APIRouter(
@@ -25,3 +26,12 @@ async def create_tournament(
         background_image=background_image,
         banner_image=banner_image
     )
+    
+
+@router.get("/tournamnets")
+def tournaments(
+    current_user : Player = Depends(get_current_user),
+    tournament_service:TournamentService=Depends(get_tournament_service)
+):
+
+    return tournament_service.get_tournaments(current_user=current_user)

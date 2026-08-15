@@ -1,7 +1,7 @@
 export const TOURNAMENT_ENDPOINT = {
   CREATE_TOURNAMENT: "/tournament/create",
 
-  GET_TOURNAMENTS: "/tournaments",
+  GET_TOURNAMENTS: "/tournament/tournaments",
 
   GET_TOURNAMENT: (tournamentId) =>
     `/tournament/${tournamentId}`,

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom"
 import {
   LayoutDashboard,
   Users,
@@ -167,57 +167,64 @@ export default function AdminSidebar() {
         </Link>
 
         {/* Management */}
-        <p
-          className="mb-2 px-2 text-[7px] font-semibold uppercase tracking-[0.2em]"
-          style={{ color: "var(--text-muted)" }}
-        >
-          Management
-        </p>
+        <div className="mb-5">
 
-        <div className="space-y-0.5">
+          <p className="mb-2 px-2.5 text-[8px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-muted)" }}>
+            Management
+          </p>
 
-          <Link
-            to="/admin/users"
-            className="admin-nav-item"
-          >
-            <Users size={15} strokeWidth={1.5} />
-            Users
-          </Link>
+          <div className="space-y-0.5">
 
-          <Link
-            to="/admin/teams"
-            className="admin-nav-item"
-          >
-            <ShieldCheck size={15} strokeWidth={1.5} />
-            Teams
-          </Link>
+            <button className="admin-nav-item">
+              <Users size={15} strokeWidth={1.6} />
+              <span>Users</span>
+            </button>
 
-          <Link
-            to="/admin/tournaments"
-            className="admin-nav-item"
-          >
-            <Trophy size={15} strokeWidth={1.5} />
-            Tournaments
-          </Link>
+            <button className="admin-nav-item">
+              <ShieldCheck size={15} strokeWidth={1.6} />
+              <span>Teams</span>
+            </button>
 
-          <Link
-            to="/admin/prize-distribution"
-            className="admin-nav-item"
-          >
-            <ChartPie size={15} strokeWidth={1.5} />
-            Prize Distribution
-          </Link>
+            <Link to='tournaments' className="admin-nav-item">
+              <Trophy size={15} strokeWidth={1.6} />
+              <span>Tournaments</span>
+            </Link>
 
-          {/* Verification */}
-          <button
-            onClick={() => setVerificationOpen(!verificationOpen)}
-            className="admin-nav-item w-full"
-          >
-            <BadgeCheck size={15} strokeWidth={1.5} />
+            <button className="admin-nav-item">
+              <ChartPie size={15} strokeWidth={1.6} />
+              <span>Price Distribution</span>
+            </button>
 
-            <span className="flex-1 text-left">
-              Verification
-            </span>
+            <button onClick={() => setVerificationOpen(!verificationOpen)} className="admin-nav-item">
+
+              <BadgeCheck size={15} strokeWidth={1.6} />
+
+              <span className="flex-1">
+                Verification
+              </span>
+
+              {verificationOpen ? (
+                <ChevronDown size={13} strokeWidth={1.6} />
+              ) : (
+                <ChevronRight size={13} strokeWidth={1.6} />
+              )}
+
+            </button>
+
+            {verificationOpen && (
+              <div className="ml-7 space-y-0.5 pt-1">
+
+                <button className="admin-sub-item">
+                  Screenshots
+                </button>
+
+                <button className="admin-sub-item">
+                  KYC
+                </button>
+
+                <button className="admin-sub-item">
+                  Team Verification
+                </button>
 
             {verificationOpen ? (
               <ChevronDown size={12} strokeWidth={1.5} />
