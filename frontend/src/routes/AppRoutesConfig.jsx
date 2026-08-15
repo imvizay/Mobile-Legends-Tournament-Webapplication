@@ -35,10 +35,12 @@ import TeamMembers from '../features/team/pages/TeamMembers'
 import ProtectedRoutes from './ProtectedRoutes'
 import AdminLayout from '../layouts/AdminLayout'
 import CreateTournament from '../pages/admin/pages/tournament/CreateTournament'
+import AdminTournamentLayout from '../layouts/AdminTournamentLayout'
+import AdminTournamentOverview from '../pages/admin/pages/tournament/AdminTournamentOverview'
 
 
 function AppRoutesConfig() {
-  
+
   return (
 
     <Routes>
@@ -59,7 +61,7 @@ function AppRoutesConfig() {
       {/* Player Dashboard */}
       <Route
         path='/player/:id'
-        element={<ProtectedRoutes role="player"/>}>
+        element={<ProtectedRoutes role="player" />}>
 
         <Route path='create' element={<TeamCreatePage />} />
         <Route path='discover' element={<DiscoverTeamPage />} />
@@ -80,13 +82,18 @@ function AppRoutesConfig() {
 
       {/* Admin Routes */}
       <Route
-        path="/admin/:id/"
+        path="/admin"
         element={<ProtectedRoutes role="admin" />}>
-          <Route path='create-tournament' element={<CreateTournament/>} />
+
+        <Route path="tournaments" element={<AdminTournamentLayout />}>
+          {/* Index Component */}
+          <Route index element={<AdminTournamentOverview />} /> 
+          <Route path='create-tournament' element={<CreateTournament />} />
+        </Route>
 
 
 
-        
+
 
       </Route>
 
