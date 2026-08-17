@@ -86,20 +86,21 @@ class Tournament(Base):
     # Cloudinary - Banner Image
     banner_image_url = Column(Text, nullable=True)
     banner_image_public_id = Column(String(255), nullable=True)
+    
+    # Tournament Lifecycle
+    status = Column(String(30),default="scheduled",nullable=True,)
+
+    # Registration Lifecycle
+    registration_status = Column(String(30),nullable=True,default="upcoming",)
+
+    # Visibility
+    visibility_status = Column(String(20),nullable=True,default="unpublished",)
 
     # Admin who created the tournament
-    created_by = Column(
-        Integer,
-        ForeignKey("players.id"),
-        nullable=False,
-    )
+    created_by = Column(Integer,ForeignKey("players.id"),nullable=False,)
 
     # Metadata
-    created_at = Column(
-        DateTime,
-        default=lambda:datetime.now(timezone.utc),
-        nullable=False,
-    )
+    created_at = Column(DateTime,default=lambda:datetime.now(timezone.utc),nullable=False,)
 
     updated_at = Column(
         DateTime,

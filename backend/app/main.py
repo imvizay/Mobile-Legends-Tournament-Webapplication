@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from app.core.middleware.middleware import register_middlewares
+
+# app routes
 from app.modules.auth.router import router as auth_router
 from app.modules.teams.router import router as team_router
 from app.modules.tournaments.router import router as tournament_router

@@ -9,7 +9,7 @@ export const tournamentService = {
             payload
         )
 
-        return response.data
+        return response
     },
 
     getTournaments: async () => {
@@ -17,7 +17,7 @@ export const tournamentService = {
             TOURNAMENT_ENDPOINT.GET_TOURNAMENTS
         )
 
-        return response.data
+        return response
     },
 
     getTournament: async (tournamentId) => {
@@ -25,7 +25,7 @@ export const tournamentService = {
             TOURNAMENT_ENDPOINT.GET_TOURNAMENT(tournamentId)
         )
 
-        return response.data
+        return response
     },
 
     updateTournament: async (tournamentId, payload) => {
@@ -34,7 +34,7 @@ export const tournamentService = {
             payload
         )
 
-        return response.data
+        return response
     },
 
     publishTournament: async (tournamentId) => {
@@ -42,7 +42,7 @@ export const tournamentService = {
             TOURNAMENT_ENDPOINT.PUBLISH_TOURNAMENT(tournamentId)
         )
 
-        return response.data
+        return response
     },
 
     cancelTournament: async (tournamentId) => {
@@ -50,7 +50,7 @@ export const tournamentService = {
             TOURNAMENT_ENDPOINT.CANCEL_TOURNAMENT(tournamentId)
         )
 
-        return response.data
+        return response
     },
 
 }

@@ -21,6 +21,10 @@ class TournamentService:
                 tournament=results
             )
             
+        return AdminTournamentRes(
+            tournament=results
+        )
+            
 
     async def create_tournament(
         self,
@@ -31,7 +35,7 @@ class TournamentService:
     ):
         
         # return early if tournament_name is already in db
-        tournament_name = validated_data.get("tournament_name", None)
+        tournament_name = validated_data.tournament_name or None
         
         if tournament_name:
             exists = self.repository.check_tournament_name(tournament_name)
@@ -80,14 +84,20 @@ class TournamentService:
             "message":f"Tournament: {created_tournament.tournament_name} created successfully."
         }
         
-        
-        
+          
 
     def update_tournament(self, tournament_id, validated_data):
         pass
 
-    def publish_tournament(self, tournament_id):
-        pass
+    def publish_tournament(self, tournament_id:int,current_user: Player):
+        
+        tournament = self.repository.publish_tournament(tournament_id)
+        
+        return {
+            "success":True,
+            "status":200,
+            "message":"Tournament published {tournament.tournament_name}"   
+        }
 
     def cancel_tournament(self, tournament_id):
         pass

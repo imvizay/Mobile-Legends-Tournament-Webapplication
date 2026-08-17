@@ -7,27 +7,26 @@ import { useQuery } from "@tanstack/react-query";
 import { useUserContext } from "../../../../contexts/UserContext";
 import { tournamentService } from "../../../../services/admin/tournament_service";
 
-function AdminTournamentOverview() {
+import { useOutletContext } from "react-router-dom";
+import TournamentDetailsModal from "./AdminTournamentDetail";
 
+function AdminTournamentOverview() {
 
     const [openMenu, setOpenMenu] = useState(false)
     const { user } = useUserContext()
+    const { isSelTournament, setSelTournament } = useOutletContext()
 
-    const { data } = useQuery({
-        queryKey: ['tournaments',user.id ],
-        queryFn:tournamentService.getTournaments
+    const {
+        data: tournaments,
+        isSuccess,
+        isLoading,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["tournaments", user?.id],
+        queryFn: tournamentService.getTournaments,
+        enabled: !!user?.id,
     })
-
-
-    const [tournaments, setTournaments] = useState([
-        { id: 1, name: "MLBB Legends Cup S4", subtitle: "Season 4 · Grand Finals", format: "5v5", type: "Single Elimination", teams: "128 / 128", prize: "₹50,000", regOpen: "May 01, 10:00 AM", regClose: "May 13, 11:59 PM", start: "May 14, 02:30 PM", end: "May 16, 09:30 PM", state: "Ongoing", published: true },
-        { id: 2, name: "Battle Arena Championship", subtitle: "Season Finals", format: "5v5", type: "Single Elimination", teams: "64 / 64", prize: "₹30,000", regOpen: "Apr 25, 10:00 AM", regClose: "May 13, 11:59 PM", start: "May 14, 04:00 PM", end: "May 15, 10:00 PM", state: "Ongoing", published: true },
-        { id: 3, name: "Esports Arena Series", subtitle: "Quarter Finals", format: "5v5", type: "Double Elimination", teams: "256 / 256", prize: "₹20,000", regOpen: "May 02, 10:00 AM", regClose: "May 15, 11:59 PM", start: "May 16, 07:00 PM", end: "May 18, 11:00 PM", state: "Upcoming", published: true },
-        { id: 4, name: "Victory Cup Season 2", subtitle: "Quarter Finals", format: "5v5", type: "Single Elimination", teams: "128 / 128", prize: "₹15,000", regOpen: "May 03, 10:00 AM", regClose: "May 16, 11:59 PM", start: "May 17, 11:00 AM", end: "May 19, 09:00 PM", state: "Upcoming", published: true },
-        { id: 5, name: "Elite Showdown", subtitle: "Semi Finals", format: "5v5", type: "Single Elimination", teams: "64 / 64", prize: "₹10,000", regOpen: "May 10, 10:00 AM", regClose: "May 18, 11:59 PM", start: "May 19, 01:30 PM", end: "May 20, 08:00 PM", state: "Scheduled", published: false },
-        { id: 6, name: "Rising Legends Cup", subtitle: "League Stage", format: "5v5", type: "Round Robin", teams: "32 / 64", prize: "₹50,000", regOpen: "May 10, 10:00 AM", regClose: "May 20, 11:59 PM", start: "May 21, 06:00 PM", end: "May 22, 09:00 PM", state: "Scheduled", published: false },
-        // { id: 7, name: "Thunder Clash", subtitle: "Community Cup", format: "5v5", type: "Single Elimination", teams: "16 / 32", prize: "₹10,000", regOpen: "Apr 25, 10:00 AM", regClose: "May 04, 11:59 PM", start: "May 05, 08:00 AM", end: "May 05, 11:00 AM", state: "Completed", published: true },
-    ]);
 
     const publishTournament = (id) => {
         setTournaments((current) => current.map((tournament) => tournament.id === id ? { ...tournament, published: true } : tournament));
@@ -53,7 +52,6 @@ function AdminTournamentOverview() {
                     <Link to="/admin/tournaments/create" className="flex h-8 items-center gap-1.5 rounded-md bg-[var(--accent-gold)] px-3.5 text-[9px] font-semibold text-white hover:brightness-95"><Plus size={13} strokeWidth={1.8} /> Create Tournament</Link>
                 </div>
             </div>
-
 
             {/* Tournament List */}
             <div className="mt-6">
@@ -92,13 +90,14 @@ function AdminTournamentOverview() {
                         </thead>
 
                         <tbody>
-                            {tournaments.map((tournament) => (
+                            {tournaments?.tournament?.map((tournament) => (
                                 <TournamentRow
                                     key={tournament.id}
                                     tournament={tournament}
                                     openMenu={openMenu}
                                     setOpenMenu={setOpenMenu}
                                     onPublish={publishTournament}
+                                    setSelTournament={setSelTournament}
                                 />
                             ))}
                         </tbody>
@@ -125,14 +124,67 @@ function AdminTournamentOverview() {
 
 
 function FilterButton({ text }) {
+
     return <button className="flex h-8 items-center gap-2 rounded-md border border-[var(--border-default)] px-2.5 text-[8px] font-medium hover:bg-[var(--surface-elevated)]">{text}<ChevronDown size={11} /></button>;
 }
 
-function TournamentRow({ tournament, onPublish, openMenu, setOpenMenu }) {
+function TournamentRow({ tournament, onPublish, openMenu, setOpenMenu, setSelTournament }) {
+    const {
+        id,
+        tournament_name,
+        category,
+        bracket_format,
+        team_format,
+        min_teams,
+        max_teams,
+        entry_fee,
+        reg_open_date,
+        reg_open_time,
+        reg_close_date,
+        reg_close_time,
+        tournament_start_date,
+        tournament_start_time,
+        tournament_end_date,
+        tournament_end_time,
+        status,
+        visibility_status,
+    } = tournament;
 
-    const { name, subtitle, format, type, teams, prize, regOpen, regClose, start, end, state, published } = tournament;
 
-    const stateColor = state === "Ongoing" ? "text-emerald-600" : state === "Upcoming" ? "text-blue-600" : state === "Completed" ? "text-[var(--text-muted)]" : "text-purple-600";
+    const formatDate = (date, time) => {
+        if (!date || !time) return "--";
+
+        const value = new Date(`${date}T${time}`);
+
+        return value.toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        }) + ", " + value.toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
+
+    const state = status || "Upcoming";
+
+    const stateColor =
+        state === "Ongoing"
+            ? "text-emerald-600"
+            : state === "Upcoming"
+                ? "text-blue-600"
+                : state === "Completed"
+                    ? "text-[var(--text-muted)]"
+                    : "text-red-500";
+
+    const stateDot =
+        state === "Ongoing"
+            ? "bg-emerald-500"
+            : state === "Upcoming"
+                ? "bg-blue-500"
+                : state === "Completed"
+                    ? "bg-gray-400"
+                    : "bg-red-500";
 
     return (
         <tr className="border-b border-[var(--border-default)] last:border-0 transition hover:bg-[rgba(255,255,255,0.018)]">
@@ -141,62 +193,131 @@ function TournamentRow({ tournament, onPublish, openMenu, setOpenMenu }) {
             <td className="px-3 py-3">
                 <div className="flex items-center gap-2.5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--border-default)] bg-[var(--surface-elevated)]">
-                        <Trophy size={13} strokeWidth={1.5} className="text-[var(--accent-gold)]" />
+
+                        {tournament?.banner_image_url ?
+                            <img src={tournament?.banner_image_url} alt="no-img" /> :
+                            <Trophy
+                                size={13}
+                                strokeWidth={1.5}
+                                className="text-[var(--accent-gold)]"
+                            />}
+
                     </div>
+
                     <div className="min-w-0">
-                        <p className="truncate text-[9px] font-semibold">{name}</p>
-                        <p className="mt-0.5 truncate text-[7px] text-[var(--text-muted)]">{subtitle}</p>
+                        <p className="truncate text-[9px] font-semibold">
+                            {tournament_name}
+                        </p>
+
+                        <p className="mt-0.5 truncate text-[7px] text-[var(--text-muted)]">
+                            {category?.charAt(0).toUpperCase() + category?.slice(1)}
+                        </p>
                     </div>
                 </div>
             </td>
 
             {/* Format */}
             <td className="px-2 py-3">
-                <p className="text-[9px] font-medium">{format}</p>
-                <p className="mt-0.5 truncate text-[7px] text-[var(--text-muted)]">{type}</p>
+                <p className="text-[9px] font-medium">
+                    {team_format?.replace("vs", "v")}
+                </p>
+
+                <p className="mt-0.5 truncate text-[7px] text-[var(--text-muted)]">
+                    {bracket_format?.replaceAll("_", " ")
+                        ?.replace(/\b\w/g, (char) => char.toUpperCase())}
+                </p>
             </td>
 
             {/* Teams */}
             <td className="px-2 py-3">
-                <div className="flex items-center gap-1 text-[9px] font-medium"><Users size={10} className="text-[var(--text-muted)]" />{teams}</div>
+                <div className="flex items-center gap-1 text-[9px] font-medium">
+                    <Users
+                        size={10}
+                        className="text-[var(--text-muted)]"
+                    />
+
+                    {min_teams}–{max_teams}
+                </div>
+
+                <p className="mt-0.5 text-[7px] text-[var(--text-muted)]">
+                    Team Capacity
+                </p>
             </td>
 
-            {/* Prize */}
+            {/* Entry Fee */}
             <td className="px-2 py-3">
-                <p className="text-[9px] font-semibold">{prize}</p>
-                <p className="mt-0.5 text-[7px] text-[var(--text-muted)]">Prize Pool</p>
+                <p className="text-[9px] font-semibold">
+                    ₹{entry_fee ?? 0}
+                </p>
+
+                <p className="mt-0.5 text-[7px] text-[var(--text-muted)]">
+                    Entry Fee
+                </p>
             </td>
 
             {/* Registration */}
             <td className="px-2 py-3">
                 <div className="space-y-0.5">
-                    <p className="flex items-center gap-1 text-[7px] text-[var(--text-muted)]"><CalendarDays size={9} /> Opens <span className="font-medium text-[var(--text-primary)]">{regOpen}</span></p>
-                    <p className="flex items-center gap-1 text-[7px] text-[var(--text-muted)]"><Clock3 size={9} /> Closes <span className="font-medium text-[var(--text-primary)]">{regClose}</span></p>
+                    <p className="flex items-center gap-1 text-[7px] text-[var(--text-muted)]">
+                        <CalendarDays size={9} />
+                        Opens
+                        <span className="font-medium text-[var(--text-primary)]">
+                            {formatDate(reg_open_date, reg_open_time)}
+                        </span>
+                    </p>
+
+                    <p className="flex items-center gap-1 text-[7px] text-[var(--text-muted)]">
+                        <Clock3 size={9} />
+                        Closes
+                        <span className="font-medium text-[var(--text-primary)]">
+                            {formatDate(reg_close_date, reg_close_time)}
+                        </span>
+                    </p>
                 </div>
             </td>
 
             {/* Tournament Schedule */}
             <td className="px-2 py-3">
                 <div className="space-y-0.5">
-                    <p className="text-[8px] font-medium">Start · {start}</p>
-                    <p className="text-[7px] text-[var(--text-muted)]">End · {end}</p>
+                    <p className="text-[8px] font-medium">
+                        Start · {formatDate(
+                            tournament_start_date,
+                            tournament_start_time
+                        )}
+                    </p>
+
+                    <p className="text-[7px] text-[var(--text-muted)]">
+                        End · {formatDate(
+                            tournament_end_date,
+                            tournament_end_time
+                        )}
+                    </p>
                 </div>
             </td>
 
             {/* State */}
             <td className="px-2 py-3">
                 <div className={`flex items-center gap-1.5 text-[8px] font-medium ${stateColor}`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${state === "Ongoing" ? "bg-emerald-500" : state === "Upcoming" ? "bg-blue-500" : state === "Completed" ? "bg-gray-400" : "bg-purple-500"}`} />
+                    <span className={`h-1.5 w-1.5 rounded-full ${stateDot}`} />
                     {state}
                 </div>
             </td>
 
             {/* Visibility */}
             <td className="px-2 py-3">
-                {published ? (
-                    <div className="flex items-center gap-1.5 text-[8px] font-medium text-emerald-600"><Globe size={10} /> Published</div>
+                {visibility_status == "published" ? (
+                    <div className="flex items-center gap-1.5 text-[8px] font-medium text-emerald-600">
+                        <Globe size={10} />
+                        Published
+                    </div>
                 ) : (
-                    <button onClick={() => onPublish(tournament.id)} className="flex items-center gap-1.5 text-[8px] font-semibold text-[var(--accent-gold)] hover:underline"><EyeOff size={10} /> Publish</button>
+                    <button
+                        onClick={() => onPublish(id)}
+                        className="flex items-center gap-1.5 text-[8px] font-semibold text-[var(--accent-gold)] hover:underline"
+                    >
+                        <EyeOff size={10} />
+                        Unpublished
+                    </button>
                 )}
             </td>
 
@@ -204,8 +325,10 @@ function TournamentRow({ tournament, onPublish, openMenu, setOpenMenu }) {
             <td className="px-2 py-3 text-right">
                 <div className="relative flex justify-end">
                     <button
-                        onClick={() => setOpenMenu(openMenu === tournament.id ? null : tournament.id)}
-                        className={`flex h-7 w-7 items-center justify-center rounded-md border transition ${openMenu === tournament.id
+                        onClick={() =>
+                            setOpenMenu(openMenu === id ? null : id)
+                        }
+                        className={`flex h-7 w-7 items-center justify-center rounded-md border transition ${openMenu === id
                             ? "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--text-primary)]"
                             : "border-[var(--border-default)] text-[var(--text-muted)] hover:bg-[var(--surface-elevated)] hover:text-[var(--text-primary)]"
                             }`}
@@ -213,19 +336,22 @@ function TournamentRow({ tournament, onPublish, openMenu, setOpenMenu }) {
                         <MoreVertical size={13} strokeWidth={1.6} />
                     </button>
 
-                    {openMenu === tournament.id && (
+                    {openMenu === id && (
                         <div className="absolute right-7 top-1/2 z-50 w-[155px] -translate-y-1/2 rounded-lg border border-[var(--border-default)] bg-[var(--surface-base)] p-1 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
 
-                            <Link
-                                to={`/admin/tournaments/${tournament.id}`}
-                                onClick={() => setOpenMenu(null)}
+                            <button
+
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelTournament(tournament)
+                                }}
                                 className="flex items-center rounded-md px-2.5 py-2 text-[9px] font-medium text-[var(--text-primary)] transition hover:bg-[var(--surface-elevated)]"
                             >
                                 See details
-                            </Link>
+                            </button>
 
                             <Link
-                                to={`/admin/tournaments/${tournament.id}/edit`}
+                                to={`/admin/tournaments/${id}/edit`}
                                 onClick={() => setOpenMenu(null)}
                                 className="flex items-center rounded-md px-2.5 py-2 text-[9px] font-medium text-[var(--text-primary)] transition hover:bg-[var(--surface-elevated)]"
                             >
@@ -241,4 +367,6 @@ function TournamentRow({ tournament, onPublish, openMenu, setOpenMenu }) {
     );
 }
 
+
 export default AdminTournamentOverview;
+

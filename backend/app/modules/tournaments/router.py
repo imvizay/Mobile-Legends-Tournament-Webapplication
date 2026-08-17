@@ -1,37 +1,47 @@
-from fastapi import APIRouter,Depends,UploadFile,File
+from fastapi import APIRouter, Depends, UploadFile, File
 from app.modules.auth.models import Player
-from .dependency import get_tournament_service,get_tournament_form
+from .dependency import get_tournament_service, get_tournament_form
 from .service import TournamentService
 from app.dependencies.roles import get_current_admin
 from app.dependencies.auth import get_current_user
 from .schema import TournamentForm
 
-router  = APIRouter(
-    prefix="/tournament",
-    tags=["Tournaments"]
-)
+router = APIRouter(prefix="/tournament", tags=["Tournaments"])
+
 
 @router.post("/create")
 async def create_tournament(
-    data:TournamentForm = Depends(get_tournament_form),
-    background_image:UploadFile | None = File(None),
-    banner_image:UploadFile | None = File(None),
-    current_user:Player = Depends(get_current_admin),
-    tournament_service: TournamentService = Depends(get_tournament_service)
-) :
-    
+    data: TournamentForm = Depends(get_tournament_form),
+    background_image: UploadFile | None = File(None),
+    banner_image: UploadFile | None = File(None),
+    current_user: Player = Depends(get_current_admin),
+    tournament_service: TournamentService = Depends(get_tournament_service),
+):
+
     return await tournament_service.create_tournament(
         admin=current_user,
         validated_data=data,
         background_image=background_image,
-        banner_image=banner_image
+        banner_image=banner_image,
     )
-    
 
-@router.get("/tournamnets")
+
+@router.get("/tournaments")
 def tournaments(
-    current_user : Player = Depends(get_current_user),
-    tournament_service:TournamentService=Depends(get_tournament_service)
+    current_user: Player = Depends(get_current_user),
+    tournament_service: TournamentService = Depends(get_tournament_service),
 ):
 
     return tournament_service.get_tournaments(current_user=current_user)
+
+
+@router.post("/{tournament_id}/publish")
+def publish_tournaments(
+    tournament_id: int,
+    current_user: Player = Depends(get_current_admin),
+    tournament_service: TournamentService = Depends(get_tournament_service),
+):
+
+    return tournament_service.publish_tournament(
+        tournament_id=tournament_id, current_user=current_user
+    )
