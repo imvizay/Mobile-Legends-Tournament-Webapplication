@@ -12,13 +12,13 @@ import { useUserContext } from "../../contexts/UserContext";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [userCredError,setUserCredError] = useState({});
-  const [formData,setFormData] = useState({
-    email:'',
-    password:''
+  const [userCredError, setUserCredError] = useState({});
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
   })
 
-  const {setUser} = useUserContext()
+  const { setUser } = useUserContext()
 
   const navigate = useNavigate()
 
@@ -38,13 +38,13 @@ export default function LoginPage() {
 
   // handle input 
   const handleInputFields = (e) => {
-    const {name,value} = e.target
+    const { name, value } = e.target
 
     setFormData(
       prev => (
         {
           ...prev,
-          [name]:value
+          [name]: value
         }
       )
     )
@@ -53,31 +53,29 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const { isValid, errors} = validLoginCredentials(formData)
+    const { isValid, errors } = validLoginCredentials(formData)
 
     if (!isValid) {
       setUserCredError(errors)
 
       if (errors.empty_fields) {
-        toast.info("All fields are required.",{
-           toastId: "fields-required-info",
-          })
+        toast.info("All fields are required.", {
+          toastId: "fields-required-info",
+        })
       }
-        return;
+      return;
     }
 
-    try{
-      console.log("1 - Calling Login Endpoint")
-      const response = await mutateAsync(formData) 
-      const data = response.data
-      localStorage.setItem('MLBB_User',JSON.stringify(data))
-     
-      const redirectRoute = response.data.role  
-
-      navigate(`/${redirectRoute}/${data.id}`)
+    try {
+      const response = await mutateAsync(formData);
+      const data = response.data;
+      localStorage.setItem("MLBB_User", JSON.stringify(data));
+      const redirectRoute = data.role;
+      navigate(`/${redirectRoute}`,{
+        replace:true
+      });
     }
-    catch(e){
-      console.log("LOGIN ERROR",e)
+    catch (e) {
       console.log(e.data)
     }
 
@@ -86,18 +84,18 @@ export default function LoginPage() {
   const handleSocialLogin = async (socialProvider) => {
     // socialProvider (facebook or google)
 
-    try{
-      if(socialProvider == "google"){
+    try {
+      if (socialProvider == "google") {
         window.location.href = 'http://127.0.0.1:8000/api/auth/google/login';
       }
-      else{
-        window.location.href="http://127.0.0.1:8000/api/auth/discord/login";
+      else {
+        window.location.href = "http://127.0.0.1:8000/api/auth/discord/login";
       }
       // const data = await socialMutateAsync(socialProvider)
       // console.log("Social Login Success:",data)
     }
-    catch(e){
-      console.log("Social Login Failed Error:",e)
+    catch (e) {
+      console.log("Social Login Failed Error:", e)
     }
 
   }
@@ -105,15 +103,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[var(--bg-canvas)]  relative overflow-hidden">
 
-    
+
       <div className="relative z-10 px-4 py-4 md:px-8">
 
         {/* Header */}
         <header className="max-w-6xl mx-auto flex items-center justify-between mb-6">
 
-          <h1 
-          onClick={ () => navigate('/') }
-          className="text-[var(--text-primary)] text-3xl font-[Google Sans] font-extrabold tracking-tight">
+          <h1
+            onClick={() => navigate('/')}
+            className="text-[var(--text-primary)] text-3xl font-[Google Sans] font-extrabold tracking-tight">
             Gamix.
           </h1>
 
@@ -125,7 +123,7 @@ export default function LoginPage() {
               Don't have an account?
             </p>
 
-            <button onClick={ () => navigate('/register') } className="text-[var(--text-primary)] font-medium">
+            <button onClick={() => navigate('/register')} className="text-[var(--text-primary)] font-medium">
               Register →
             </button>
 
@@ -220,7 +218,7 @@ export default function LoginPage() {
                   />
 
                 </div>
-                {userCredError.email && <p className="text-red-400 text-[12px]">{userCredError.email}</p>} 
+                {userCredError.email && <p className="text-red-400 text-[12px]">{userCredError.email}</p>}
               </div>
 
               {/* Password */}
@@ -236,9 +234,9 @@ export default function LoginPage() {
                     size={18} className=" absolute left-4 top-1/2 -translate-y-1/2 " />
 
                   <input
-                  onChange={handleInputFields}
-                  name="password"
-                  value={formData.password}
+                    onChange={handleInputFields}
+                    name="password"
+                    value={formData.password}
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter password"
                     className="
@@ -284,7 +282,7 @@ export default function LoginPage() {
                 pt-1
               "
               >
- 
+
                 <button
                   type="button"
                   className="
@@ -300,7 +298,7 @@ export default function LoginPage() {
 
               {/* Login Button */}
               <button
-              type="submit"
+                type="submit"
                 className="
                 w-full
                 h-12

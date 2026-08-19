@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { teamService } from "../services/team_service"
 
-import TeamLayout from "../layouts/TeamLayout"
+import TeamLayout from "../pages/player/layouts/TeamLayout"
 import EmptyTeamState from "../pages/player/team/EmptyTeam"
 import TeamPageSkeleton from "../skeletons/playerdash/my_team/TeamPageSkeleton"
 

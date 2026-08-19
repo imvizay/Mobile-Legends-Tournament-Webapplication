@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { Outlet } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query';
-import TournamentDetailsModal from '../pages/admin/pages/tournament/AdminTournamentDetail';
-import { tournamentService } from '../services/admin/tournament_service';
+import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import { tournamentService } from '../../../../services/admin/tournament_service';
+import TournamentDetailsModal from '../tournament/AdminTournamentDetail';
 
 function AdminTournamentLayout() {
 
@@ -23,10 +23,9 @@ function AdminTournamentLayout() {
 
 
   return (
+    
     <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <main className="min-h-0 min-w-0 flex-1 overflow-hidden">
-
-
 
         <Outlet context={{
           isSelTournament: isSelectedTournament,

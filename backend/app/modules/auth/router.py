@@ -220,3 +220,6 @@ def resend_verification_token(
     service: AuthService=Depends(get_auth_service)
 ):
     return service.resend_verification_token(email,bg_task)
+
+
+

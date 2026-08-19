@@ -18,27 +18,24 @@ import RegistrationSuccess from '../pages/common/RegistrationSuccess'
 // Default Home page component.
 
 /* PlayerDashboard Components */
-import PlayerLayout from '../layouts/PlayerLayout'
 // Teams
-import TeamListingPage from '../pages/player/team/DiscoverTeamPage'
 
 
 import Overview from '../features/team/pages/Overview'
-import TeamLayout from '../layouts/TeamLayout'
-import EmptyTeamState from '../pages/player/team/EmptyTeam'
-import TeamCreatePage from '../pages/player/team/TeamCreatePage'
-import RequireTeam from './RequireTeam'
-import DiscoverTeamPage from '../pages/player/team/DiscoverTeamPage'
 import TeamApplication from '../features/team/pages/TeamApplication'
 import TeamMembers from '../features/team/pages/TeamMembers'
+import TeamLayout from '../pages/player/layouts/TeamLayout'
+import DiscoverTeamPage from '../pages/player/team/DiscoverTeamPage'
+import TeamCreatePage from '../pages/player/team/TeamCreatePage'
+import RequireTeam from './RequireTeam'
 
-import ProtectedRoutes from './ProtectedRoutes'
-import AdminLayout from '../layouts/AdminLayout'
-import CreateTournament from '../pages/admin/pages/tournament/CreateTournament'
-import AdminTournamentLayout from '../layouts/AdminTournamentLayout'
+import AdminTournamentLayout from '../pages/admin/pages/layouts/AdminTournamentLayout'
 import AdminTournamentOverview from '../pages/admin/pages/tournament/AdminTournamentOverview'
+import CreateTournament from '../pages/admin/pages/tournament/CreateTournament'
+import ProtectedRoutes from './ProtectedRoutes'
 
-import TournamentDetailsModal from '../pages/admin/pages/tournament/AdminTournamentDetail'
+import AdminUsersOverview from '../pages/admin/pages/users/AdminUsersOverview'
+import AdminUsersLayout from '../pages/admin/pages/layouts/AdminUsersLayout'
 
 
 function AppRoutesConfig() {
@@ -87,11 +84,16 @@ function AppRoutesConfig() {
         path="/admin"
         element={<ProtectedRoutes role="admin" />}>
 
+        {/* Users */}
+        <Route path='users' element={<AdminUsersLayout />}>
+          <Route index element={<AdminUsersOverview />} />
+        </Route>
+        
+        {/* Tournaments */}
         <Route path="tournaments" element={<AdminTournamentLayout />}>
           {/* Index Component */}
-          <Route index element={<AdminTournamentOverview />} /> 
+          <Route index element={<AdminTournamentOverview />} />
           <Route path='create' element={<CreateTournament />} />
-         
         </Route>
 
       </Route>
