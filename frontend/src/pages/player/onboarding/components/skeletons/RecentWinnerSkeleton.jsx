@@ -3,9 +3,7 @@ import React from "react";
 function RecentWinnerHistorySkeleton({ historyCount = 4 }) {
     return (
         <div className="overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--surface-base)]">
-            {/* =========================================================
-                FEATURED TOURNAMENT SKELETON
-            ========================================================= */}
+           
             <div className="relative h-[220px] overflow-hidden xs:h-[230px] sm:h-[260px] md:h-[290px] lg:h-[310px]">
                 {/* Background */}
                 <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
@@ -31,25 +29,19 @@ function RecentWinnerHistorySkeleton({ historyCount = 4 }) {
                 <div className="absolute inset-x-3 bottom-3 sm:inset-x-5 sm:bottom-5">
                     <div className="flex items-end justify-between gap-3">
                         <div className="min-w-0 flex-1">
+
                             {/* Season */}
                             <Skeleton className="h-2 w-16 bg-white/10" />
-
-                            {/* Title */}
                             <Skeleton className="mt-2 h-6 w-[70%] max-w-[360px] bg-white/10 sm:h-7 md:h-8" />
-
-                            {/* Subtitle */}
                             <Skeleton className="mt-2 h-2 w-28 bg-white/10 sm:w-36" />
-                        </div>
 
-                        {/* Duration */}
+                        </div>
                         <Skeleton className="h-6 w-12 shrink-0 rounded-md bg-white/10" />
                     </div>
                 </div>
             </div>
 
-            {/* =========================================================
-                WINNER RESULT SKELETON
-            ========================================================= */}
+           
             <div className="border-b border-[var(--border-default)] px-3 py-3 sm:px-5 sm:py-4">
                 {/* Teams + Score */}
                 <div className="flex items-center justify-between gap-2 sm:gap-4">
@@ -100,9 +92,6 @@ function RecentWinnerHistorySkeleton({ historyCount = 4 }) {
                 </div>
             </div>
 
-            {/* =========================================================
-                TOURNAMENT HISTORY SKELETON
-            ========================================================= */}
             <div className="px-3 py-3 sm:px-4">
                 {/* Header */}
                 <div className="mb-2 flex items-center justify-between px-0.5 sm:px-1">
@@ -121,22 +110,9 @@ function RecentWinnerHistorySkeleton({ historyCount = 4 }) {
     );
 }
 
-/* =========================================================
-   HISTORY CARD
-========================================================= */
-
 function HistoryCardSkeleton() {
     return (
-        <div
-            className="
-                flex min-w-[145px] shrink-0 items-center gap-2
-                rounded-md
-                border border-[var(--border-default)]
-                bg-[var(--surface-base)]
-                px-2 py-1.5
-                sm:min-w-[170px] sm:gap-2.5 sm:px-2.5 sm:py-2
-            "
-        >
+        <div className=" flex min-w-[145px] shrink-0 items-center gap-2 rounded-md border border-[var(--border-default)] bg-[var(--surface-base)] px-2 py-1.5 sm:min-w-[170px] sm:gap-2.5 sm:px-2.5 sm:py-2 " >
             {/* Logo */}
             <Skeleton className="size-7 shrink-0 rounded-md sm:size-8" />
 
@@ -152,33 +128,11 @@ function HistoryCardSkeleton() {
     );
 }
 
-/* =========================================================
-   SHIMMER
-========================================================= */
 
 function Skeleton({ className = "" }) {
     return (
-        <div
-            className={`
-                relative
-                overflow-hidden
-                rounded
-                bg-black/[0.055]
-                animate-pulse
-                ${className}
-            `}
-        >
-            <div
-                className="
-                    absolute inset-0
-                    -translate-x-full
-                    animate-[skeleton-shimmer_1.6s_ease-in-out_infinite]
-                    bg-gradient-to-r
-                    from-transparent
-                    via-white/55
-                    to-transparent
-                "
-            />
+        <div className={` relative overflow-hidden rounded bg-black/[0.055] animate-pulse ${className} `} >
+            <div className=" absolute inset-0 -translate-x-full animate-[skeleton-shimmer_1.6s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/55 to-transparent " />
         </div>
     );
 }
