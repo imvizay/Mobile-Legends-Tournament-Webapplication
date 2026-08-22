@@ -47,22 +47,10 @@ def make_recent_most_tournament_roster_response(
         prize_pool=tournament.prize_pool,
         entry_fee=tournament.entry_fee,
         max_teams=tournament.max_teams,
-        registration_open_date=datetime.combine(
-            tournament.reg_open_date,
-            tournament.reg_open_time,
-        ).replace(tzinfo=timezone.utc),
-        registration_end_date=datetime.combine(
-            tournament.reg_close_date,
-            tournament.reg_close_time,
-        ).replace(tzinfo=timezone.utc),
-        tournament_start_date=datetime.combine(
-            tournament.tournament_start_date,
-            tournament.tournament_start_time,
-        ).replace(tzinfo=timezone.utc),
-        tournament_end_date=datetime.combine(
-            tournament.tournament_end_date,
-            tournament.tournament_end_time,
-        ).replace(tzinfo=timezone.utc),
+        registration_opens_at=tournament.registration_opens_at,
+        registration_closes_at=tournament.registration_closes_at,
+        starts_at=tournament.starts_at,
+        ends_at=tournament.ends_at,
         status=registration.status.value,
         applied_at=registration.applied_at,
         roster=roster_response,
@@ -81,22 +69,11 @@ def make_tournament_response(registration):
         ),
         entry_fee=tournament.entry_fee,
         max_teams=tournament.max_teams,
-        registration_open_date=datetime.combine(
-            tournament.reg_open_date,
-            tournament.reg_open_time,
-        ).replace(tzinfo=timezone.utc),
-        registration_end_date=datetime.combine(
-            tournament.reg_close_date,
-            tournament.reg_close_time,
-        ).replace(tzinfo=timezone.utc),
-        tournament_start_date=datetime.combine(
-            tournament.tournament_start_date,
-            tournament.tournament_start_time,
-        ).replace(tzinfo=timezone.utc),
-        tournament_end_date=datetime.combine(
-            tournament.tournament_end_date,
-            tournament.tournament_end_time,
-        ).replace(tzinfo=timezone.utc),
+        registration_opens_at=tournament.registration_opens_at,
+        registration_closes_at=tournament.registration_closes_at,
+        
+        starts_at=tournament.starts_at,
+        ends_at=tournament.ends_at,
         status=registration.status.value,
         applied_at=registration.applied_at,
     )
