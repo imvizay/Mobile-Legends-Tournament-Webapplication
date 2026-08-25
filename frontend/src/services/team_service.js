@@ -53,7 +53,7 @@ export const teamService = {
 export const teamTournamentService = {
     teamTournamentRegistration(tournament_id){
         return api.post(
-            `team/tournament/${tournament_id}/register`
+            `/player/team/tournament/${tournament_id}/register`
         )
     }
 }
