@@ -229,6 +229,7 @@ class TeamJoinRequest(Base):
 
 
 # TOURNAMENT
+from ..tournaments.models import Tournament
 class TournamentRegistrationStatus(str, Enum):
     PENDING = "pending"
     UNDER_REVIEW = "under_review"
@@ -290,3 +291,5 @@ class TeamTournamentRegistration(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    
+    tournament = relationship("Tournament",back_populates="team_registrations")

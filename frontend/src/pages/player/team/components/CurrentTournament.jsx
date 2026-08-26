@@ -2,6 +2,11 @@ import React from "react";
 import { CalendarDays, Check, Trophy, Users, Zap } from "lucide-react";
 
 export default function CurrentTournament({ tournament }) {
+
+    
+
+
+
     if (!tournament) {
         return (
             <section className="flex min-h-[260px] items-center justify-center rounded-[16px] border border-dashed border-[var(--border-default)] bg-[var(--surface-elevated)]">

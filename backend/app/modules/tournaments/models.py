@@ -19,6 +19,7 @@ from sqlalchemy.orm import Mapped,mapped_column
 from app.core.db.base import Base
 
 
+
 class Tournament(Base):
     
     __tablename__ = "tournaments"
@@ -67,6 +68,8 @@ class Tournament(Base):
     # Entry
     entry_fee : Mapped[Decimal] = mapped_column(Numeric(5,2),nullable=False,default=Decimal("0.00"))
     entry_type = Column(String(50), nullable=False)
+    
+    prize_pool = Column(Numeric(12, 2), nullable=True)
 
     # Player Requirements
     minimum_account_level = Column(Integer, nullable=True)
@@ -107,4 +110,10 @@ class Tournament(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda:datetime.now(timezone.utc),
         nullable=False,
+    )
+    
+    team_registrations = relationship(
+        "TeamTournamentRegistration",
+        back_populates="tournament",
+        cascade="all, delete-orphan"
     )

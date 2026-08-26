@@ -79,6 +79,8 @@ class TeamMemberResponse(BaseModel):
     player_role: str
     player_name: str
     player_email: str
+    
+    
 
 
 class TeamResponse(BaseModel):
@@ -129,13 +131,11 @@ class JoinTeamResponse(BaseModel):
     message: str
 
 
-
-
 # Team Summary
 class CaptainSummary(BaseModel):
     id: int
     captain_name: str
-    role:str
+    role: str
 
 
 class TeamSummary(BaseModel):
@@ -150,3 +150,46 @@ class TeamSummary(BaseModel):
 class TeamSummaryResponse(BaseModel):
     has_team: bool
     team: TeamSummary | None = None
+
+ 
+# REGISTERED TOURNAMENT DASHBOARD RESPONSE
+class TeamRegisteredTournament(BaseModel):
+    model_config=ConfigDict(from_attributes=True)
+    tournament_id: int
+    tournament_name: str
+
+    server: str
+
+    prize_pool: Decimal | None = None
+    entry_fee: Decimal
+    max_teams: int
+
+    registration_open_date:datetime
+    registration_end_date: datetime
+    tournament_start_date: datetime
+    tournament_end_date: datetime
+
+    status: str
+    applied_at: datetime
+    
+class TeamMembers(BaseModel):
+    model_config=ConfigDict(from_attributes=True)
+    
+    id:int
+    email:str 
+    mlbb_id:str | None = None
+    mlbb_server:str | None = None
+    
+    role:str
+    status:str
+    
+
+class TeamDashboardData(BaseModel):
+    current_tournament: TeamRegisteredTournament | None = None
+    upcoming_tournament: list[TeamRegisteredTournament] | None = None
+    team_members: list[TeamMembers] 
+
+
+class TeamDashboardResponse(BaseModel):
+    success: bool
+    data: TeamDashboardData | None = None

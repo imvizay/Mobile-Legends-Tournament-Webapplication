@@ -19,6 +19,28 @@ class TeamRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    def get_team_registered_tournaments(self, team_id: int):
+        
+        tournaments = (
+            self.db.query(TeamTournamentRegistration).
+            options(joinedload(TeamTournamentRegistration.tournament)).
+            filter(TeamTournamentRegistration.team_id == team_id).
+            all()
+        )
+        
+        return tournaments
+        
+    def get_team_members(self, team_id: int):
+        members = (
+            self.db.query(TeamMember).
+            options(joinedload(TeamMember.player)).
+            filter(TeamMember.team_id == team_id).
+            all()
+        )
+        return members
+    
+    
+
     def team_summary(self, current_user):
         return (
             self.db.query(TeamMember)
@@ -180,7 +202,7 @@ class TeamTournamentRepository:
 
     # Get the team membership of a player
     def get_player_team_membership(self, player_id: int):
-        result =  self.db.execute(
+        result = self.db.execute(
             select(TeamMember).where(
                 TeamMember.player_id == player_id,
                 TeamMember.status == TeamMemberStatus.ACTIVE,
@@ -191,7 +213,7 @@ class TeamTournamentRepository:
 
     # Get tournament by ID
     def get_tournament(self, tournament_id: int):
-        result =  self.db.execute(
+        result = self.db.execute(
             select(Tournament).where(Tournament.id == tournament_id)
         )
 
@@ -203,7 +225,7 @@ class TeamTournamentRepository:
         team_id: int,
         tournament_id: int,
     ):
-        result =  self.db.execute(
+        result = self.db.execute(
             select(TeamTournamentRegistration).where(
                 TeamTournamentRegistration.team_id == team_id,
                 TeamTournamentRegistration.tournament_id == tournament_id,
@@ -225,7 +247,7 @@ class TeamTournamentRepository:
             captain_id=captain_id,
             status=TournamentRegistrationStatus.PENDING,
         )
-        
+
         self.db.add(registration)
         self.db.flush()
         self.db.commit()
@@ -234,7 +256,7 @@ class TeamTournamentRepository:
 
     # Get all active registrations of a team
     def get_team_registrations(self, team_id: int):
-        result =  self.db.execute(
+        result = self.db.execute(
             select(TeamTournamentRegistration).where(
                 TeamTournamentRegistration.team_id == team_id,
                 TeamTournamentRegistration.status.in_(
@@ -258,7 +280,7 @@ class TeamTournamentRepository:
         start_at: datetime,
         end_at: datetime,
     ):
-        result =  self.db.execute(
+        result = self.db.execute(
             select(TeamTournamentRegistration)
             .join(
                 Tournament,
@@ -281,7 +303,7 @@ class TeamTournamentRepository:
 
         for registration in registrations:
 
-            tournament =  self.get_tournament(registration.tournament_id)
+            tournament = self.get_tournament(registration.tournament_id)
 
             if not tournament:
                 continue
@@ -309,7 +331,7 @@ class TeamTournamentRepository:
         self,
         tournament_id: int,
     ) -> int:
-        result =  self.db.execute(
+        result = self.db.execute(
             select(func.count(TeamTournamentRegistration.id)).where(
                 TeamTournamentRegistration.tournament_id == tournament_id,
                 TeamTournamentRegistration.status.in_(
@@ -330,7 +352,7 @@ class TeamTournamentRepository:
         self,
         tournament_id: int,
     ):
-        result =  self.db.execute(
+        result = self.db.execute(
             select(TeamTournamentRegistration).where(
                 TeamTournamentRegistration.tournament_id == tournament_id,
                 TeamTournamentRegistration.status
