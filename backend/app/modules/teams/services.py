@@ -88,13 +88,7 @@ class TeamService:
             elif start > now:
                 current_tournament = registration
                 upcoming_tournaments.append(registration)
-                
         
-            print("TOURNAMENT:", tournament.tournament_name)
-            print("START:", start)
-            print("END:", end)
-            print("RUNNING:", start <= now <= end)
-
         # Nearest tournament first 
         upcoming_tournaments.sort(
             key=lambda registration: registration.tournament.tournament_start_date
@@ -198,6 +192,7 @@ class TeamService:
 
         return TeamResponseOutput(
             team=TeamResponse(
+                id=team.id,
                 team_name=team.name,
                 team_tag=team.tag,
                 team_max_members=team.max_members,

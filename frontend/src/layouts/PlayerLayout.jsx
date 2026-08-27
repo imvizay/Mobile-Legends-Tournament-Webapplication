@@ -1,53 +1,35 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 
 import PlayerSidebar from "../components/playerdashboard/Sidebar";
 import MobileNavbar from "../components/navigations/MobileNavbar";
 
-import { teamService } from "../services/team_service";
 import { PLAYER_DASHBOARD_NAVIGATION_LINKS } from "../utils/playerdashboard_links/playerdash_links";
-
 
 function PlayerLayout() {
     return (
-        <section className="grid h-screen w-full min-w-0 overflow-hidden bg-[var(--bg-canvas)] lg:grid-cols-[220px_minmax(0,1fr)]">
-
-            {/* Desktop Sidebar */}
+        <section className="grid h-dvh w-full min-w-0 overflow-hidden bg-[var(--bg-canvas)] lg:grid-cols-[240px_minmax(0,1fr)]">
+            {/* Desktop Navigation */}
             <aside className="hidden min-h-0 lg:block">
-                <PlayerSidebar
-                    dashboardLinks={PLAYER_DASHBOARD_NAVIGATION_LINKS}
-                />
+                <PlayerSidebar dashboardLinks={PLAYER_DASHBOARD_NAVIGATION_LINKS} />
             </aside>
 
-
-            {/* Right Content */}
+            {/* Application Content */}
             <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
-
-                {/* Desktop Header */}
-                {/*
-        <div className="hidden lg:block">
-          <TopbarHeader />
-        </div>
-        */}
-
-
-                {/* Mobile Header */}
-                <div className="lg:hidden">
+                {/* Mobile Navigation */}
+                <div className="shrink-0 lg:hidden">
                     <MobileNavbar />
                 </div>
 
-
-                {/* Main Content */}
-                <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-1.5 pt-17.5 pb-6 md:px-6 lg:px-8 lg:pt-6">
-                    <Outlet />
+                {/* Main Workspace */}
+                <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-3 pb-7 pt-[4.75rem] sm:px-4 md:px-6 md:pb-8 lg:px-8 lg:py-7 xl:px-10 2xl:px-12">
+                    <div className="mx-auto w-full min-w-0">
+                        <Outlet />
+                    </div>
                 </main>
-
             </div>
-
         </section>
     );
 }
-
 
 export default PlayerLayout;

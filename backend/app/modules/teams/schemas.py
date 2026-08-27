@@ -84,7 +84,7 @@ class TeamMemberResponse(BaseModel):
 
 
 class TeamResponse(BaseModel):
-
+    id:int
     team_name: str
     team_bio: str
     team_tag: str
