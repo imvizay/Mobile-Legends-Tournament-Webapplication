@@ -105,6 +105,15 @@ export const teamTournamentService = {
         return api.get(
             `/player/team/tournament/${registrationId}/team/${teamId}/contribution`
         )
+    },
+
+    getTournamentDetails(tournament_id){
+        return api.get(`/player/team/tournament/${tournament_id}/detail`)
+    },
+
+    getPaymentReview(tournament_id){
+        return api.get(`/player/team/tournament/${tournament_id}/payment-review`)
     }
+
 
 }
