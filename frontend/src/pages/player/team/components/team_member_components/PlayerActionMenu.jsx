@@ -1,17 +1,38 @@
 import { BellRing, Eye, ShieldCheck, UserRoundPlus, UserRoundX } from "lucide-react";
 
-function PlayerActionMenu({ member, isRoster, onViewProfile, onMakeRoster, onRemoveRoster, onMakeSubstitute, onRemindPayment }) {
+function PlayerActionMenu({
+    member,
+    isRoster,
+    onViewProfile,
+    onMakeRoster,
+    onRemoveRoster,
+    onMakeSubstitute,
+    onRemindPayment
+}) {
     return (
         <div className="absolute right-0 top-8 z-30 w-44 overflow-hidden rounded-xl border bg-[var(--surface-base)] p-1.5" style={{ borderColor: "var(--border-default)", boxShadow: "var(--shadow-md)" }}>
             <ActionButton icon={<Eye size={13} />} label="View Profile" onClick={() => onViewProfile?.(member)} />
 
-            <ActionButton icon={isRoster ? <UserRoundX size={13} /> : <ShieldCheck size={13} />} label={isRoster ? "Remove from Roster" : "Make Roster"} onClick={() => isRoster ? onRemoveRoster?.(member) : onMakeRoster?.(member)} />
+            <ActionButton
+                icon={isRoster ? <UserRoundX size={13} /> : <ShieldCheck size={13} />}
+                label={isRoster ? "Remove from Roster" : "Make Roster"}
+                onClick={() => isRoster ? onRemoveRoster?.(member) : onMakeRoster?.(member)}
+            />
 
-            <ActionButton icon={<UserRoundPlus size={13} />} label="Make Substitute" onClick={() => onMakeSubstitute?.(member)} />
+            <ActionButton
+                icon={<UserRoundPlus
+                    size={13} />}
+                label="Make Substitute"
+                onClick={() => onMakeSubstitute?.(member)}
+            />
 
             <div className="my-1 border-t border-[var(--border-subtle)]" />
 
-            <ActionButton icon={<BellRing size={13} />} label="Remind to Pay Fees" onClick={() => onRemindPayment?.(member)} />
+            <ActionButton
+                icon={<BellRing size={13} />}
+                label="Remind to Pay Fees"
+                onClick={() => onRemindPayment?.(member)}
+            />
         </div>
     );
 }

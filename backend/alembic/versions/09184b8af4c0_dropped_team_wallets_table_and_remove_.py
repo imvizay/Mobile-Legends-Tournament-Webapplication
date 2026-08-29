@@ -1,8 +1,8 @@
-"""create players table
+"""dropped team_wallets table and remove wallet column from team table
 
-Revision ID: 4cade6efb156
-Revises: 10b050b00466
-Create Date: 2026-06-05 17:03:21.967886
+Revision ID: 09184b8af4c0
+Revises: 44f5f95aa94f
+Create Date: 2026-08-28 13:32:44.127404
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '4cade6efb156'
-down_revision: Union[str, Sequence[str], None] = '10b050b00466'
+revision: str = '09184b8af4c0'
+down_revision: Union[str, Sequence[str], None] = '44f5f95aa94f'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

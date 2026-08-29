@@ -5,17 +5,18 @@ from app.dependencies.auth import get_current_user
 from .services import TeamService, TeamTournamentService
 from .dependency import get_team_service, get_teamtournament_service
 
+# captain
+from app.dependencies.roles import get_team_captain
+
 router = APIRouter(prefix="/player/team", tags=["Team"])
 
 
-
-@router.get('/dashboard')
+@router.get("/dashboard")
 def team_dashboard(
-    current_user: Player=Depends(get_current_user),
-    team_service:TeamService=Depends(get_team_service)
+    current_user: Player = Depends(get_current_user),
+    team_service: TeamService = Depends(get_team_service),
 ):
     return team_service.get_teamdashboard(current_user=current_user)
-
 
 
 @router.get("/summary")
@@ -76,16 +77,32 @@ async def join_team(
     return team_service.join_team(team_id, current_user)
 
 
-#  TEAM TOURNAMENTS ENDPOINTS
+# ======================================
+# TEAM TOURNAMENTS ENDPOINTS
+# ======================================
 
 
+# Register the team for a tournament
 @router.post("/tournament/{tournament_id}/register")
 def register_team(
     tournament_id: int,
     current_user: Player = Depends(get_current_user),
-    teamtournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
 ):
 
-    return teamtournament_service.register_team_tournament(
+    return tournament_service.register_team_tournament(
         tournament_id=tournament_id, current_user=current_user
+    )
+
+
+# add Roster
+@router.post("/tournament/{tournament_id}/roster/{player_id}")
+def add_roster(
+    tournament_id: int,
+    player_id: int,
+    captain: Player = Depends(get_team_captain),
+    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+):
+    return tournament_service.add_roster_player(
+        tournament_id=tournament_id, player_id=player_id, captain=captain
     )

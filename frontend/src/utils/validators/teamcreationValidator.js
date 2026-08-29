@@ -12,6 +12,8 @@ const ALLOWED_IMAGE_TYPES = [
 
 export const validateTeamDataAndImages = (data, images) => {
 
+    console.log("DATA ",data)
+
     const errors = {}
 
     const {
@@ -23,6 +25,10 @@ export const validateTeamDataAndImages = (data, images) => {
         team_communication_link,
         team_tag
     } = data
+
+    
+
+    console.log("Team tag",team_tag.toUpperCase())
 
     const { team_logo, team_banner } = images || {}
 
@@ -51,10 +57,9 @@ export const validateTeamDataAndImages = (data, images) => {
     }
 
     // Team Tag
-
     if (team_tag.trim()) {
 
-        if (!/^[A-Z0-9]{2,5}$/.test(team_tag.trim())) {
+        if (!/^[A-Z0-9]{2,5}$/.test(team_tag.trim().toUpperCase())) {
             errors.team_tag =
                 "Tag should be 2-5 uppercase letters or numbers.";
         }
@@ -74,11 +79,6 @@ export const validateTeamDataAndImages = (data, images) => {
         errors.team_region = "Please select a region.";
     }
 
-    // Language
-
-    if (!team_language.trim()) {
-        errors.team_language = "Please select a language.";
-    }
 
     // Communication Link
 
