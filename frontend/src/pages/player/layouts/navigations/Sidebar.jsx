@@ -1,8 +1,12 @@
 import React from "react";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home, LogOut } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
+import { useUserContext } from "../../../../contexts/UserContext";
 function PlayerSidebar({ dashboardLinks }) {
+
+    const {user, logout } = useUserContext()
+
     return (
         <aside className="flex h-screen w-[232px] shrink-0 flex-col border-r border-[var(--border-default)] bg-[var(--surface-base)]">
 
@@ -100,6 +104,7 @@ function PlayerSidebar({ dashboardLinks }) {
                 ))}
             </nav>
 
+
             {/* Player */}
             <div className="shrink-0 border-t border-[var(--border-default)] px-4 py-3">
                 <div className="flex items-center gap-3">
@@ -112,7 +117,7 @@ function PlayerSidebar({ dashboardLinks }) {
                     {/* Player Info */}
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-[13px] font-medium text-[var(--text-primary)]">
-                            Vijay
+                            {user?.email?.split('@')[0].toUpperCase() || ""}
                         </p>
 
                         <p className="mt-0.5 truncate text-[9px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]">
@@ -120,12 +125,22 @@ function PlayerSidebar({ dashboardLinks }) {
                         </p>
                     </div>
 
-                    <ChevronRight className="size-3.5 shrink-0 text-[var(--text-muted)]" strokeWidth={1.8} />
+                    {/* Logout */}
+                    <button
+                        type="button"
+                        onClick={logout}
+                        title="Logout"
+                        className="flex size-8 shrink-0 items-center justify-center rounded-[6px] text-[var(--text-muted)] transition-colors duration-150 hover:bg-red-500/5 hover:text-red-500"
+                    >
+                        <LogOut
+                            className="size-4"
+                            strokeWidth={1.8}
+                        />
+                    </button>
 
                 </div>
             </div>
-
-        </aside>
+        </aside >
     );
 }
 

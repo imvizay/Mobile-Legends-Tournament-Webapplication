@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 
-import PlayerSidebar from "../components/playerdashboard/Sidebar";
+import PlayerSidebar from "../pages/player/layouts/navigations/Sidebar";
 import MobileNavbar from "../components/navigations/MobileNavbar";
 
 import { PLAYER_DASHBOARD_NAVIGATION_LINKS } from "../utils/playerdashboard_links/playerdash_links";

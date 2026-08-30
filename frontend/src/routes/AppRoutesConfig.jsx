@@ -37,8 +37,10 @@ import PlayerDashboard from '../pages/player/onboarding/PlayerDashboard'
 import TeamDashboard from '../pages/player/team/dashboard/TeamDashboard'
 import TournamentDetail from '../pages/player/onboarding/components/TournamentDetail'
 import TournamentPage from '../pages/player/team/components/TournamentDetailPage'
-import PublishedTournament from '../pages/admin/pages/tournament/published/PublishedTournament'
-import TournamentContributionPreviewPage from '../pages/player/onboarding/components/TournamentContributionPreviewPage'
+import PublishedTournament from '../pages/admin/pages/tournament/ongoingRegistration/OngoingRegistration'
+import TournamentEntryCheckoutPage from '../pages/player/onboarding/components/TournaCheckoutEntryPage'
+import PaymentSuccess from '../pages/player/onboarding/components/PaymentSuccess'
+import OngoingTournamentRegistration from '../pages/admin/pages/tournament/ongoingRegistration/OngoingRegistration'
 
 
 export const dummyTournament = {
@@ -176,10 +178,12 @@ function AppRoutesConfig() {
 
         {/* <Route path='tournament/:id/detail' element={<TournamentPage />} /> */}
 
-        {/* =============================================== */}
-        {/* TEAM */}
-        {/* =============================================== */}
+        {/* PAYMENTS */}
+        <Route path='payments/success/:payment_reference' element={<PaymentSuccess/>}/>
+        <Route path='payments/success/already_paid/:payment_reference' element={<PaymentSuccess/>}/>
 
+
+        {/* TEAM */}
         <Route path='team/create' element={<TeamCreatePage />} />
         <Route path='team/discover' element={<DiscoverTeamPage />} />
 
@@ -192,9 +196,9 @@ function AppRoutesConfig() {
 
         {/* Tournaments Detail and Payment Flow */}
         <Route path='tournament/:id'>
-          <Route path='detail' element={<TournamentPage/>} />
-          <Route path='review-contribution' element={<TournamentContributionPreviewPage/>} />
-          <Route path='paymethod-wallet'/>
+          <Route path='detail' element={<TournamentPage />} />
+          <Route path='review-contribution' element={<TournamentEntryCheckoutPage />} />
+          <Route path='paymethod-wallet' />
           <Route path='verify-payment' />
           <Route path='payment-success' />
         </Route>
@@ -219,11 +223,14 @@ function AppRoutesConfig() {
           {/* Index Component */}
           <Route index element={<AdminTournamentOverview />} />
           <Route path='create' element={<CreateTournament />} />
-          <Route path='published' element={<PublishedTournament />} />
+          <Route path='ongoing-registration' element={<OngoingTournamentRegistration />} />
+          {/* <Route path='ongoing-registration/:id' element={<PublishedTournament />} /> */}
+
         </Route>
 
       </Route>
 
+    
 
       {/* Forbidden Or Invalid Routes */}
       {/* <Route path='*' element={<NotFound/>}/> */}

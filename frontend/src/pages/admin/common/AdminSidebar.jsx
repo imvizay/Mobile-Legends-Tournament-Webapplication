@@ -109,11 +109,20 @@ export default function AdminSidebar() {
 
           {openSection === "tournaments" && (
             <div className="ml-4 space-y-0.5 border-l pl-3" style={{ borderColor: "var(--border-default)" }}>
-              <Link to="/admin/tournaments" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments") ? "var(--text-primary)" : "var(--text-muted)" }}>All Tournaments</Link>
-              <Link to="/admin/tournaments/published" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/published") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/published") ? "var(--text-primary)" : "var(--text-muted)" }}>Published</Link>
-              <Link to="/admin/tournaments/drafts" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/drafts") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/drafts") ? "var(--text-primary)" : "var(--text-muted)" }}>Drafts</Link>
-              <Link to="/admin/tournaments/ongoing" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/ongoing") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/ongoing") ? "var(--text-primary)" : "var(--text-muted)" }}>Ongoing</Link>
+              <Link
+                to="/admin/tournaments"
+                className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`}
+                style={{ color: isActive("/admin/tournaments") ? "var(--text-primary)" : "var(--text-muted)" }}>
+                All Tournaments
+              </Link>
+
+              <Link to="/admin/tournaments/ongoing-registration" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/published") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/published") ? "var(--text-primary)" : "var(--text-muted)" }}>Ongoing Registration</Link>
+
+
+              <Link to="/admin/tournaments/live-tournament" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/ongoing") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/live") ? "var(--text-primary)" : "var(--text-muted)" }}>Live</Link>
+
               <Link to="/admin/tournaments/completed" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/completed") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/completed") ? "var(--text-primary)" : "var(--text-muted)" }}>Completed</Link>
+              
               <Link to="/admin/tournaments/cancelled" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/cancelled") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/cancelled") ? "var(--text-primary)" : "var(--text-muted)" }}>Cancelled</Link>
             </div>
           )}
@@ -142,11 +151,11 @@ export default function AdminSidebar() {
 
           {openSection === "verification" && (
             <div className="ml-4 space-y-0.5 border-l pl-3" style={{ borderColor: "var(--border-default)" }}>
-              <Link 
-              to="/admin/verification/screenshots" 
-              className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors 
-              ${isActive("/admin/verification/screenshots") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} 
-              style={{ color: isActive("/admin/verification/screenshots") ? "var(--text-primary)" : "var(--text-muted)" }}>Screenshots</Link>
+              <Link
+                to="/admin/verification/screenshots"
+                className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors 
+              ${isActive("/admin/verification/screenshots") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`}
+                style={{ color: isActive("/admin/verification/screenshots") ? "var(--text-primary)" : "var(--text-muted)" }}>Screenshots</Link>
 
               <Link to="/admin/verification/kyc" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/verification/kyc") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/verification/kyc") ? "var(--text-primary)" : "var(--text-muted)" }}>KYC</Link>
               <Link to="/admin/verification/teams" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/verification/teams") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/verification/teams") ? "var(--text-primary)" : "var(--text-muted)" }}>Team Verification</Link>
