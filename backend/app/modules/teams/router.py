@@ -106,3 +106,14 @@ def add_roster(
     return tournament_service.add_roster_player(
         tournament_id=tournament_id, player_id=player_id, captain=captain
     )
+    
+# CONFIRM ROSTER
+
+@router.patch('/tournament/{registration_id}/roster/lock')
+def confirm_roster(
+    registration_id:int,
+    captain: Player = Depends(get_team_captain),
+    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),    
+):
+    return tournament_service.confirm_roster(registration_id=registration_id,captain=captain)
+

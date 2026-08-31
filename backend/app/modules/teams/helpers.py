@@ -13,8 +13,9 @@ def make_roster_player_response(roster_player):
         return None
 
     return TeamRosterPlayer(
+        
         is_roster_locked=roster_player[0].roster.status,
-        roster=[
+        roster_players=[
             RosterPlayer(
                 id=roster.player.id,
                 mlbb_id=None,

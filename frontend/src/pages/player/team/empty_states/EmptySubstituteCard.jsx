@@ -1,27 +1,39 @@
-import { Users } from "lucide-react";
+import { ShieldPlus, Users } from "lucide-react";
 
 export default function EmptySubstituteCard() {
     return (
-        <div className="mt-3 flex flex-col gap-4 rounded-xl border border-dashed p-4 sm:flex-row sm:items-center sm:justify-between" style={{ background: "color-mix(in srgb, var(--surface-base) 70%, transparent)", borderColor: "var(--border-subtle)" }}>
-            <div className="flex min-w-0 items-start gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-[var(--surface-base)]" style={{ borderColor: "var(--border-subtle)" }}>
-                    <Users size={15} className="text-[var(--text-muted)]" />
-                </div>
+        <div className="relative overflow-hidden rounded-[15px] border border-dashed border-[var(--border-default)] bg-[var(--surface-base)] p-4">
+            <div className="flex items-start gap-3">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] text-[var(--text-muted)]">
+                    <Users size={13} />
+                </span>
 
-                <div className="min-w-0">
-                    <p className="text-[10px] font-bold text-[var(--text-primary)]">
-                        No substitute players assigned
-                    </p>
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--text-primary)]">
+                                Reserve Slot Available
+                            </p>
 
-                    <p className="mt-1 max-w-2xl text-[8px] leading-relaxed text-[var(--text-muted)]">
-                        Add substitute players who can participate if an active roster member becomes unavailable during the tournament.
-                    </p>
+                            <p className="mt-1 text-[7px] leading-relaxed text-[var(--text-muted)]">
+                                No substitute player has been assigned to this tournament.
+                            </p>
+                        </div>
+
+                        <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] text-[var(--text-muted)]">
+                            <ShieldPlus size={11} />
+                        </span>
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-2 border-t border-[var(--border-subtle)] pt-2.5">
+                        <span className="size-1.5 rounded-full bg-[var(--text-muted)]" />
+
+                        <p className="text-[6px] font-bold uppercase tracking-[0.1em] text-[var(--text-muted)]">
+                            Optional Tournament Reserve
+                        </p>
+                    </div>
                 </div>
             </div>
-
-            <span className="shrink-0 text-[7px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)]">
-                Optional Reserve
-            </span>
         </div>
     );
 }

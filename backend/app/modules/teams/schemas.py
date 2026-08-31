@@ -161,9 +161,8 @@ class RosterPlayer(BaseModel):
 
 class TeamRosterPlayer(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
     is_roster_locked: str
-    roster: list[RosterPlayer] = []
+    roster_players: list[RosterPlayer] = []
     
 
 class TeamRegisteredTournament(BaseModel):

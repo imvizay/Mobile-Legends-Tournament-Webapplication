@@ -475,3 +475,18 @@ class TeamTournamentRepository:
         self.db.flush()
 
         return roster_player
+    
+    def confirm_roster(self,registration_id:int,member:Player):
+        
+        roster = (
+            self.db.query(TournamentRoster)
+            .filter( 
+                    TournamentRoster.tournament_id == registration_id ,
+                    TournamentRoster.team_id == member.team_id
+            ).first()
+        )
+        
+        if not roster:
+            return None
+        
+        return roster
