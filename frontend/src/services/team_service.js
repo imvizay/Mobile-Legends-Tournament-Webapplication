@@ -98,4 +98,13 @@ export const teamTournamentService = {
         )
     },
 
+    getTeamContribution({registrationId,teamId}){
+        console.log("REGID",registrationId)
+        console.log("TEAMID",teamId)
+
+        return api.get(
+            `/player/team/tournament/${registrationId}/team/${teamId}/contribution`
+        )
+    }
+
 }

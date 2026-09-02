@@ -464,5 +464,102 @@ const dummyBracket = {
     },
 };
 
+export const dummyTournamentDetail = {
+    id: 1,
+    name: "Mobile Legends Champions Cup",
+    slug: "mobile-legends-champions-cup",
+    status: "registration_open",
+
+    banner_image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1800&auto=format&fit=crop",
+
+    game: "Mobile Legends: Bang Bang",
+
+    format: "5v5",
+    tournament_type: "Single Elimination",
+
+    region: "India",
+
+    registration_start: "2026-09-05T10:00:00",
+    registration_end: "2026-09-15T23:59:00",
+
+    tournament_start: "2026-09-18T18:00:00",
+    tournament_end: "2026-09-20T23:00:00",
+
+    entry_fee: "500.00",
+    currency: "INR",
+
+    prize_pool: "50000.00",
+
+    max_teams: 32,
+    registered_teams: 18,
+
+    team_size: 5,
+    max_substitutes: 2,
+
+    description: {
+        basic: `The Mobile Legends Champions Cup brings competitive teams together for a structured tournament experience. Teams will compete through a single elimination bracket for prize rewards and seasonal recognition.`,
+
+        tournament_rules: [
+            "Each participating team must have a confirmed competitive roster before contribution.",
+            "Only officially confirmed roster members are eligible to participate.",
+            "Teams must report before their scheduled match time.",
+            "Match results must follow the official tournament reporting process.",
+            "Unsportsmanlike behaviour may result in penalties or disqualification."
+        ],
+
+        reward_rules: [
+            "Prize rewards are distributed after tournament result verification.",
+            "Winning teams may be required to submit additional verification information.",
+            "Rewards are processed only after final tournament confirmation.",
+            "The platform may delay reward distribution when verification is incomplete."
+        ],
+
+        verification_rules: [
+            "Players must use their verified Mobile Legends account.",
+            "MLBB ID and Server ID must match the registered platform records.",
+            "Tournament administrators may request additional identity or account verification.",
+            "Incorrect or misleading account information may result in disqualification."
+        ],
+
+        cancellation_rules: [
+            "The platform may cancel or reschedule the tournament when necessary.",
+            "Eligible contributions may be refunded according to the tournament refund policy.",
+            "No refund is guaranteed after the tournament has officially started.",
+            "Players will be notified through the platform when a cancellation occurs."
+        ]
+    },
+
+    awards: [
+        {
+            id: 1,
+            position: "Winner",
+            reward: "₹30,000",
+            description: "Champion team reward",
+            percentage: "60%"
+        },
+        {
+            id: 2,
+            position: "Runner Up",
+            reward: "₹15,000",
+            description: "Second place reward",
+            percentage: "30%"
+        },
+        {
+            id: 3,
+            position: "MVP",
+            reward: "₹5,000",
+            description: "Tournament MVP award",
+            percentage: "10%"
+        }
+    ],
+
+    contribution: {
+        status: "open",
+        roster_required: true,
+        roster_size: 5,
+        contribution_required: true,
+        contribution_deadline: "2026-09-15T23:59:00"
+    }
+};
 
 export {dummyBracket,dummyPlayers,dummyTournament}

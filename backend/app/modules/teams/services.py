@@ -21,6 +21,7 @@ from .schemas import (
     TeamSummaryResponse,
     CaptainSummary,
     TeamSummary,
+    TeamContributionResponse
 )
 
 # Team Custom Exception
@@ -179,6 +180,8 @@ class TeamService:
                         player_name=member.player.email.split("@")[0],
                         player_email=member.player.email,
                         player_role=member.role,
+                        mlbb_id=member.player.mlbb_id,
+                        mlbb_server=member.player.mlbb_server
                     )
                     for member in team.members
                 ],
@@ -592,8 +595,8 @@ class TeamTournamentService:
     # Confirm Roster
     def confirm_roster(self, registration_id: int, captain: Player):
 
-        roster = self.repository.confirm_roster(
-            registration_id=registration_id, captain=captain
+        roster = self.repository.my_roster(
+            registration_id=registration_id, member=captain
         )
 
         if not roster:
@@ -615,14 +618,42 @@ class TeamTournamentService:
                 f"Currently selected: {roster.selected_player_count}.",
             )
 
-        roster.status = TournamentRosterStatus.CONFIRMED
-        roster.confirmed_at = datetime.now(timezone.utc)
+        confirmed_roster = self.repository.confirm_roster(roster=roster)
+        entry_fee = roster.registration.tournament.entry_fee
 
-        for player in roster.players:
-            if player.status == TournamentRosterPlayerStatus.SELECTED:
-                player.status = TournamentRosterPlayerStatus.CONFIRMED
+        self.repository.create_contribution(
+            roster_players=roster.players, entry_fee=entry_fee
+        )
 
         self.repository.db.commit()
         self.repository.db.refresh(roster)
 
         return {"message": "Done.", "data": {"roster": roster}}
+
+    def contribution_stats(
+        self, registration_id: int, team_id: int, current_user: Player
+    ):
+
+        contributions = self.repository.get_tournament_contribution(
+            registration_id=registration_id,
+            team_id=team_id,
+        )
+
+        response = [
+            TeamContributionResponse(
+                id=contribution.id,
+                username=contribution.roster_player.player.username,
+                email=contribution.roster_player.player.email,
+                mlbb_id=contribution.roster_player.player.mlbb_id,
+                mlbb_server=contribution.roster_player.player.mlbb_server,
+                amount=contribution.amount,
+                contribution_status=contribution.status,
+                paid_at=contribution.paid_at,
+            )
+            for contribution in contributions
+        ]
+
+        return {
+            "message": "Success",
+            "data": response,
+        }

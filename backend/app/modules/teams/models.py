@@ -262,6 +262,7 @@ class TeamTournamentRegistration(Base):
     )
 
     tournament = relationship("Tournament", back_populates="team_registrations")
+    
     roster = relationship(
         "TournamentRoster",
         back_populates="registration",
@@ -364,8 +365,7 @@ class TournamentRoster(Base):
 class TournamentRosterPlayerStatus(str, Enum):
     SELECTED = "selected"
     REMOVED = "removed"
-    CONFIRMED = 'confirmed'
-    LOCKED = "locked"
+    
     SUBSTITUTE = "substitute"
 
 
@@ -468,7 +468,7 @@ class TeamTournamentContribution(Base):
 
     status = Column(
         SQLEnum(TeamTournamentContributionStatus),
-        default=TeamTournamentContributionStatus.PENDING,
+        server_default=TeamTournamentContributionStatus.PENDING,
         nullable=False,
     )
 

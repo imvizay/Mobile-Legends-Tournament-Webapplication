@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 from fastapi import Form
 from decimal import Decimal
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator,computed_field
 
 from .models import TeamVisibility
 
@@ -69,17 +69,14 @@ class TeamCreateSchema(BaseModel):
         )
 
 
-
 class TeamMemberResponse(BaseModel):
     player_role: str
     player_name: str
     player_email: str
-    
-    
 
 
 class TeamResponse(BaseModel):
-    id:int
+    id: int
     team_name: str
     team_bio: str
     team_tag: str
@@ -144,66 +141,86 @@ class TeamSummaryResponse(BaseModel):
     has_team: bool
     team: TeamSummary | None = None
 
- 
+
 # REGISTERED TOURNAMENT DASHBOARD RESPONSE
 
 
 # ROSTER PLAYER
+
 class RosterPlayer(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     mlbb_id: str | None = None
     mlbb_server: str | None = None
-    tournament_readiness:str
+    role: str
+    tournament_readiness: str
     status: str
 
 
 class TeamRosterPlayer(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    is_roster_locked: str
-    roster_players: list[RosterPlayer] = []
-    
+
+    roster_status: str
+    is_roster_locked: bool
+    roster_players: list[RosterPlayer] = Field(default_factory=list)
+
 
 class TeamRegisteredTournament(BaseModel):
-    model_config=ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
+
     tournament_id: int
     tournament_name: str
-
     server: str
 
     prize_pool: Decimal | None = None
     entry_fee: Decimal
     max_teams: int
 
-    registration_open_date:datetime
+    registration_open_date: datetime
     registration_end_date: datetime
     tournament_start_date: datetime
     tournament_end_date: datetime
 
     status: str
-    roster: TeamRosterPlayer
+    roster: TeamRosterPlayer | None = None
     applied_at: datetime
-    
+
+
 class TeamMembers(BaseModel):
-    model_config=ConfigDict(from_attributes=True)
-    
-    id:int
-    email:str 
-    mlbb_id:str | None = None
-    mlbb_server:str | None = None
-    
-    role:str
-    status:str
-    
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: str
+    mlbb_id: str | None = None
+    mlbb_server: str | None = None
+
+    role: str
+    status: str
+
 
 class TeamDashboardData(BaseModel):
     current_tournament: TeamRegisteredTournament | None = None
     upcoming_tournament: list[TeamRegisteredTournament] | None = None
-    team_members: list[TeamMembers] 
+    team_members: list[TeamMembers]
 
 
 class TeamDashboardResponse(BaseModel):
     success: bool
     data: TeamDashboardData | None = None
 
+
+
+class TeamContributionResponse(BaseModel):
+    id: int
+    email: str
+    mlbb_id: str | None
+    mlbb_server: str | None
+    amount: Decimal
+    contribution_status: str
+    paid_at: datetime | None
+    
+    @computed_field
+    @property
+    def username(self) -> str:
+        return self.email.split("@")[0]

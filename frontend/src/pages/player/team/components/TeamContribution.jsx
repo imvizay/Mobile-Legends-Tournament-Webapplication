@@ -1,209 +1,246 @@
-import React from "react";
-import { Check, Clock3, LockKeyhole, ShieldCheck, Users, WalletCards } from "lucide-react";
 
-const teamMembers = [
-    { id: 1, name: "Vijay Meena", role: "CAPTAIN", amount: 100, paidAt: "2 hours ago" },
-    { id: 2, name: "Arjun Sharma", role: "PLAYER", amount: 100, paidAt: "3 hours ago" },
-    { id: 3, name: "Rahul Verma", role: "PLAYER", amount: 100, paidAt: "5 hours ago" },
-    { id: 4, name: "Aman Khan", role: "PLAYER", amount: 100, paidAt: "7 hours ago" },
-    { id: 5, name: "Karan Singh", role: "PLAYER", amount: 0, paidAt: null },
-];
+import { useQuery } from "@tanstack/react-query";
+import { Bell, Check, CircleAlert, CircleX, Clock3, RefreshCw, WalletCards } from "lucide-react";
 
-const CONTRIBUTION_PER_PLAYER = 100;
+import { teamTournamentService } from "../../../../services/team_service";
+import TeamContributionSkeleton from "../skeletons/TeamContributionSkeletons";
 
-export default function TeamContribution() {
-    const paidMembers = teamMembers.filter((member) => member.amount >= CONTRIBUTION_PER_PLAYER);
-    const remainingMembers = teamMembers.filter((member) => member.amount < CONTRIBUTION_PER_PLAYER);
+import { useTeamContribution } from "../../../../hooks/tournament/contribution/useTeamContribution";
 
-    const totalContribution = teamMembers.length * CONTRIBUTION_PER_PLAYER;
+const paymentConfig = {
+    PAID: {
+        icon: Check,
+        label: "Paid",
+        statusClass: "text-emerald-500",
+        iconClass: "border-emerald-500/20 bg-emerald-500/10 text-emerald-500",
+    },
+    PENDING: {
+        icon: Clock3,
+        label: "Pending",
+        statusClass: "text-amber-500",
+        iconClass: "border-amber-500/20 bg-amber-500/10 text-amber-500",
+    },
+    FAILED: {
+        icon: CircleX,
+        label: "Failed",
+        statusClass: "text-red-500",
+        iconClass: "border-red-500/20 bg-red-500/10 text-red-500",
+    },
+};
 
-    const paidAmount = paidMembers.reduce((total, member) => total + member.amount, 0);
-    
-    const remainingAmount = Math.max(totalContribution - paidAmount, 0);
-    const allPaid = remainingMembers.length === 0;
-    const progress = totalContribution > 0 ? Math.round((paidAmount / totalContribution) * 100) : 0;
+export default function TeamContribution({
+    teamId,
+    registrationId,
+    onRemindPlayers,
+    isCaptain = false
+}) {
+
+    const { data, isPending, isError, refetch, isFetching } = useTeamContribution({ teamId, registrationId })
+
+
+    if (isPending) return <TeamContributionSkeleton rows={5} isCaptain={isCaptain} />;
+
+    if (isError) return <ContributionError onRetry={refetch} isRetrying={isFetching} />;
+
+    const rosterMembers = data?.data ?? [];
+
+    console.log("ROSTER_MEM", rosterMembers)
+
+    const contributionTotal = rosterMembers?.reduce((total, member) => {
+        const status = member?.contribution_status?.toUpperCase();
+
+        if (["UNPAID", "FAILED", "PENDING", "CANCELLED"].includes(status)) {
+            return total + Number(member?.amount ?? 0);
+        }
+
+        return total;
+    }, 0);
+
+    const paidAmount = rosterMembers.reduce((total, member) => {
+        const status = member.status?.toUpperCase();
+        return status === "PAID" ? total + Number(member.amount ?? 0) : total;
+    }, 0);
+
+    const hasOutstandingPayments = rosterMembers.some((member) => {
+        const status = member.status?.toUpperCase();
+        return status === "PENDING" || status === "FAILED";
+    });
+
+    const allPaid = rosterMembers.length > 0 && !hasOutstandingPayments;
 
     return (
-        <section className="w-full min-w-0">
-            <div className="mb-3">
-                <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-lg font-bold uppercase leading-none tracking-[-0.02em]" style={{ color: "var(--headline-primary)" }}>
-                        TEAM CONTRIBUTION
-                    </h2>
+        <section className="w-full overflow-hidden rounded-[16px] border border-[var(--border-default)] bg-[var(--surface-elevated)]">
 
-                    <span className="text-[7px] font-bold uppercase tracking-[0.12em]" style={{ color: allPaid ? "var(--accent-gold)" : "var(--text-muted)" }}>
-                        {allPaid ? "RESERVED" : "IN PROGRESS"}
-                    </span>
+            {/* Contribution Overview */}
+            <div className="border-b border-[var(--border-subtle)] px-4 py-4 sm:px-5">
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-base)] text-[var(--accent-gold)]">
+                            <WalletCards size={14} />
+                        </span>
+
+                        <div className="min-w-0">
+                            <h2 className="text-[9px] font-black uppercase tracking-[0.14em] text-[var(--text-primary)]">Roster Contribution</h2>
+                            <p className="mt-1 text-[7px] text-[var(--text-muted)]">Tournament entry contribution</p>
+                        </div>
+                    </div>
+
+                    <div className="flex shrink-0 items-baseline gap-1.5">
+                        <span className="text-[22px] font-black leading-none tracking-[-0.04em] text-[var(--text-primary)] sm:text-[26px]">
+                            ₹{paidAmount.toLocaleString("en-IN")}
+                        </span>
+
+                        <span className="text-[10px] font-bold text-[var(--text-muted)]">
+                            / ₹{contributionTotal.toLocaleString("en-IN")}
+                        </span>
+                    </div>
                 </div>
-
-                <p className="mt-1 text-[8px] font-semibold uppercase tracking-[0.13em]" style={{ color: "var(--text-muted)" }}>
-                    TOURNAMENT ENTRY CONTRIBUTION
-                </p>
             </div>
 
-            <div className="min-w-0 overflow-hidden rounded-[16px] border" style={{ background: "var(--surface-elevated)", borderColor: "var(--border-default)" }}>
-                <ContributionOverview
-                    paidAmount={paidAmount}
-                    totalContribution={totalContribution}
-                    remainingAmount={remainingAmount}
-                    remainingMembers={remainingMembers.length}
-                    progress={progress}
-                    allPaid={allPaid}
-                />
+            {/* Payment Records */}
+            <div className="px-4 py-3 sm:px-5">
+                <div className="mb-1 flex items-center justify-between gap-3">
+                    <p className="text-[7px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Roster Payment Status</p>
+                    <span className="text-[7px] font-medium text-[var(--text-muted)]">{rosterMembers.length} Players</span>
+                </div>
 
-                <ContributionList members={teamMembers} />
+                <div>
+                    {rosterMembers.map((member, index) => (
+                        <PaymentRow key={member.id} member={member} isLast={index === rosterMembers.length - 1} />
+                    ))}
+                </div>
 
-                <ContributionPolicy allPaid={allPaid} />
+                {isCaptain && hasOutstandingPayments && (
+                    <button type="button" onClick={onRemindPlayers} className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--surface-base)] px-4 py-2.5 text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--text-primary)] transition-transform active:scale-[0.99]">
+                        <Bell size={12} />
+                        Remind Players to Contribute
+                    </button>
+                )}
+            </div>
+
+            {/* Payment Reservation */}
+            <div className="border-t border-[var(--border-subtle)] bg-[var(--surface-base)] px-4 py-3 sm:px-5">
+                <div className="flex items-start gap-2.5">
+                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] text-[var(--accent-gold)]">
+                        <CircleAlert size={12} />
+                    </span>
+
+                    <div className="min-w-0">
+                        <p className="text-[7px] font-bold uppercase tracking-[0.12em] text-[var(--text-primary)]">Payment Reservation</p>
+
+                        <p className="mt-1 text-[7px] leading-relaxed text-[var(--text-muted)]">
+                            {allPaid
+                                ? "All roster contributions are complete. The collected amount is reserved for this tournament and cannot be disbursed until the tournament is completed."
+                                : "Once all required roster players complete their contributions, the collected amount will be reserved for the tournament and cannot be disbursed until the tournament is completed."}
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
     );
 }
 
-function ContributionOverview({
-    paidAmount,
-    totalContribution,
-    remainingAmount,
-    remainingMembers,
-    progress,
-    allPaid,
-}) {
+
+/* =====================================================
+   PAYMENT ROW
+===================================================== */
+
+function PaymentRow({ member, isLast }) {
+    const status = member.contribution_status?.toUpperCase() ?? "PENDING";
+    const config = paymentConfig[status] ?? paymentConfig.PENDING;
+    const StatusIcon = config.icon;
+
+    const detail = getPaymentDetail(status, member.paid_at);
+
     return (
-        <div className="border-b px-3.5 py-3.5" style={{ borderColor: "var(--border-subtle)" }}>
-            <div className="flex items-center gap-2.5">
-                <div className="flex size-7 shrink-0 items-center justify-center rounded-full border" style={{ background: "color-mix(in srgb, var(--accent-gold) 7%, transparent)", borderColor: "color-mix(in srgb, var(--accent-gold) 18%, transparent)" }}>
-                    {allPaid ? (
-                        <LockKeyhole size={12} style={{ color: "var(--accent-gold)" }} />
-                    ) : (
-                        <WalletCards size={12} style={{ color: "var(--accent-gold)" }} />
-                    )}
+        <div className={`flex min-w-0 items-center gap-3 py-2.5 ${!isLast ? "border-b border-[var(--border-subtle)]" : ""}`}>
+            <span className={`flex size-7 shrink-0 items-center justify-center rounded-full border ${config.iconClass}`}>
+                <StatusIcon size={11} />
+            </span>
+
+            <div className="min-w-0 flex-1">
+                <p className="truncate text-[9px] font-bold text-[var(--text-primary)]">{member.username}</p>
+
+                <div className="mt-0.5 flex min-w-0 items-center gap-1">
+                    <span className={`shrink-0 text-[7px] font-bold uppercase tracking-[0.08em] ${config.statusClass}`}>{config.label}</span>
+                    <span className="shrink-0 text-[var(--text-muted)]">·</span>
+                    <span className="truncate text-[7px] text-[var(--text-muted)]">{detail}</span>
                 </div>
-
-                <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline gap-1">
-                        <span className="text-[21px] font-black leading-none tracking-tight" style={{ color: "var(--text-primary)" }}>
-                            ₹{paidAmount.toLocaleString("en-IN")}
-                        </span>
-
-                        <span className="text-[9px] font-semibold" style={{ color: "var(--text-muted)" }}>
-                            / ₹{totalContribution.toLocaleString("en-IN")}
-                        </span>
-                    </div>
-
-                    <p className="mt-1 text-[7px] font-bold uppercase tracking-[0.12em]" style={{ color: "var(--text-muted)" }}>
-                        {allPaid ? "TOTAL CONTRIBUTION RESERVED" : "CONTRIBUTION RECEIVED"}
-                    </p>
-                </div>
-
-                <span className="shrink-0 text-[9px] font-bold" style={{ color: allPaid ? "var(--accent-gold)" : "var(--text-secondary)" }}>
-                    {progress}%
-                </span>
             </div>
 
-            <div className="mt-3 h-[3px] overflow-hidden rounded-full" style={{ background: "var(--border-subtle)" }}>
-                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, background: "var(--accent-gold)" }} />
-            </div>
-
-            <div className="mt-2 flex min-w-0 items-center justify-between gap-2">
-                <span className="truncate text-[7px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--text-muted)" }}>
-                    {allPaid ? "ALL MEMBERS PAID" : `${remainingMembers} MEMBER${remainingMembers === 1 ? "" : "S"} REMAINING`}
-                </span>
-
-                <span className="shrink-0 text-[7px] font-bold uppercase tracking-[0.08em]" style={{ color: allPaid ? "var(--accent-gold)" : "var(--text-secondary)" }}>
-                    {allPaid ? "FUND RESERVED" : `₹${remainingAmount.toLocaleString("en-IN")} DUE`}
-                </span>
-            </div>
-        </div>
-    );
-}
-
-function ContributionList({ members }) {
-    return (
-        <div className="px-3.5 py-3">
-            <div className="mb-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                    <Users size={11} style={{ color: "var(--accent-gold)" }} />
-
-                    <span className="text-[7px] font-bold uppercase tracking-[0.14em]" style={{ color: "var(--text-muted)" }}>
-                        MEMBER CONTRIBUTIONS
-                    </span>
-                </div>
-
-                <span className="text-[7px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--text-muted)" }}>
-                    {members.length} MEMBERS
-                </span>
-            </div>
-
-            <div>
-                {members.map((member, index) => {
-                    const hasPaid = member.amount >= CONTRIBUTION_PER_PLAYER;
-
-                    return (
-                        <div key={member.id} className={`flex min-w-0 items-center gap-2.5 py-2 ${index !== members.length - 1 ? "border-b" : ""}`} style={{ borderColor: "var(--border-subtle)" }}>
-                            <div className="flex size-7 shrink-0 items-center justify-center rounded-full border text-[8px] font-bold uppercase" style={{ background: "var(--surface-base)", borderColor: hasPaid ? "color-mix(in srgb, var(--accent-gold) 22%, var(--border-default))" : "var(--border-subtle)", color: hasPaid ? "var(--accent-gold)" : "var(--text-muted)" }}>
-                                {member.name.charAt(0)}
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                                <div className="flex min-w-0 items-center gap-1.5">
-                                    <p className="truncate text-[9px] font-bold uppercase" style={{ color: "var(--text-primary)" }}>
-                                        {member.name}
-                                    </p>
-
-                                    {member.role === "CAPTAIN" && (
-                                        <span className="shrink-0 text-[6px] font-bold uppercase tracking-[0.08em]" style={{ color: "var(--accent-gold)" }}>
-                                            CAPTAIN
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div className="mt-0.5 flex items-center gap-1">
-                                    {hasPaid ? (
-                                        <>
-                                            <Check size={8} style={{ color: "var(--accent-gold)" }} />
-                                            <span className="text-[7px] font-medium" style={{ color: "var(--text-muted)" }}>
-                                                PAID · {member.paidAt}
-                                            </span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Clock3 size={8} style={{ color: "var(--text-muted)" }} />
-                                            <span className="text-[7px] font-bold uppercase" style={{ color: "var(--text-muted)" }}>
-                                                CONTRIBUTION PENDING
-                                            </span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="shrink-0 text-right">
-                                <p className="text-[9px] font-bold" style={{ color: hasPaid ? "var(--text-primary)" : "var(--text-muted)" }}>
-                                    ₹{member.amount.toLocaleString("en-IN")}
-                                </p>
-
-                                <p className="mt-0.5 text-[6px] font-bold uppercase tracking-[0.08em]" style={{ color: hasPaid ? "var(--accent-gold)" : "var(--text-muted)" }}>
-                                    {hasPaid ? "RECEIVED" : "DUE"}
-                                </p>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
-
-function ContributionPolicy({ allPaid }) {
-    return (
-        <div className="border-t px-3.5 py-2.5" style={{ background: "color-mix(in srgb, var(--accent-gold) 3%, transparent)", borderColor: "var(--border-subtle)" }}>
-            <div className="flex items-start gap-2">
-                <ShieldCheck size={11} className="mt-0.5 shrink-0" style={{ color: "var(--accent-gold)" }} />
-
-                <p className="text-[7px] leading-[1.5]" style={{ color: "var(--text-muted)" }}>
-                    {allPaid
-                        ? "FUNDS ARE RESERVED. RESERVED CONTRIBUTIONS ARE NON-REFUNDABLE UNLESS THE TOURNAMENT IS CANCELLED UNDER TOURNAMENT POLICY."
-                        : "ONCE ALL MEMBERS PAY, THE CONTRIBUTION WILL BE RESERVED. RESERVED FUNDS ARE NON-REFUNDABLE UNLESS THE TOURNAMENT IS CANCELLED UNDER TOURNAMENT POLICY."}
+            <div className="shrink-0 text-right">
+                <p className="text-[10px] font-black text-[var(--text-primary)]">
+                    ₹{Number(member.amount ?? 0).toLocaleString("en-IN")}
                 </p>
             </div>
         </div>
     );
 }
+
+
+/* =====================================================
+   PAYMENT STATUS DETAIL
+===================================================== */
+
+function getPaymentDetail(status, paidAt) {
+    if (status === "PAID") return paidAt ? formatRelativeTime(paidAt) : "Payment received";
+
+    if (status === "FAILED") return "Payment failed";
+
+    return "Due";
+}
+
+
+/* =====================================================
+   RELATIVE TIME FORMATTER
+===================================================== */
+
+function formatRelativeTime(dateValue) {
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) return "Payment received";
+
+    const difference = Date.now() - date.getTime();
+
+    const minutes = Math.floor(difference / (1000 * 60));
+    const hours = Math.floor(difference / (1000 * 60 * 60));
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+    if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+    if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+
+    return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+
+/* =====================================================
+   API ERROR STATE
+===================================================== */
+
+function ContributionError({ onRetry, isRetrying }) {
+    return (
+        <section className="flex min-h-[300px] w-full items-center justify-center rounded-[16px] border border-[var(--border-default)] bg-[var(--surface-elevated)] px-5 py-8">
+            <div className="flex max-w-[320px] flex-col items-center text-center">
+                <span className="flex size-10 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-500">
+                    <CircleX size={18} />
+                </span>
+
+                <h3 className="mt-3 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--text-primary)]">
+                    Contribution Details Unavailable
+                </h3>
+
+                <p className="mt-2 text-[8px] leading-relaxed text-[var(--text-muted)]">
+                    We couldn't load your team's contribution details right now. Please try again. If the issue continues, raise a support ticket with a screenshot.
+                </p>
+
+                <button type="button" onClick={onRetry} disabled={isRetrying} className="mt-4 flex min-w-[120px] items-center justify-center gap-2 rounded-lg border border-[var(--border-default)] bg-[var(--surface-base)] px-4 py-2.5 text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-60">
+                    <RefreshCw size={12} className={isRetrying ? "animate-spin" : ""} />
+                    {isRetrying ? "Retrying..." : "Try Again"}
+                </button>
+            </div>
+        </section>
+    );
+}
+

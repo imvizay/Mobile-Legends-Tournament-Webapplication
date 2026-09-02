@@ -7,7 +7,10 @@ from .models import (
     TeamJoinRequestStatus,
     TeamRole,
     TournamentRosterPlayer,
+    TeamTournamentContribution,
+    TeamTournamentContributionStatus,
 )
+
 from ..auth.models import Player
 from sqlalchemy import exists, func, select
 from datetime import datetime, timezone
@@ -475,18 +478,65 @@ class TeamTournamentRepository:
         self.db.flush()
 
         return roster_player
-    
-    def confirm_roster(self,registration_id:int,member:Player):
-        
+
+    def my_roster(self, registration_id: int, member: Player):
+
         roster = (
             self.db.query(TournamentRoster)
-            .filter( 
-                    TournamentRoster.tournament_id == registration_id ,
-                    TournamentRoster.team_id == member.team_id
-            ).first()
+            .options(
+                joinedload(TournamentRoster.registration).joinedload(
+                    TeamTournamentRegistration.tournament
+                )
+            )
+            .filter(
+                TournamentRoster.tournament_id == registration_id,
+                TournamentRoster.team_id == member.team_id,
+            )
+            .first()
         )
-        
+
         if not roster:
             return None
-        
+
         return roster
+
+    def confirm_roster(self, roster: TournamentRoster):
+        roster.status = TournamentRosterStatus.CONFIRMED
+        roster.created_at = datetime.now(timezone.utc)
+
+    def create_contribution(
+        self, roster_players: TournamentRosterPlayer, entry_fee: int
+    ):
+
+        for player in roster_players:
+
+            contribution = TeamTournamentContribution(
+                roster_player_id=player.id, amount=entry_fee
+            )
+
+            self.db.add(contribution)
+
+    def get_tournament_contribution(self, registration_id: int, team_id: int):
+
+        return (
+            self.db.query(TeamTournamentContribution)
+            .options(
+                joinedload(TeamTournamentContribution.roster_player).joinedload(
+                    TournamentRosterPlayer.player
+                )
+            )
+            .join(
+                TournamentRosterPlayer,
+                TournamentRosterPlayer.id
+                == TeamTournamentContribution.roster_player_id,
+            )
+            .join(
+                TournamentRoster,
+                TournamentRoster.id == TournamentRosterPlayer.roster_id,
+            )
+            .filter(
+                TournamentRoster.registration_id == registration_id,
+                TournamentRoster.team_id == team_id,
+            )
+            .all()
+        )
