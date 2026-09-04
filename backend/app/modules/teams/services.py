@@ -663,6 +663,7 @@ class TeamTournamentService:
         # Current User Team Tournament
         
         review = self.repository.get_tournament_review(tournament_id=tournament_id,player_id=current_user.id)
+
         
         if not review:
             raise HTTPException(
@@ -673,6 +674,7 @@ class TeamTournamentService:
         return TournamentReviewResponse(
             team=TeamReview(
                 id=review.team.id,
+                roster_id=review.roster.id,
                 team_name=review.team.name
             ),
             tournament=TournamentReview.model_validate(review.tournament),
