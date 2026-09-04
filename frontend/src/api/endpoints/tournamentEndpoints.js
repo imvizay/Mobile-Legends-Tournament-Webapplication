@@ -3,6 +3,8 @@ export const TOURNAMENT_ENDPOINT = {
 
   GET_TOURNAMENTS: "/tournament/tournaments",
 
+  ONGOING_TOURNAMENT:'/tournament/ongoing',
+
   GET_TOURNAMENT: (tournamentId) =>
     `/player/tournament/${tournamentId}/detail`,
 
@@ -14,6 +16,8 @@ export const TOURNAMENT_ENDPOINT = {
 
   CANCEL_TOURNAMENT: (tournamentId) =>
     `/tournament/${tournamentId}/cancel`,
+
+  
 
 };
 

@@ -51,5 +51,10 @@ export const tournamentService = {
 
         return response
     },
+    onGoingTournament: async () => {
+        const response = await api.get(
+            TOURNAMENT_ENDPOINT.ONGOING_TOURNAMENT
+        )
+    }
 
 }

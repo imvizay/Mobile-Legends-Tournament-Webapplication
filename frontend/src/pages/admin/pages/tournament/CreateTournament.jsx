@@ -182,45 +182,75 @@ const CreateTournament = () => {
     return (
         <section className="flex h-full w-full flex-col">
 
-            <header className="shrink-0 border-b pb-4" style={{ borderColor: "var(--border-subtle)" }}>
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <header
+                className="shrink-0 border-b pb-3.5"
+                style={{ borderColor: "var(--border-subtle)" }}
+            >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
+                    {/* Heading */}
                     <div className="min-w-0">
-
-                        <div className="mb-1.5 flex items-center gap-2 text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                        <div className="mb-1 flex items-center gap-1.5 text-[10px] font-medium leading-none" style={{ color: "var(--text-muted)" }}>
                             <span>Tournaments</span>
-                            <span className="opacity-40">/</span>
-                            <span style={{ color: "var(--text-primary)" }}>Create Tournament</span>
+                            <span className="opacity-35">/</span>
+                            <span style={{ color: "var(--text-secondary)" }}>Create Tournament</span>
                         </div>
 
-                        <h1 className="text-[27px] font-semibold leading-tight tracking-[-0.9px] sm:text-[30px]" style={{ color: "var(--headline-primary)" }}>
+                        <h1
+                            className="text-[23px] font-semibold leading-[1.1] tracking-[-0.7px] sm:text-[26px]"
+                            style={{ color: "var(--headline-primary)" }}
+                        >
                             Create Tournament
                         </h1>
 
-                        <p className="mt-1 text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                        <p
+                            className="mt-1 max-w-[560px] text-[11px] leading-[1.5] sm:text-[12px]"
+                            style={{ color: "var(--text-secondary)" }}
+                        >
                             Set up your tournament details, schedule, rewards and registration settings.
                         </p>
-
                     </div>
 
+                    {/* Actions */}
                     <div className="flex shrink-0 items-center gap-2">
-
-                        <button type="button" className="h-10 rounded-lg border px-4 text-xs font-medium transition-colors hover:bg-[var(--surface-elevated)] sm:text-[13px]" style={{ background: "var(--surface-base)", borderColor: "var(--border-default)", color: "var(--text-primary)" }}>
+                        <button
+                            type="button"
+                            className="h-9 rounded-[7px] border px-3.5 text-[11px] font-medium transition-all hover:bg-[var(--surface-elevated)] active:scale-[0.98] sm:text-[12px]"
+                            style={{
+                                background: "var(--surface-base)",
+                                borderColor: "var(--border-default)",
+                                color: "var(--text-primary)",
+                            }}
+                        >
                             Save Draft
                         </button>
 
-                        <button type="submit" form="tournament-form" disabled={tournamentMutation.isPending} className="flex h-10 items-center gap-2 rounded-lg px-4 text-xs font-semibold transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:px-5 sm:text-[13px]" style={{ background: "var(--action-primary-bg)", color: "var(--action-primary-text)" }}>
-                            {tournamentMutation.isPending ? "Creating..." : "Create Tournament"}
+                        <button
+                            type="submit"
+                            form="tournament-form"
+                            disabled={tournamentMutation.isPending}
+                            className="flex h-9 items-center gap-2 rounded-[7px] px-3.5 text-[11px] font-semibold transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:text-[12px]"
+                            style={{
+                                background: "var(--action-primary-bg)",
+                                color: "var(--action-primary-text)",
+                            }}
+                        >
+                            <span>
+                                {tournamentMutation.isPending
+                                    ? "Creating..."
+                                    : "Create Tournament"}
+                            </span>
 
                             {!tournamentMutation.isPending && (
-                                <span className="text-sm leading-none" style={{ color: "var(--accent-gold)" }}>
+                                <span
+                                    className="text-[13px] leading-none"
+                                    style={{ color: "var(--accent-gold)" }}
+                                >
                                     →
                                 </span>
                             )}
                         </button>
-
                     </div>
-
                 </div>
             </header>
 
