@@ -14,7 +14,7 @@ export const useRazorpayPayment = () => {
   const [networkStatus, setNetworkStatus] = useState(null);
   const { user } = useUserContext()
 
-  const startPayment = async (contributionId, idempotencyKey) => {
+  const startPayment = async ({registrationId,rosterId, idempotencyKey}) => {
 
     try {
       const network = getNetworkStatus();
@@ -42,11 +42,11 @@ export const useRazorpayPayment = () => {
 
       setPaymentState("CREATING_ORDER");
 
-      const { data } = await paymentService.createOrder(contributionId,idempotencyKey)
+      const { data } = await paymentService.createOrder(registrationId,rosterId, idempotencyKey)
 
       setPaymentState("CHECKOUT_READY");
 
-      openRazorpayCheckout(data);
+      openRazorpayCheckout(registrationId,data);
 
     } catch (error) {
       console.error(error);
@@ -60,13 +60,13 @@ export const useRazorpayPayment = () => {
 
     if (network.status == "OFFLINE") {
       await startPayment(
-        contributionId,
+        registrationId,
         idempotencyKey
       )
     }
   }
 
-  const openRazorpayCheckout = (order) => {
+  const openRazorpayCheckout = (registrationId, order) => {
     const options = {
       key: order.key_id,
       amount: order.amount,
@@ -75,13 +75,14 @@ export const useRazorpayPayment = () => {
 
       name: "GAMIX",
       description: order.description,
-      prefil: {
-        name: user?.email.split("@")[0],
-        email: user?.email,
-        ...(user?.contact && { contact: user?.contact })
+
+      prefill: {
+        name: user?.email?.split("@")[0] || "",
+        email: user?.email || "",
+        ...(user?.contact && { contact: user.contact }),
       },
       handler: async (response) => {
-        await verifyPayment(response);
+        await verifyPayment(registrationId, response);
       },
 
       modal: {
@@ -102,15 +103,20 @@ export const useRazorpayPayment = () => {
     razorpay.open();
   };
 
-  const verifyPayment = async (response) => {
+  const verifyPayment = async (registrationId, response) => {
     try {
+
       setPaymentState("VERIFYING_PAYMENT");
+      console.log("RAZORPAY RESPONSE", response)
 
       await paymentService.verifyPayment({
+        registration_id: registrationId,
         razorpay_order_id: response.razorpay_order_id,
         razorpay_payment_id: response.razorpay_payment_id,
         razorpay_signature: response.razorpay_signature,
       });
+
+
 
       setPaymentState("PAYMENT_SUCCESS");
 
