@@ -21,7 +21,7 @@ from .schemas import (
     TeamSummaryResponse,
     CaptainSummary,
     TeamSummary,
-    TeamContributionResponse
+    TeamContributionResponse,
 )
 
 # Team Custom Exception
@@ -83,14 +83,9 @@ class TeamService:
 
             tournament = registration.tournament
 
-            start = datetime.combine(
-                tournament.tournament_start_date, tournament.tournament_start_time
-            ).replace(tzinfo=timezone.utc)
+            start = tournament.starts_at
 
-            end = datetime.combine(
-                tournament.tournament_end_date, tournament.tournament_end_time
-            ).replace(tzinfo=timezone.utc)
-
+            end = tournament.ends_at
             # Currently started tournament
             if start <= now <= end:
                 current_tournament = registration
@@ -108,7 +103,7 @@ class TeamService:
 
         # Nearest tournament first
         upcoming_tournaments.sort(
-            key=lambda registration: registration.tournament.tournament_start_date
+            key=lambda registration: registration.tournament.starts_at
         )
 
         current_tournament = (
@@ -181,7 +176,7 @@ class TeamService:
                         player_email=member.player.email,
                         player_role=member.role,
                         mlbb_id=member.player.mlbb_id,
-                        mlbb_server=member.player.mlbb_server
+                        mlbb_server=member.player.mlbb_server,
                     )
                     for member in team.members
                 ],
@@ -354,6 +349,7 @@ class TeamService:
 # Team Tournament Service
 from .repository import TeamTournamentRepository
 from .models import TeamRole, TournamentRegistrationStatus
+from .schemas import *
 
 
 class TeamTournamentService:
@@ -417,29 +413,13 @@ class TeamTournamentService:
 
         now = datetime.now(timezone.utc)
 
-        reg_open_datetime = datetime.combine(
-            tournament.reg_open_date,
-            tournament.reg_open_time,
-            tzinfo=timezone.utc,
-        )
+        reg_open_datetime = tournament.registration_opens_at
 
-        registration_close_datetime = datetime.combine(
-            tournament.reg_close_date,
-            tournament.reg_close_time,
-            tzinfo=timezone.utc,
-        )
+        registration_close_datetime = tournament.registration_closes_at
 
-        tournament_start_datetime = datetime.combine(
-            tournament.tournament_start_date,
-            tournament.tournament_start_time,
-            tzinfo=timezone.utc,
-        )
+        tournament_start_datetime = tournament.starts_at
 
-        tournament_end_datetime = datetime.combine(
-            tournament.tournament_end_date,
-            tournament.tournament_end_time,
-            tzinfo=timezone.utc,
-        )
+        tournament_end_datetime = tournament.ends_at
 
         # Registration must still be open
         if now < reg_open_datetime:
@@ -476,8 +456,8 @@ class TeamTournamentService:
         # Prevent team from participating in overlapping tournaments
         conflicting_tournament = self.repository.get_team_conflicting_tournament(
             team_id=team.id,
-            start_at=tournament.tournament_start_date,
-            end_at=tournament.tournament_end_date,
+            start_at=tournament.starts_at,
+            end_at=tournament.ends_at,
         )
 
         if conflicting_tournament:
@@ -513,10 +493,8 @@ class TeamTournamentService:
             "message": ("Your team has successfully appliedfor the tournament."),
         }
 
-    # ================================================
     # ADD TEAM MEMBER AS TOURNAMENT ROSTER PLAYER
-    # ================================================
-
+   
     def add_roster_player(
         self,
         tournament_id: int,
@@ -657,3 +635,49 @@ class TeamTournamentService:
             "message": "Success",
             "data": response,
         }
+
+    def tournament_detail(self, tournament_id: int, current_user: Player):
+
+        if not tournament_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Tournament Id Missing."
+            )
+
+        tournament = self.repository.get_tournament(tournament_id)
+
+        if not tournament:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No tournament found with this ID",
+            )
+
+        return TournamentDetailResponse.model_validate(tournament)
+
+    def get_paying_review(self, tournament_id: int, current_user: Player):
+        
+        if not tournament_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Tournament Id Missing."
+            )
+            
+        # Current User Team Tournament
+        
+        review = self.repository.get_tournament_review(tournament_id=tournament_id,player_id=current_user.id)
+        
+        if not review:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tournament Not Found"
+            )
+        
+        return TournamentReviewResponse(
+            team=TeamReview(
+                id=review.team.id,
+                team_name=review.team.name
+            ),
+            tournament=TournamentReview.model_validate(review.tournament),
+            player=PlayerReview(
+                id=current_user.id,
+                player_name=current_user.email.split('@')[0]
+            )   
+        )

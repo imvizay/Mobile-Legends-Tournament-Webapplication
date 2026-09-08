@@ -150,8 +150,9 @@ class Team(Base):
     members = relationship(
         "TeamMember", back_populates="team", cascade="all, delete-orphan"
     )
+    
 
-    # tournaments = relationship(TournamentRegistration,back_populates="team")
+    tournament_registrations = relationship("TeamTournamentRegistration",back_populates="team")
 
     __table_args__ = (
         Index("idx_team_status_visibility", "status", "visibility"),
@@ -262,7 +263,7 @@ class TeamTournamentRegistration(Base):
     )
 
     tournament = relationship("Tournament", back_populates="team_registrations")
-    
+    team = relationship("Team",back_populates="tournament_registrations")
     roster = relationship(
         "TournamentRoster",
         back_populates="registration",
@@ -441,6 +442,7 @@ class TeamTournamentContributionStatus(str, Enum):
     PENDING = "pending"
     PAID = "paid"
     FAILED = "failed"
+    REFUND_PENDING = "refund_pending"
     REFUNDED = "refunded"
 
 

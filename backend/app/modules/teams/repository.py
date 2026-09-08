@@ -203,7 +203,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import TeamMemberStatus
-from ..tournaments.models import Tournament
+from ..tournaments.models import *
 from .models import (
     TeamTournamentRegistration,
     TournamentRegistrationStatus,
@@ -230,11 +230,12 @@ class TeamTournamentRepository:
 
     # Get tournament by ID
     def get_tournament(self, tournament_id: int):
-        result = self.db.execute(
-            select(Tournament).where(Tournament.id == tournament_id)
+        stmt = select(Tournament).where(
+            Tournament.id == tournament_id,
+            Tournament.visibility_status == VisibilityStatus.PUBLISHED,
+            Tournament.status == TournamentStatus.SCHEDULED,
         )
-
-        return result.scalar_one_or_none()
+        return self.db.execute(stmt).scalar_one_or_none()
 
     # Check if team already applied for this tournament
     def get_existing_registration(
@@ -325,17 +326,9 @@ class TeamTournamentRepository:
             if not tournament:
                 continue
 
-            existing_start = datetime.combine(
-                tournament.tournament_start_date,
-                tournament.tournament_start_time,
-                tzinfo=timezone.utc,
-            )
+            existing_start = tournament.starts_at
 
-            existing_end = datetime.combine(
-                tournament.tournament_end_date,
-                tournament.tournament_end_time,
-                tzinfo=timezone.utc,
-            )
+            existing_end = tournament.ends_at
 
             # Check if the two tournament time periods overlap
             if existing_start < end_at and existing_end > start_at:
@@ -540,3 +533,28 @@ class TeamTournamentRepository:
             )
             .all()
         )
+
+    def get_tournament_review(self, tournament_id: int, player_id: int):
+        review = (
+            self.db.query(TeamTournamentRegistration)
+            .options(
+                joinedload(TeamTournamentRegistration.tournament),
+                joinedload(TeamTournamentRegistration.team)
+                
+            )
+            .join(
+                TournamentRoster,
+                TournamentRoster.team_id == TeamTournamentRegistration.team_id,
+            )
+            .join(
+                TournamentRosterPlayer,
+                TournamentRosterPlayer.roster_id == TournamentRoster.id,
+            )
+            .filter(
+                TeamTournamentRegistration.tournament_id == tournament_id,
+                TournamentRosterPlayer.player_id == player_id,
+            )
+            .first()
+        )
+
+        return review

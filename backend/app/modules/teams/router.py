@@ -133,3 +133,24 @@ def team_contribution(
     return tournament_service.contribution_stats(
         registration_id=registration_id, team_id=team_id, current_user=current_user
     )
+
+# Tournament Detail
+
+@router.get('/tournament/{tournament_id}/detail')
+def tournament_detail(
+    tournament_id:int,
+    current_user: Player=Depends(get_current_user),
+    tournament_service:TeamTournamentService = Depends(get_teamtournament_service)
+):
+    
+    return tournament_service.tournament_detail(tournament_id=tournament_id,current_user=current_user)
+
+
+@router.get('/tournament/{tournament_id}/payment-review')
+def get_tournament_paying_review(
+    tournament_id:int,
+    current_user: Player=Depends(get_current_user),
+    tournament_service:TeamTournamentService = Depends(get_teamtournament_service)
+):
+    
+    return tournament_service.get_paying_review(tournament_id=tournament_id,current_user=current_user)

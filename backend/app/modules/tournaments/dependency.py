@@ -1,12 +1,12 @@
-from fastapi import Depends, Form
-from datetime import date, time
+from datetime import datetime
 
+from fastapi import Depends, Form
 from sqlalchemy.orm import Session
 
+from app.core.db.session import get_db
+from .repository import TournamentRepository
 from .schema import TournamentForm
 from .service import TournamentService
-from .repository import TournamentRepository
-from app.core.db.session import get_db
 
 
 def get_tournament_repository(db: Session = Depends(get_db)):
@@ -19,7 +19,6 @@ def get_tournament_service(
     return TournamentService(repository)
 
 
-# Get Tournament Form
 def get_tournament_form(
     tournament_name: str = Form(...),
     game_name: str = Form("Mobile Legends: Bang Bang"),
@@ -31,14 +30,10 @@ def get_tournament_form(
     platform_fee: str | None = Form(None),
     winner_share: str | None = Form(None),
     runner_up_share: str | None = Form(None),
-    reg_open_date: date = Form(...),
-    reg_open_time: time = Form(...),
-    reg_close_date: date = Form(...),
-    reg_close_time: time = Form(...),
-    tournament_start_date: date = Form(...),
-    tournament_start_time: time = Form(...),
-    tournament_end_date: date = Form(...),
-    tournament_end_time: time = Form(...),
+    registration_opens_at: datetime = Form(...),
+    registration_closes_at: datetime = Form(...),
+    starts_at: datetime = Form(...),
+    ends_at: datetime = Form(...),
     check_in: str | None = Form(None),
     grace_period: str | None = Form(None),
     bracket_format: str | None = Form(None),
@@ -64,14 +59,10 @@ def get_tournament_form(
         platform_fee=platform_fee,
         winner_share=winner_share,
         runner_up_share=runner_up_share,
-        reg_open_date=reg_open_date,
-        reg_open_time=reg_open_time,
-        reg_close_date=reg_close_date,
-        reg_close_time=reg_close_time,
-        tournament_start_date=tournament_start_date,
-        tournament_start_time=tournament_start_time,
-        tournament_end_date=tournament_end_date,
-        tournament_end_time=tournament_end_time,
+        registration_opens_at=registration_opens_at,
+        registration_closes_at=registration_closes_at,
+        starts_at=starts_at,
+        ends_at=ends_at,
         check_in=check_in,
         grace_period=grace_period,
         bracket_format=bracket_format,

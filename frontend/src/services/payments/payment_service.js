@@ -1,7 +1,14 @@
 import { api } from "../../api/client/request";
 
 export const paymentService = {
-    createOrder: (contributionId) => {
-        return api.post(`payments/contribution/${contribution_id}/razorpay/create-order`)
-    }
-}
+    createOrder: (contributionId, idempotencyKey) => {
+        return api.post(`/payments/contribution/${contributionId}/razorpay/create-order`,
+            {},
+            {
+                headers: {
+                    "Idempotency-Key": idempotencyKey,
+                },
+            }
+        );
+    },
+};

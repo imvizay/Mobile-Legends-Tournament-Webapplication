@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 from fastapi import Form
 from decimal import Decimal
-from pydantic import BaseModel, ConfigDict, Field, field_validator,computed_field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, computed_field
 
 from .models import TeamVisibility
 
@@ -147,6 +147,7 @@ class TeamSummaryResponse(BaseModel):
 
 # ROSTER PLAYER
 
+
 class RosterPlayer(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -177,10 +178,10 @@ class TeamRegisteredTournament(BaseModel):
     entry_fee: Decimal
     max_teams: int
 
-    registration_open_date: datetime
-    registration_end_date: datetime
-    tournament_start_date: datetime
-    tournament_end_date: datetime
+    registration_opens_at: datetime
+    registration_closes_at: datetime
+    starts_at: datetime
+    ends_at: datetime
 
     status: str
     roster: TeamRosterPlayer | None = None
@@ -210,7 +211,6 @@ class TeamDashboardResponse(BaseModel):
     data: TeamDashboardData | None = None
 
 
-
 class TeamContributionResponse(BaseModel):
     id: int
     email: str
@@ -219,8 +219,91 @@ class TeamContributionResponse(BaseModel):
     amount: Decimal
     contribution_status: str
     paid_at: datetime | None
-    
+
     @computed_field
     @property
     def username(self) -> str:
         return self.email.split("@")[0]
+
+
+# Tournament Detailed Response
+class TournamentDetailResponse(BaseModel):
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    tournament_name: str
+    game_name: str
+    category: str | None
+    description: str | None
+
+    background_image_url: str | None
+    banner_image_url: str | None
+
+    tournament_type: str
+    bracket_format: str | None
+    team_format: str
+    competition_type: str | None
+    seeding_method: str | None
+
+    min_teams: int
+    max_teams: int
+
+    registration_opens_at: datetime
+    registration_closes_at: datetime
+    starts_at: datetime
+    ends_at: datetime
+
+    check_in: str | None
+    grace_period: str | None
+
+    entry_type: str
+    entry_fee: Decimal
+
+    prize_pool: Decimal | None
+    winner_share: Decimal | None
+    runner_up_share: Decimal | None
+
+    minimum_account_level: int | None
+    minimum_rank: str | None
+
+    registration_access: str | None
+    registration_approval: str | None
+
+    server: str
+
+    status: str
+    registration_status: str
+
+
+
+class TournamentReview(BaseModel):
+        model_config=ConfigDict(from_attributes=True)
+        id:int
+        
+        tournament_name:str
+        game_name:str | None
+        
+        tournament_type: str
+        bracket_format: str | None
+        team_format: str
+        
+        entry_fee:int
+        
+        background_image_url: str | None
+        banner_image_url: str | None
+
+class PlayerReview(BaseModel):
+    id:int
+    player_name:str
+
+    
+class TeamReview(BaseModel):
+    id:int
+    team_name:str
+    
+class TournamentReviewResponse(BaseModel):
+    team:TeamReview
+    tournament:TournamentReview
+    player:PlayerReview
+     

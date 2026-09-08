@@ -20,21 +20,35 @@ class PaymentStatus(str, Enum):
     FAILED = "failed"
     REFUNDED = "refunded"
     CANCELLED = "cancelled"
+    UNKNOWN = "unknown"
 
 
 class PaymentType(str, Enum):
     TOURNAMENT_CONTRIBUTION = "tournament_contribution"
-
+    WALLET_TOPUP = "wallet_topup"
+    WITHDRAWAL = "withdrawal"
+    REFUND = "refund"
+    REWARD = "reward"
+    CLAIM = "claim"
+    BONUS = "bonus"
+    
 
 class Payment(Base):
     __tablename__ = "payments"
 
     id = Column(Integer, primary_key=True)
 
-    payment_reference = Column(
+    idempotency_key = Column(
         String(100),
         unique=True,
         nullable=False,
+        index=True,
+    )
+
+    payment_reference = Column(
+        String(100),
+        unique=True,
+        nullable=True,
         index=True,
     )
 
@@ -229,3 +243,55 @@ class PaymentAttempt(Base):
         "Payment",
         back_populates="attempts",
     )
+
+
+
+class PlayerPaymentSecurity(Base):
+    __tablename__ = "player_payment_security"
+
+    id = Column(Integer, primary_key=True)
+
+    player_id = Column(
+        Integer,
+        ForeignKey("players.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+
+    consecutive_failures = Column(
+        Integer,
+        default=0,
+        nullable=False,
+    )
+
+    lock_count = Column(
+        Integer,
+        default=0,
+        nullable=False,
+    )
+
+    locked_until = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    last_failed_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    player = relationship("Player")

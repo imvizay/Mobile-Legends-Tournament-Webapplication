@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings,SettingsConfigDict
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -29,6 +29,16 @@ class Settings(BaseSettings):
     CLOUDINARY_CLOUD_NAME: str = os.getenv("CLOUDINARY_CLOUD_NAME")
     CLOUDINARY_API_KEY:str = os.getenv("CLOUDINARY_API_KEY")
     CLOUDINARY_API_SECRET:str = os.getenv("CLOUDINARY_API_SECRET")
+    
+    # Razorpay
+    RAZORPAY_KEY_ID:str = os.getenv("RAZORPAY_KEY_ID") 
+    RAZORPAY_KEY_SECRET:str = os.getenv("RAZORPAY_KEY_SECRET")
+    
+    
+    model_config= SettingsConfigDict(
+        env_file='.env',
+        extra='ignore'
+    )
 
 
 

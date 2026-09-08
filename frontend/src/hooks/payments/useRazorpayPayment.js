@@ -9,11 +9,12 @@ import { useUserContext } from "../../contexts/UserContext";
 import { Contact } from "lucide-react";
 
 export const useRazorpayPayment = () => {
+
   const [paymentState, setPaymentState] = useState("IDLE");
   const [networkStatus, setNetworkStatus] = useState(null);
-  const {user} = useUserContext()
+  const { user } = useUserContext()
 
-  const startPayment = async (contributionId) => {
+  const startPayment = async (contributionId, idempotencyKey) => {
 
     try {
       const network = getNetworkStatus();
@@ -41,7 +42,7 @@ export const useRazorpayPayment = () => {
 
       setPaymentState("CREATING_ORDER");
 
-      const { data } = await paymentService.createOrder(contributionId,)
+      const { data } = await paymentService.createOrder(contributionId,idempotencyKey)
 
       setPaymentState("CHECKOUT_READY");
 
@@ -53,6 +54,18 @@ export const useRazorpayPayment = () => {
     }
   };
 
+  const retryPayment = async () => {
+    const network = getNetworkStatus()
+    setNetworkStatus(network)
+
+    if (network.status == "OFFLINE") {
+      await startPayment(
+        contributionId,
+        idempotencyKey
+      )
+    }
+  }
+
   const openRazorpayCheckout = (order) => {
     const options = {
       key: order.key_id,
@@ -62,10 +75,10 @@ export const useRazorpayPayment = () => {
 
       name: "GAMIX",
       description: order.description,
-      prefil:{
-        name:user?.email.split("@")[0],
-        email:user?.email,
-        ...(user?.contact && {contact:user?.contact})
+      prefil: {
+        name: user?.email.split("@")[0],
+        email: user?.email,
+        ...(user?.contact && { contact: user?.contact })
       },
       handler: async (response) => {
         await verifyPayment(response);
@@ -111,5 +124,6 @@ export const useRazorpayPayment = () => {
     paymentState,
     networkStatus,
     startPayment,
+    retryPayment
   };
 };

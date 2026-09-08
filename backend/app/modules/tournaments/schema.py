@@ -1,15 +1,15 @@
-from datetime import date, time,datetime
+from datetime import date, time, datetime
 from fastapi import Form
 from decimal import Decimal
 from datetime import date, time
-from pydantic import BaseModel,model_validator,ConfigDict
+from pydantic import BaseModel, model_validator, ConfigDict
 
 
 class TournamentForm(BaseModel):
     tournament_name: str
     game_name: str
     tournament_type: str
-    team_format: str 
+    team_format: str
     min_teams: int
     max_teams: int
 
@@ -19,15 +19,12 @@ class TournamentForm(BaseModel):
     winner_share: str | None = None
     runner_up_share: str | None = None
 
-    reg_open_date: date
-    reg_open_time: time
-    reg_close_date: date
-    reg_close_time: time
+    registration_opens_at: datetime
 
-    tournament_start_date: date
-    tournament_start_time: time
-    tournament_end_date: date
-    tournament_end_time: time
+    registration_closes_at: datetime
+
+    starts_at: datetime
+    ends_at: datetime
 
     check_in: str | None = None
     grace_period: str | None = None
@@ -45,46 +42,45 @@ class TournamentForm(BaseModel):
 
     registration_access: str | None = None
     registration_approval: str | None = None
-    
+
     server: str
 
     @classmethod
     @model_validator(mode="after")
     def validate_schedule(self):
-        
-        reg_open = datetime.combine(self.reg_open_date,self.reg_open_time)
-        reg_close = datetime.combine(self.reg_close_date,self.reg_close_time)
-        
-        tournament_start = datetime.combine(self.tournament_start_date,self.tournament_start_time)
-        tournament_end = datetime.combine(self.tournament_end_date,self.tournament_end_time)
-        
+
+        reg_open = self.registration_opens_at
+        reg_close = self.registration_closes_at
+
+        tournament_start = self.starts_at
+        tournament_end = self.ends_at
+
         if reg_close <= reg_open:
             raise ValueError("Registration close must be after registration open")
-        
+
         if tournament_start <= reg_close:
             raise ValueError("Tournament must start after registration closes")
-        
+
         if tournament_end <= tournament_start:
             raise ValueError("Tournament end must be after tournament start")
-        
+
         return self
-        
- 
-        
+
+
 # Admin List tournament
 class TournamentListResponse(BaseModel):
 
-    id:int
+    id: int
     tournament_name: str
     game_name: str
     tournament_type: str
-    team_format: str 
+    team_format: str
     min_teams: int
     max_teams: int
-    
+
     # images
     background_image_url: str | None = None
-    banner_image_url:str | None = None
+    banner_image_url: str | None = None
 
     description: str | None = None
 
@@ -92,15 +88,10 @@ class TournamentListResponse(BaseModel):
     winner_share: Decimal | None = None
     runner_up_share: Decimal | None = None
 
-    reg_open_date: date
-    reg_open_time: time
-    reg_close_date: date
-    reg_close_time: time
-
-    tournament_start_date: date
-    tournament_start_time: time
-    tournament_end_date: date
-    tournament_end_time: time
+    registration_opens_at: datetime
+    registration_closes_at: datetime
+    starts_at: datetime
+    ends_at: datetime
 
     check_in: str | None = None
     grace_period: str | None = None
@@ -109,7 +100,7 @@ class TournamentListResponse(BaseModel):
     category: str | None = None
     competition_type: str | None = None
     seeding_method: str | None = None
-    
+
     entry_fee: int
     entry_type: str
 
@@ -121,17 +112,17 @@ class TournamentListResponse(BaseModel):
 
     server: str
     # status
-    registration_status:str
-    status:str
-    visibility_status:str
-    
-    model_config= ConfigDict(from_attributes=True)
-    
-    
+    registration_status: str
+    status: str
+    visibility_status: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class AdminTournamentRes(BaseModel):
-    tournament:list[TournamentListResponse]
-    
+    tournament: list[TournamentListResponse]
+
 
 class TournamentDetailResponse(BaseModel):
-    success:str
-    data:TournamentListResponse
+    success: str
+    data: TournamentListResponse
