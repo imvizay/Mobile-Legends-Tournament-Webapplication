@@ -300,6 +300,7 @@ class PlayerReview(BaseModel):
     
 class TeamReview(BaseModel):
     id:int
+    roster_id:int
     team_name:str
     
 class TournamentReviewResponse(BaseModel):
