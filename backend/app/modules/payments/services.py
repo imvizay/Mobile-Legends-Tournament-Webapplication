@@ -1,6 +1,7 @@
+from sqlalchemy.sql import func
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_DOWN
-from sqlalchemy.sql import func
+
 from ..auth.models import Player
 from ..teams.models import (
     TeamTournamentContributionStatus,
@@ -16,14 +17,30 @@ from .models import (
 )
 
 from .exceptions import *
-from .repository import PaymentRepository
-from .helpers import *
-from app.core.config.settings import settings
-from app.integrations.razorpay.razorpay_client import razorpay_client
-from app.integrations.razorpay.verifier import RazorpayVerifier
 from .razorpay_verifier_exception import *
-from app.integrations.razorpay.razorpay_service import RazorpayGatewayService
-from app.integrations.razorpay.razorpay_inspector import RazorpayPaymentInspector
+from .repository import PaymentRepository
+from .responses import (
+    payment_already_paid_response,
+    payment_attempt_failed_response,
+    payment_attempt_resumable_response,
+    payment_attempt_success_response,
+    payment_order_created_response,
+    PaymentSuccessResponse,
+    PaymentSuccessData,
+)
+
+from app.core.logging.config import get_logger
+
+from app.core.config.settings import settings
+from app.integrations.razorpay.verifier import RazorpayVerifier
+from app.integrations.razorpay.razorpay_service import (
+    RazorpayGatewayService,
+)
+from app.integrations.razorpay.razorpay_inspector import (
+    RazorpayPaymentInspector,
+)
+
+payment_logger = get_logger("app.payment")
 
 
 class PaymentService:
@@ -34,6 +51,10 @@ class PaymentService:
         self.razorpay_service = RazorpayGatewayService()
         self.razorpay_inspector = RazorpayPaymentInspector()
 
+    # ============================================================
+    # CREATE RAZORPAY ORDER
+    # ============================================================
+
     def create_razorpay_order(
         self,
         registration_id: int,
@@ -41,170 +62,195 @@ class PaymentService:
         current_user: Player,
         idempotency_key: str,
     ):
+
         if not registration_id:
-            raise MissingContributionIdException()
+            raise MissingRegistrationIdException()
 
         if not roster_id:
             raise TournamentRosterNotFoundException()
 
+        if not current_user or not current_user.id:
+            raise PlayerTeamNotFoundException()
+
         if not idempotency_key:
             raise MissingIdempotencyKeyException()
 
-        contribution_player = self.repository.find_contribution_id(
+        payment_logger.info(
+            "payment_order_request player=%s registration=%s roster=%s",
+            current_user.id,
+            registration_id,
+            roster_id,
+        )
+
+        # ========================================================
+        # Find contribution belonging to CURRENT PLAYER
+        # ========================================================
+
+        contribution = self.repository.find_contribution_id(
             roster_id=roster_id,
             player_id=current_user.id,
         )
 
-        if contribution_player is None:
+        if not contribution:
+            payment_logger.warning(
+                "payment_contribution_not_found player=%s roster=%s",
+                current_user.id,
+                roster_id,
+            )
+
             return {
                 "success": False,
                 "code": "CONTRIBUTION_RECORD_NOT_FOUND",
                 "message": (
-                    "You are not a member of the roster player list"
+                    "You are not a member of the roster player list "
                     "for the provided roster."
                 ),
                 "data": None,
             }
 
-        contribution_id = contribution_player.id
+        contribution_id = contribution.id
+
+        # ========================================================
+        # Find logical Payment
+        # ========================================================
 
         payment = self.repository.get_payment_by_contribution_id(
             contribution_id=contribution_id,
+            player_id=current_user.id,
         )
 
+        # ========================================================
+        # Existing Payment
+        # ========================================================
+
         if payment:
-            if payment.status == PaymentStatus.PAID:
+
+            if payment.status == PaymentStatus.PAID.value:
+                payment_logger.info(
+                    "payment_already_paid payment=%s player=%s",
+                    payment.id,
+                    current_user.id,
+                )
+
                 return payment_already_paid_response(payment)
 
-            if payment.status == PaymentStatus.PENDING:
+            if payment.status != PaymentStatus.PENDING.value:
+                raise ContributionPaymentNotAllowedException()
 
-                # if any same request attempt exists
-                existing_attempt = (
-                    self.repository.get_payment_attempt_by_idempotency_key(
-                        idempotency_key=idempotency_key,
+            # ====================================================
+            # Check exact idempotency request
+            # ====================================================
+
+            existing_attempt = self.repository.get_payment_attempt_by_idempotency_key(
+                idempotency_key=idempotency_key,
+            )
+
+            if existing_attempt:
+
+                if existing_attempt.payment_id != payment.id:
+                    payment_logger.error(
+                        "idempotency_key_mismatch key=%s payment=%s attempt_payment=%s",
+                        idempotency_key,
+                        payment.id,
+                        existing_attempt.payment_id,
                     )
-                )
 
-                if existing_attempt:
+                    raise PaymentException(
+                        "The idempotency key belongs to another payment."
+                    )
 
-                    if existing_attempt.payment_id != payment.id:
-                        raise PaymentException(
-                            "The idempotency key belongs to another payment."
+                # ------------------------------------------------
+                # Same request already succeeded
+                # ------------------------------------------------
+
+                if existing_attempt.status == PaymentAttemptStatus.SUCCESS.value:
+
+                    if payment.status != PaymentStatus.PAID.value:
+                        self.repository.mark_payment_paid(
+                            payment_id=payment.id,
                         )
 
-                    # if existing attempt of the same request is paid
-                    if existing_attempt.status == PaymentAttemptStatus.SUCCESS:
-                        if payment.status != PaymentStatus.PAID:
-                            self.repository.mark_payment_paid(
-                                payment_id=payment.id,
-                            )
-                            self.repository.db.commit()
+                    self.repository.db.commit()
 
-                        return payment_attempt_success_response(
-                            payment=payment,
-                            payment_attempt=existing_attempt,
-                        )
+                    return payment_attempt_success_response(
+                        payment=payment,
+                        payment_attempt=existing_attempt,
+                    )
 
-                    # if existing attempt of the same request is due/unpaid/created
-                    if (
-                        existing_attempt.status == PaymentAttemptStatus.CREATED
-                        and existing_attempt.gateway_order_id
-                    ):
-                        razorpay_order = self.razorpay_inspector.inspect_order(
-                            existing_attempt.gateway_order_id
-                        )
+                # ------------------------------------------------
+                # Same request has a Razorpay order
+                # ------------------------------------------------
 
-                        if razorpay_order["state"] == "UNKNOWN":
-                            return {
-                                "code": 404,
-                                "status": "RAZORPAY_ORDER_NOT_FOUND",
-                                "message": "No such order with this order id {existing_attempt.gateway_order_id} found",
-                            }
+                if (
+                    existing_attempt.status == PaymentAttemptStatus.CREATED.value
+                    and existing_attempt.gateway_order_id
+                ):
 
-                        if razorpay_order["state"] == "PAID":
+                    return self._reconcile_existing_attempt(
+                        payment=payment,
+                        payment_attempt=existing_attempt,
+                    )
 
-                            # razorpay_order_payments
-                            razorpay_payments = (
-                                self.razorpay_inspector.inspect_payments(
-                                    existing_attempt.gateway_order_id
-                                )
-                            )
+                # ------------------------------------------------
+                # Same request exists but Razorpay order failed
+                # ------------------------------------------------
 
-                            if razorpay_payments["state"] == "PAID":
-                                self.repository.mark_payment_attempt_success(
-                                    attempt_id=existing_attempt.id,
-                                    gateway_payment_id=razorpay_payments["payment"].id,
-                                )
-                                self.repository.mark_payment_paid(payment_id=payment.id)
-                                self.repository.db.commit()
+                if (
+                    existing_attempt.status == PaymentAttemptStatus.CREATED.value
+                    and not existing_attempt.gateway_order_id
+                ):
 
-                                return payment_already_paid_response(payment)
+                    self.repository.mark_payment_attempt_failed(
+                        attempt_id=existing_attempt.id,
+                        failure_reason=("Razorpay order was not created."),
+                    )
 
-                        # if razorpay order status other than paid
-                        return payment_attempt_resumable_response(
-                            payment=payment,
-                            payment_attempt=existing_attempt,
-                        )
+                    self.repository.db.commit()
 
-                    if (
-                        existing_attempt.status
-                        in (
-                            PaymentAttemptStatus.CREATED,
-                            PaymentAttemptStatus.PROCESSING,
-                        )
-                        and not existing_attempt.gateway_order_id
-                    ):
-                        return payment_attempt_processing_response(
-                            payment=payment,
-                            payment_attempt=existing_attempt,
-                        )
+                    payment_logger.warning(
+                        "payment_attempt_failed_without_order payment=%s attempt=%s",
+                        payment.id,
+                        existing_attempt.id,
+                    )
 
-                    if existing_attempt.status == PaymentAttemptStatus.FAILED:
-                        raise PaymentException(
-                            "This payment attempt has already failed. "
-                            "Please create a new payment attempt."
-                        )
+                    # Important:
+                    # Do NOT reuse this attempt.
+                    # Continue and create a new attempt.
 
-                latest_attempt = self.repository.get_latest_payment_attempt(
-                    payment_id=payment.id,
-                )
+            # Check latest attempt belonging to this Payment.
 
-                if latest_attempt:
-                    print("LATEST ATTEMPT", True)
-                    if (
-                        latest_attempt.status == PaymentAttemptStatus.CREATED
-                        and latest_attempt.gateway_order_id
-                    ):
-                        # razorpay reconcilation
-                        razorpay_order = self.razorpay_inspector.inspect_order(
-                            latest_attempt.gateway_order_id
-                        )
+            latest_attempt = self.repository.get_latest_payment_attempt(
+                payment_id=payment.id,
+            )
 
-                        if razorpay_order["state"] == "PAID":
+            if latest_attempt:
 
-                            self.repository.mark_payment_attempt_success(
-                                attempt_id=latest_attempt.id,
-                                gateway_payment_id=razorpay_order["order"].id,
-                            )
+                if (
+                    latest_attempt.status == PaymentAttemptStatus.CREATED.value
+                    and latest_attempt.gateway_order_id
+                ):
 
-                            self.repository.mark_payment_paid(payment_id=payment.id)
-                            self.repository.db.commit()
+                    return self._reconcile_existing_attempt(
+                        payment=payment,
+                        payment_attempt=latest_attempt,
+                    )
 
-                            return payment_already_paid_response(payment)
+                if (
+                    latest_attempt.status == PaymentAttemptStatus.CREATED.value
+                    and not latest_attempt.gateway_order_id
+                ):
 
-                        return payment_attempt_resumable_response(
-                            payment=payment,
-                            payment_attempt=latest_attempt,
-                        )
+                    self.repository.mark_payment_attempt_failed(
+                        attempt_id=latest_attempt.id,
+                        failure_reason=(
+                            "Previous Razorpay order creation " "did not complete."
+                        ),
+                    )
 
-                    if (
-                        latest_attempt.status == PaymentAttemptStatus.CREATED
-                        and not latest_attempt.gateway_order_id
-                    ):
+                    self.repository.db.commit()
 
-                        return payment_attempt_resumable_response(payment=payment)
+        # Perform expensive registration validation only when necessary.
 
-        # continue as if no payments exists proceed towards creating an order
         team_membership = self.repository.get_contributer_team_membership(
             player_id=current_user.id,
         )
@@ -224,8 +270,8 @@ class PaymentService:
             raise TournamentRegistrationNotFoundException()
 
         if tournament_registration.status in (
-            TournamentRegistrationStatus.CANCELLED,
-            TournamentRegistrationStatus.FAILED,
+            TournamentRegistrationStatus.CANCELLED.value,
+            TournamentRegistrationStatus.FAILED.value,
         ):
             raise TournamentRegistrationNotEligibleException()
 
@@ -237,14 +283,14 @@ class PaymentService:
         if roster.id != roster_id:
             raise TournamentRosterNotFoundException()
 
-        if roster.status != TournamentRosterStatus.CONFIRMED:
+        if roster.status != TournamentRosterStatus.CONFIRMED.value:
             raise RosterNotLockedException()
 
         roster_player = next(
             (
-                roster_member
-                for roster_member in roster.players
-                if roster_member.player_id == current_user.id
+                member
+                for member in roster.players
+                if member.player_id == current_user.id
             ),
             None,
         )
@@ -257,17 +303,12 @@ class PaymentService:
         if not contribution:
             raise ContributionNotFoundException()
 
-        if roster_player.id != contribution.roster_player_id:
-            raise ContributionNotFoundException(
-                contribution_id=contribution_id,
-            )
-
-        if contribution.status == TeamTournamentContributionStatus.PAID:
-            return contribution_already_paid_response(contribution)
+        if contribution.status == TeamTournamentContributionStatus.PAID.value:
+            return payment_already_paid_response(contribution)
 
         if contribution.status in (
-            TeamTournamentContributionStatus.REFUND_PENDING,
-            TeamTournamentContributionStatus.REFUNDED,
+            TeamTournamentContributionStatus.REFUND_PENDING.value,
+            TeamTournamentContributionStatus.REFUNDED.value,
         ):
             raise ContributionPaymentNotAllowedException()
 
@@ -276,66 +317,7 @@ class PaymentService:
         if not tournament:
             raise TournamentNotFoundException()
 
-        now = datetime.now(timezone.utc)
-
-        registration_opens_at = tournament.registration_opens_at
-        registration_closes_at = tournament.registration_closes_at
-
-        if not registration_opens_at or not registration_closes_at:
-            raise InvalidTournamentScheduleException()
-
-        if registration_opens_at >= registration_closes_at:
-            raise InvalidTournamentScheduleException()
-
-        if now < registration_opens_at:
-            raise PaymentWindowNotOpenException()
-
-        if now > registration_closes_at:
-            raise PaymentWindowClosedException()
-
-        payment = self.repository.get_payment_by_contribution_id(
-            contribution_id=contribution.id,
-        )
-
-        if payment:
-
-            if payment.status == PaymentStatus.PAID:
-                return payment_already_paid_response(payment)
-
-            if payment.status == PaymentStatus.PENDING:
-
-                latest_attempt = self.repository.get_latest_payment_attempt(
-                    payment_id=payment.id,
-                )
-
-                if latest_attempt:
-
-                    if (
-                        latest_attempt.status == PaymentAttemptStatus.CREATED
-                        and latest_attempt.gateway_order_id
-                    ):
-                        return payment_attempt_resumable_response(
-                            payment=payment,
-                            payment_attempt=latest_attempt,
-                        )
-
-                    if (
-                        latest_attempt.status == PaymentAttemptStatus.PROCESSING
-                        and latest_attempt.gateway_order_id
-                    ):
-                        return payment_attempt_resumable_response(
-                            payment=payment,
-                            payment_attempt=latest_attempt,
-                        )
-
-                    if (
-                        latest_attempt.status == PaymentAttemptStatus.PROCESSING
-                        and not latest_attempt.gateway_order_id
-                    ):
-                        return payment_attempt_processing_response(
-                            payment=payment,
-                            payment_attempt=latest_attempt,
-                        )
+        # Payment amount
 
         payment_amount = contribution.amount
 
@@ -357,37 +339,49 @@ class PaymentService:
         if razorpay_amount <= 0:
             raise ContributionPaymentNotAllowedException()
 
-        if not payment:
-            payment = self.repository.create_payment(
-                payment_type=PaymentType.TOURNAMENT_CONTRIBUTION,
-                status=PaymentStatus.PENDING,
-                amount=payment_amount,
-                team_id=team_id,
-                player_id=current_user.id,
-                tournament_id=tournament.id,
-                registration_id=registration_id,
-                contribution_id=contribution.id,
-            )
+        # Lock payment row before creating attempt
 
-            self.repository.db.flush()
-
-        locked_payment = self.repository.get_payment_by_contribution_id_for_update(
+        payment = self.repository.get_payment_by_contribution_id_for_update(
             contribution_id=contribution.id,
+            player_id=current_user.id,
         )
 
-        if not locked_payment:
-            raise PaymentException("Unable to lock the payment record.")
+        if payment:
 
-        payment = locked_payment
+            if payment.status == PaymentStatus.PAID.value:
+                self.repository.db.commit()
 
-        if payment.status == PaymentStatus.PAID:
-            self.repository.db.commit()
+                return payment_already_paid_response(payment)
 
-            return payment_already_paid_response(payment)
+            if payment.status != PaymentStatus.PENDING.value:
+                self.repository.db.rollback()
 
-        if payment.status != PaymentStatus.PENDING:
-            self.repository.db.rollback()
-            raise ContributionPaymentNotAllowedException()
+                raise ContributionPaymentNotAllowedException()
+
+        else:
+
+            try:
+                payment = self.repository.create_payment(
+                    payment_type=PaymentType.TOURNAMENT_CONTRIBUTION,
+                    status=PaymentStatus.PENDING,
+                    amount=payment_amount,
+                    team_id=team_id,
+                    player_id=current_user.id,
+                    tournament_id=tournament.id,
+                    registration_id=registration_id,
+                    contribution_id=contribution.id,
+                )
+
+                self.repository.db.flush()
+
+            except Exception:
+                self.repository.db.rollback()
+                raise
+
+        # ========================================================
+        # Lock is now held.
+        # Check again for active attempt.
+        # ========================================================
 
         active_attempt = self.repository.get_latest_active_payment_attempt(
             payment_id=payment.id,
@@ -396,37 +390,30 @@ class PaymentService:
         if active_attempt:
 
             if (
-                active_attempt.status == PaymentAttemptStatus.CREATED
+                active_attempt.status == PaymentAttemptStatus.CREATED.value
                 and active_attempt.gateway_order_id
             ):
-                self.repository.db.commit()
 
-                return payment_attempt_resumable_response(
+                return self._reconcile_existing_attempt(
                     payment=payment,
                     payment_attempt=active_attempt,
                 )
 
             if (
-                active_attempt.status == PaymentAttemptStatus.PROCESSING
-                and active_attempt.gateway_order_id
-            ):
-                self.repository.db.commit()
-
-                return payment_attempt_resumable_response(
-                    payment=payment,
-                    payment_attempt=active_attempt,
-                )
-
-            if (
-                active_attempt.status == PaymentAttemptStatus.PROCESSING
+                active_attempt.status == PaymentAttemptStatus.CREATED.value
                 and not active_attempt.gateway_order_id
             ):
-                self.repository.db.commit()
 
-                return payment_attempt_processing_response(
-                    payment=payment,
-                    payment_attempt=active_attempt,
+                self.repository.mark_payment_attempt_failed(
+                    attempt_id=active_attempt.id,
+                    failure_reason=(
+                        "Previous Razorpay order creation " "did not complete."
+                    ),
                 )
+
+                self.repository.db.flush()
+
+        # Create new PaymentAttempt
 
         attempt_number = self.repository.get_next_attempt_number(
             payment_id=payment.id,
@@ -441,19 +428,33 @@ class PaymentService:
             gateway=PaymentGateway.RAZORPAY,
         )
 
+        # Persist attempt BEFORE calling Razorpay
+
         self.repository.db.commit()
 
+        payment_logger.info(
+            "payment_attempt_created payment=%s attempt=%s",
+            payment.id,
+            payment_attempt.id,
+        )
+
+        # Create Razorpay order outside the db transaction
         try:
-            razorpay_order = razorpay_client.order.create(
-                data={
-                    "amount": razorpay_amount,
-                    "currency": "INR",
-                    "receipt": payment.payment_reference,
-                    "partial_payment": False,
-                }
+
+            razorpay_order = self.razorpay_service.create_order(
+                amount=razorpay_amount,
+                currency="INR",
+                receipt=payment.payment_reference,
             )
 
         except Exception as exc:
+
+            payment_logger.exception(
+                "razorpay_order_creation_failed payment=%s attempt=%s",
+                payment.id,
+                payment_attempt.id,
+            )
+
             self.repository.mark_payment_attempt_failed(
                 attempt_id=payment_attempt.id,
                 failure_reason=str(exc),
@@ -466,31 +467,157 @@ class PaymentService:
         gateway_order_id = razorpay_order.get("id")
 
         if not gateway_order_id:
+
             self.repository.mark_payment_attempt_failed(
                 attempt_id=payment_attempt.id,
-                failure_reason="Razorpay returned no order ID.",
+                failure_reason=("Razorpay returned no gateway order ID."),
             )
 
             self.repository.db.commit()
 
             raise RazorpayOrderCreationException()
 
+        # Save Razorpay order ID
         updated_attempt = self.repository.update_payment_attempt_order(
             attempt_id=payment_attempt.id,
             gateway_order_id=gateway_order_id,
         )
 
         if not updated_attempt:
+
             self.repository.db.rollback()
+
             raise RazorpayOrderCreationException()
 
         self.repository.db.commit()
+
+        payment_logger.info(
+            "razorpay_order_created payment=%s attempt=%s",
+            payment.id,
+            payment_attempt.id,
+        )
 
         return payment_order_created_response(
             payment=payment,
             payment_attempt=payment_attempt,
             razorpay_order=razorpay_order,
         )
+
+    # RAZORPAY RECONCILIATION
+    def _reconcile_existing_attempt(
+        self,
+        payment,
+        payment_attempt,
+    ):
+
+        payment_logger.info(
+            "payment_reconciliation_started payment=%s attempt=%s order=%s",
+            payment.id,
+            payment_attempt.id,
+            payment_attempt.gateway_order_id,
+        )
+
+        inspection = self.razorpay_inspector.inspect(payment_attempt.gateway_order_id)
+
+        state = inspection["state"]
+
+        # --------------------------------------------------------
+        # Razorpay says PAID
+        # --------------------------------------------------------
+
+        if state == "PAID":
+
+            razorpay_payment = inspection.get("payment")
+
+            if not razorpay_payment:
+
+                payment_logger.warning(
+                    "razorpay_order_paid_payment_missing payment=%s attempt=%s",
+                    payment.id,
+                    payment_attempt.id,
+                )
+
+                return payment_attempt_resumable_response(
+                    payment=payment,
+                    payment_attempt=payment_attempt,
+                )
+
+            gateway_payment_id = razorpay_payment.get("id")
+
+            if not gateway_payment_id:
+                raise PaymentException(
+                    "Razorpay reported a paid order without a payment ID."
+                )
+
+            payment_method = razorpay_payment.get("method")
+
+            self.repository.mark_payment_attempt_success(
+                attempt_id=payment_attempt.id,
+                gateway_payment_id=gateway_payment_id,
+                payment_method=payment_method,
+            )
+
+            self.repository.mark_payment_paid(
+                payment_id=payment.id,
+            )
+
+            self.repository.db.commit()
+
+            payment_logger.info(
+                "payment_reconciled_successfully payment=%s attempt=%s",
+                payment.id,
+                payment_attempt.id,
+            )
+
+            return payment_attempt_success_response(
+                payment=payment,
+                payment_attempt=payment_attempt,
+            )
+
+        # --------------------------------------------------------
+        # Razorpay order still usable
+        # --------------------------------------------------------
+
+        if state == "RESUMABLE":
+
+            self.repository.db.commit()
+
+            payment_logger.info(
+                "payment_order_resumable payment=%s attempt=%s",
+                payment.id,
+                payment_attempt.id,
+            )
+
+            return payment_attempt_resumable_response(
+                payment=payment,
+                payment_attempt=payment_attempt,
+            )
+
+        # --------------------------------------------------------
+        # Razorpay order unavailable / invalid
+        # --------------------------------------------------------
+
+        if state in ("UNKNOWN", "INVALID"):
+
+            self.repository.mark_payment_attempt_failed(
+                attempt_id=payment_attempt.id,
+                failure_reason=("Razorpay order is no longer usable."),
+            )
+
+            self.repository.db.commit()
+
+            payment_logger.warning(
+                "razorpay_order_invalid payment=%s attempt=%s",
+                payment.id,
+                payment_attempt.id,
+            )
+
+            return payment_attempt_failed_response(
+                payment=payment,
+                payment_attempt=payment_attempt,
+            )
+
+        raise PaymentException("Unable to determine Razorpay payment state.")
 
     # VERIFY PAYMENT
     def verify_razorpay_payment(
@@ -626,3 +753,19 @@ class PaymentService:
                 "status": PaymentStatus.PAID,
             },
         }
+
+    # Check Payment Staus
+    def get_successful_payment_by_reference(
+        self,
+        payment_reference: str,
+        current_user: Player,
+    ) -> PaymentSuccessResponse:
+        payment = self.repository.get_payment_reference(
+            reference=payment_reference,
+            player_id=current_user.id,
+        )
+
+        if payment is None:
+            raise PaymentRecordNotFoundException()
+
+        return PaymentSuccessResponse(data=PaymentSuccessData.model_validate(payment))

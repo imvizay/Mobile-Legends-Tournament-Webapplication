@@ -2,79 +2,67 @@ from .razorpay_service import RazorpayGatewayService
 
 
 class RazorpayPaymentInspector:
-    """
-    Inspects an existing Razorpay order before deciding whether
-    the current payment attempt can be resumed.
-
-    This class does not modify database state.
-    """
 
     def __init__(self):
-        self.razorpay_service = RazorpayGatewayService()
+        self.gateway = RazorpayGatewayService()
 
-    def inspect_payments(self, order_id: str):
-
-        if not order_id:
-            return {"state": "INVALID", "payments": None}
-
-        razorpay_order_payments = self.razorpay_service.fetch_order_payments(order_id)
-
-        razorpay_payments = razorpay_order_payments.get("items", None)
-
-        successful_razorpay_payment = next(
-            (
-                gateway_payment
-                for gateway_payment in razorpay_payments
-                if gateway_payment.get("status") == "captured"
-            ),
-            None,
-        )
-
-        if successful_razorpay_payment:
-            return {
-                "state": "PAID",
-                "payment": successful_razorpay_payment,
-            }
-
-        return {
-            "state": "UNPAID",
-            "payment": None,
-        }
-
-    def inspect_order(self, order_id: str):
-        """
-        Returns the current Razorpay order state.
-        """
+    def inspect(self, order_id: str):
 
         if not order_id:
             return {
                 "state": "INVALID",
                 "order": None,
+                "payment": None,
             }
 
-        razorpay_order = self.razorpay_service.fetch_order(order_id)
+        order = self.gateway.fetch_order(order_id)
 
-        if not razorpay_order:
+        if not order:
             return {
                 "state": "UNKNOWN",
                 "order": None,
+                "payment": None,
             }
 
-        order_status = razorpay_order.get("status")
+        order_status = order.get("status")
 
         if order_status == "paid":
+
+            payments_response = self.gateway.fetch_order_payments(order_id)
+
+            if not payments_response:
+                return {
+                    "state": "PAID",
+                    "order": order,
+                    "payment": None,
+                }
+
+            payments = payments_response.get("items") or []
+
+            captured_payment = next(
+                (
+                    payment
+                    for payment in payments
+                    if payment.get("status") == "captured"
+                ),
+                None,
+            )
+
             return {
                 "state": "PAID",
-                "order": razorpay_order,
+                "order": order,
+                "payment": captured_payment,
             }
 
         if order_status in ("created", "attempted"):
             return {
                 "state": "RESUMABLE",
-                "order": razorpay_order,
+                "order": order,
+                "payment": None,
             }
 
         return {
             "state": "INVALID",
-            "order": razorpay_order,
+            "order": order,
+            "payment": None,
         }

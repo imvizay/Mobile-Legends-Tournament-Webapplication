@@ -8,7 +8,12 @@ class PaymentException(AppException):
         self.message = message
         super().__init__(message)
 
-
+class PaymentRecordNotFoundException(PaymentException):
+    def __init__(self):
+        super().__init__(
+            "No payment record was found for the provided reference."
+        )
+        
 # =========================================================
 # REQUEST / VALIDATION
 # =========================================================
