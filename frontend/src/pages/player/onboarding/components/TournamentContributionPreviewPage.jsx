@@ -1,20 +1,6 @@
 
-import {
-  AlertCircle,
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  CreditCard,
-  LockKeyhole,
-  RefreshCw,
-  ShieldCheck,
-  Swords,
-  Trophy,
-  UserRound,
-  Users,
-  Wallet,
-  X,
-} from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, CreditCard, LockKeyhole, RefreshCw, ShieldCheck, Swords, Trophy, UserRound, Users, Wallet, X, } from "lucide-react";
+
 import { useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -24,8 +10,9 @@ import PaymentNetworkStatus from "../../../../features/payments/components/Netwo
 import { teamTournamentService } from "../../../../services/team_service";
 
 function TournamentContributionPreviewPage({ onWalletPayment }) {
+
   const navigate = useNavigate();
-  const { id: tournamentId } = useParams();
+  const { id: registrationId } = useParams();
 
   const idempotencyKey = useRef(crypto.randomUUID());
 
@@ -36,18 +23,18 @@ function TournamentContributionPreviewPage({ onWalletPayment }) {
     error,
     refetch: paymentReviewRefetch,
   } = useQuery({
-    queryKey: ["payment-review", tournamentId],
-    queryFn: () => teamTournamentService.getPaymentReview(tournamentId),
-    enabled: !!tournamentId,
+    queryKey: ["payment-review", registrationId],
+    queryFn: () => teamTournamentService.getPaymentReview(registrationId),
+    enabled: !!registrationId,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
     staleTime: 1000 * 60 * 3,
   });
 
-  const goBack = () => navigate(`/player/tournament/${tournamentId}/detail`);
+  const goBack = () => navigate(`/player/tournament/${registrationId}/detail`);
 
-  if (!tournamentId) return null;
+  if (!registrationId) return null;
 
   if (paymentReviewPending) {
     return (
@@ -67,7 +54,7 @@ function TournamentContributionPreviewPage({ onWalletPayment }) {
 
   return (
     <PaymentReviewContent
-      tournamentId={tournamentId}
+      registrationId={registrationId}
       paymentReview={paymentReview}
       onWalletPayment={onWalletPayment}
       idempotencyKey={idempotencyKey}
@@ -76,7 +63,8 @@ function TournamentContributionPreviewPage({ onWalletPayment }) {
   );
 }
 
-function PaymentReviewContent({ tournamentId, paymentReview, onWalletPayment, idempotencyKey, goBack }) {
+function PaymentReviewContent({ registrationId, paymentReview, onWalletPayment, idempotencyKey, goBack }) {
+
   const tournamentData = paymentReview?.tournament ?? {};
   const playerData = paymentReview?.player ?? {};
   const teamData = paymentReview?.team ?? {};
@@ -99,15 +87,20 @@ function PaymentReviewContent({ tournamentId, paymentReview, onWalletPayment, id
   const [paymentMethod, setPaymentMethod] = useState(walletAvailable ? "wallet" : "online");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Razorpay hook 
   const { networkStatus, startPayment, retryPayment } = useRazorpayPayment();
 
   const payWithWallet = async () => {
     if (!walletAvailable) return;
-    if (onWalletPayment) return onWalletPayment(tournamentId);
-    console.log("Wallet payment:", { tournamentId, amount: tournament.entryFee, paymentMethod: "wallet" });
+    if (onWalletPayment) return onWalletPayment(registrationId);
+    console.log("Wallet payment:", { registrationId, amount: tournament.entryFee, paymentMethod: "wallet" });
   };
 
-  const payOnline = () => startPayment(tournamentId, idempotencyKey.current);
+  const payOnline = () => startPayment({
+    registrationId,
+    rosterId: teamData?.roster_id,
+    idempotencyKey: idempotencyKey.current
+  });
 
   const handlePayment = async () => {
     if (isProcessing) return;
@@ -126,7 +119,7 @@ function PaymentReviewContent({ tournamentId, paymentReview, onWalletPayment, id
     }
   };
 
-  const handleRetry = () => retryPayment(tournamentId, idempotencyKey.current);
+  const handleRetry = () => retryPayment(registrationId, idempotencyKey.current);
 
   return (
     <TournamentContributionOverlay onBack={goBack} onClose={goBack}>

@@ -13,10 +13,10 @@ class PaymentException(AppException):
 # REQUEST / VALIDATION
 # =========================================================
 
-class MissingContributionIdException(PaymentException):
+class MissingRegistrationIdException(PaymentException):
     def __init__(self):
         super().__init__(
-            "Contribution ID is required."
+            "Registration ID is required."
         )
 
 
