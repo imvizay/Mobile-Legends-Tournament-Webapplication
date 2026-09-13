@@ -1,6 +1,5 @@
 export const getNetworkStatus = () => {
     const online = navigator.onLine
-
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 
     if (!online) {
