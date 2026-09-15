@@ -68,9 +68,10 @@ export default function LoginPage() {
 
     try {
       const response = await mutateAsync(formData);
-      const data = response.data;
+      const data = response?.data;
       localStorage.setItem("MLBB_User", JSON.stringify(data));
-      const redirectRoute = data.role;
+      setUser(data)
+      const redirectRoute = data?.role;
       navigate(`/${redirectRoute}`, {
         replace: true
       });

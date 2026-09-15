@@ -1,11 +1,11 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { Bell, Check, CircleAlert, CircleX, Clock3, RefreshCw, WalletCards } from "lucide-react";
+import { useQuery } from "@tanstack/react-query"
+import { Bell, Check, CircleAlert, CircleX, Clock3, RefreshCw, WalletCards } from "lucide-react"
 
-import { teamTournamentService } from "../../../../services/team_service";
-import TeamContributionSkeleton from "../skeletons/TeamContributionSkeletons";
+import { teamTournamentService } from "../../../../services/team_service"
+import TeamContributionSkeleton from "../skeletons/TeamContributionSkeletons"
 
-import { useTeamContribution } from "../../../../hooks/tournament/contribution/useTeamContribution";
+import { useTeamContribution } from "../../../../hooks/tournament/contribution/useTeamContribution"
 
 const paymentConfig = {
     PAID: {
@@ -26,47 +26,69 @@ const paymentConfig = {
         statusClass: "text-red-500",
         iconClass: "border-red-500/20 bg-red-500/10 text-red-500",
     },
-};
+}
 
 export default function TeamContribution({
     teamId,
     registrationId,
     onRemindPlayers,
-    isCaptain = false
+    isCaptain = false,
 }) {
+    const {
+        data:contribution,
+        isPending:contributionPending,
+        isError:contributionError,
+        refetch:contributionRefetch,
+        isFetching:contributionRefetching,
+    } = useTeamContribution({
+        teamId,
+        registrationId,
+    })
 
-    const { data, isPending, isError, refetch, isFetching } = useTeamContribution({ teamId, registrationId })
+    if (contributionPending) {
+        return (
+            <TeamContributionSkeleton
+                rows={5}
+                isCaptain={isCaptain}
+            />
+        )
+    }
 
+    if (contributionError) {
+        return (
+            <ContributionError
+                onRetry={contributionRefetch}
+                isRetrying={contributionRefetching}
+            />
+        )
+    }
 
-    if (isPending) return <TeamContributionSkeleton rows={5} isCaptain={isCaptain} />;
+    const rosterMembers = contribution?.data ?? []
 
-    if (isError) return <ContributionError onRetry={refetch} isRetrying={isFetching} />;
-
-    const rosterMembers = data?.data ?? [];
-
-    console.log("ROSTER_MEM", rosterMembers)
-
-    const contributionTotal = rosterMembers?.reduce((total, member) => {
-        const status = member?.contribution_status?.toUpperCase();
-
-        if (["UNPAID", "FAILED", "PENDING", "CANCELLED"].includes(status)) {
-            return total + Number(member?.amount ?? 0);
-        }
-
-        return total;
-    }, 0);
+    const contributionTotal = rosterMembers.reduce(
+        (total, member) => total + Number(member.amount ?? 0),
+        0
+    )
 
     const paidAmount = rosterMembers.reduce((total, member) => {
-        const status = member.status?.toUpperCase();
-        return status === "PAID" ? total + Number(member.amount ?? 0) : total;
-    }, 0);
+        const status = member.contribution_status?.toUpperCase()
+
+        return status === "PAID"
+            ? total + Number(member.amount ?? 0)
+            : total
+    }, 0)
 
     const hasOutstandingPayments = rosterMembers.some((member) => {
-        const status = member.status?.toUpperCase();
-        return status === "PENDING" || status === "FAILED";
-    });
+        const status = member.contribution_status?.toUpperCase()
 
-    const allPaid = rosterMembers.length > 0 && !hasOutstandingPayments;
+        return ["PENDING", "FAILED", "UNPAID", "CANCELLED"].includes(status)
+    })
+
+    const allPaid =
+        rosterMembers.length > 0 &&
+        rosterMembers.every(
+            (member) => member.contribution_status?.toUpperCase() === "PAID"
+        )
 
     return (
         <section className="w-full overflow-hidden rounded-[16px] border border-[var(--border-default)] bg-[var(--surface-elevated)]">
@@ -137,7 +159,7 @@ export default function TeamContribution({
                 </div>
             </div>
         </section>
-    );
+    )
 }
 
 
@@ -146,11 +168,11 @@ export default function TeamContribution({
 ===================================================== */
 
 function PaymentRow({ member, isLast }) {
-    const status = member.contribution_status?.toUpperCase() ?? "PENDING";
-    const config = paymentConfig[status] ?? paymentConfig.PENDING;
-    const StatusIcon = config.icon;
+    const status = member.contribution_status?.toUpperCase() ?? "PENDING"
+    const config = paymentConfig[status] ?? paymentConfig.PENDING
+    const StatusIcon = config.icon
 
-    const detail = getPaymentDetail(status, member.paid_at);
+    const detail = getPaymentDetail(status, member.paid_at)
 
     return (
         <div className={`flex min-w-0 items-center gap-3 py-2.5 ${!isLast ? "border-b border-[var(--border-subtle)]" : ""}`}>
@@ -174,7 +196,7 @@ function PaymentRow({ member, isLast }) {
                 </p>
             </div>
         </div>
-    );
+    )
 }
 
 
@@ -183,11 +205,11 @@ function PaymentRow({ member, isLast }) {
 ===================================================== */
 
 function getPaymentDetail(status, paidAt) {
-    if (status === "PAID") return paidAt ? formatRelativeTime(paidAt) : "Payment received";
+    if (status === "PAID") return paidAt ? formatRelativeTime(paidAt) : "Payment received"
 
-    if (status === "FAILED") return "Payment failed";
+    if (status === "FAILED") return "Payment failed"
 
-    return "Due";
+    return "Due"
 }
 
 
@@ -196,22 +218,22 @@ function getPaymentDetail(status, paidAt) {
 ===================================================== */
 
 function formatRelativeTime(dateValue) {
-    const date = new Date(dateValue);
+    const date = new Date(dateValue)
 
-    if (Number.isNaN(date.getTime())) return "Payment received";
+    if (Number.isNaN(date.getTime())) return "Payment received"
 
-    const difference = Date.now() - date.getTime();
+    const difference = Date.now() - date.getTime()
 
-    const minutes = Math.floor(difference / (1000 * 60));
-    const hours = Math.floor(difference / (1000 * 60 * 60));
-    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const minutes = Math.floor(difference / (1000 * 60))
+    const hours = Math.floor(difference / (1000 * 60 * 60))
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24))
 
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
-    if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
-    if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+    if (minutes < 1) return "Just now"
+    if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`
+    if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`
+    if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`
 
-    return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+    return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
 }
 
 
@@ -241,6 +263,6 @@ function ContributionError({ onRetry, isRetrying }) {
                 </button>
             </div>
         </section>
-    );
+    )
 }
 

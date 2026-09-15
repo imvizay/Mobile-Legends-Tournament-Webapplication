@@ -15,10 +15,6 @@ from sqlalchemy.sql import func
 
 from app.core.db.base_class import Base
 
-# ============================================================
-# ENUMS
-# ============================================================
-
 
 class PaymentStatus(str, Enum):
     PENDING = "pending"
@@ -51,12 +47,9 @@ class PaymentGateway(str, Enum):
 
 class PaymentAttemptStatus(str, Enum):
     CREATED = "created"
-    PROCESSING = "processing"
     SUCCESS = "success"
     FAILED = "failed"
-
-
-# PAYMENT
+    CANCELLED = "cancelled"
 
 
 class Payment(Base):
@@ -125,14 +118,12 @@ class Payment(Base):
         index=True,
     )
 
-    # Python Enum, DB stores VARCHAR
     payment_type = Column(
         String(50),
         nullable=False,
         index=True,
     )
 
-    # Python Enum, DB stores VARCHAR
     status = Column(
         String(30),
         nullable=False,
@@ -163,16 +154,10 @@ class Payment(Base):
         nullable=False,
     )
 
-    # RELATIONSHIPS
-
     player = relationship("Player")
-
     team = relationship("Team")
-
     tournament = relationship("Tournament")
-
     registration = relationship("TeamTournamentRegistration")
-
     contribution = relationship("TeamTournamentContribution")
 
     attempts = relationship(
@@ -182,10 +167,6 @@ class Payment(Base):
         order_by="PaymentAttempt.attempt_number",
     )
 
-
-# ============================================================
-# PAYMENT ATTEMPT
-# ============================================================
 
 class PaymentAttempt(Base):
     __tablename__ = "payment_attempts"
@@ -213,10 +194,10 @@ class PaymentAttempt(Base):
     idempotency_key = Column(
         String(100),
         nullable=False,
+        unique=True,
         index=True,
     )
 
-    # Python Enum, DB stores VARCHAR
     status = Column(
         String(30),
         nullable=False,
@@ -239,13 +220,11 @@ class PaymentAttempt(Base):
         nullable=False,
     )
 
-    # Python Enum, DB stores VARCHAR
     payment_method = Column(
         String(30),
         nullable=True,
     )
 
-    # Python Enum, DB stores VARCHAR
     gateway = Column(
         String(30),
         nullable=True,
@@ -286,23 +265,12 @@ class PaymentAttempt(Base):
         nullable=False,
     )
 
-    # ========================================================
-    # RELATIONSHIPS
-    # ========================================================
-
     payment = relationship(
         "Payment",
         back_populates="attempts",
     )
 
-    # CONSTRAINTS
-
     __table_args__ = (
-        UniqueConstraint(
-            "payment_id",
-            "idempotency_key",
-            name="uq_payment_attempt_payment_idempotency",
-        ),
         UniqueConstraint(
             "payment_id",
             "attempt_number",

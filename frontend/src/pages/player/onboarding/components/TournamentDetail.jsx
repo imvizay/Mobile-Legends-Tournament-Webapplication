@@ -1,7 +1,7 @@
-import { ArrowRight, CalendarDays, CheckCircle2, Clock3, IndianRupee, ShieldCheck, Swords, Timer, Trophy, Users, X } from "lucide-react"
+import { ArrowRight, CalendarDays, Check, CheckCircle2, Clock3, IndianRupee, ShieldCheck, Swords, Timer, Trophy, Users, X } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
 
-export default function TournamentDetail({ tournament = {} }) {
+export default function TournamentDetail({ tournament = {}, payment = null }) {
     const navigate = useNavigate()
     const { id } = useParams()
 
@@ -29,59 +29,61 @@ export default function TournamentDetail({ tournament = {} }) {
     } = tournament
 
     const maxTeams = Number(max_teams) || 0
+    const isPaid = payment?.status === "paid"
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-0 backdrop-blur-md sm:p-4 lg:p-6">
-            <div className="absolute inset-0" aria-hidden="true" />
             <section className="relative flex h-[100dvh] w-full flex-col overflow-hidden border bg-[var(--surface-base)] sm:h-[92dvh] sm:max-w-[1120px] sm:rounded-[20px]" style={{ borderColor: "var(--border-default)" }}>
                 <header className="flex h-11 shrink-0 items-center justify-between border-b px-3.5 sm:h-12 sm:px-6" style={{ borderColor: "var(--border-subtle)" }}>
                     <div className="flex items-center gap-2">
                         <span className="size-1.5 rounded-full bg-[var(--accent-gold)]" />
                         <span className="text-[7px] font-bold uppercase tracking-[0.15em] text-[var(--text-muted)]">Tournament Details</span>
                     </div>
-                    <button type="button" aria-label="Close tournament details" onClick={() => navigate("/player/tournament")} className="flex size-7 items-center justify-center rounded-full transition hover:bg-[var(--surface-elevated)] sm:size-8" style={{ color: "var(--text-secondary)" }}>
+                    <button type="button" aria-label="Close tournament details" onClick={() => navigate("/player/team", { replace: true })} className="flex size-7 items-center justify-center rounded-full transition hover:bg-[var(--surface-elevated)] sm:size-8" style={{ color: "var(--text-secondary)" }}>
                         <X size={15} />
                     </button>
                 </header>
 
                 <div className="min-h-0 flex-1 overflow-y-auto">
                     <div className="mx-auto w-full max-w-[1080px] px-3 py-3 sm:px-6 sm:py-5">
-                        <section className="relative overflow-hidden rounded-[14px] border sm:rounded-[16px]" style={{ borderColor: "var(--border-default)" }}>
+                        <section className="relative overflow-hidden rounded-[15px] border sm:rounded-[18px]" style={{ borderColor: "var(--border-default)" }}>
                             {banner_image_url ? (
                                 <img src={banner_image_url} alt={tournament_name} className="absolute inset-0 h-full w-full object-cover" />
                             ) : background_image_url ? (
                                 <img src={background_image_url} alt={tournament_name} className="absolute inset-0 h-full w-full object-cover" />
                             ) : (
-                                <div className="absolute inset-0" style={{ background: "radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--accent-gold) 20%, transparent), transparent 42%), linear-gradient(135deg, var(--surface-elevated), var(--surface-base))" }} />
+                                <div className="absolute inset-0" style={{ background: "radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--accent-gold) 18%, transparent), transparent 42%), linear-gradient(135deg, var(--surface-elevated), var(--surface-base))" }} />
                             )}
 
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/25" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/65 to-black/20" />
 
-                            <div className="relative z-10 flex min-h-[185px] flex-col justify-between p-3.5 sm:min-h-[225px] sm:p-6">
+                            <div className="relative z-10 flex min-h-[205px] flex-col justify-between p-4 sm:min-h-[235px] sm:p-6">
                                 <div className="flex items-center justify-between gap-3">
-                                    <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
-                                        <span className="truncate text-[6px] font-bold uppercase tracking-[0.14em] text-[var(--accent-gold)] sm:text-[7px]">Mobile Legends</span>
+                                    <div className="flex min-w-0 items-center gap-1.5">
+                                        <span className="truncate text-[6px] font-bold uppercase tracking-[0.15em] text-[var(--accent-gold)] sm:text-[7px]">Mobile Legends</span>
                                         <span className="size-1 shrink-0 rounded-full bg-white/30" />
                                         <span className="truncate text-[6px] font-semibold uppercase tracking-[0.1em] text-white/50 sm:text-[7px]">{formatEnum(tournament_type)}</span>
                                     </div>
 
-                                    <div className="flex shrink-0 items-center gap-1 rounded-full border px-2 py-1 sm:gap-1.5 sm:px-2.5" style={{ borderColor: "rgba(255,255,255,.12)", background: "rgba(0,0,0,.25)" }}>
+                                    <div className="flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 sm:px-2.5" style={{ borderColor: "rgba(255,255,255,.12)", background: "rgba(0,0,0,.24)" }}>
                                         <CheckCircle2 size={9} className="text-[var(--accent-gold)]" />
-                                        <span className="text-[6px] font-bold uppercase tracking-[0.08em] text-white/70 sm:text-[7px]">{formatEnum(registration_status)}</span>
+                                        <span className="max-w-[95px] truncate text-[6px] font-bold uppercase tracking-[0.08em] text-white/70 sm:max-w-none sm:text-[7px]">{formatEnum(registration_status)}</span>
                                     </div>
                                 </div>
 
-                                <div className="flex min-w-0 items-center gap-2.5 sm:gap-4">
-                                    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border backdrop-blur-md sm:size-14 sm:rounded-[14px]" style={{ borderColor: "rgba(255,255,255,.15)", background: "rgba(0,0,0,.38)" }}>
-                                        <Trophy size={19} className="text-[var(--accent-gold)] sm:size-[25px]" />
+                                <div className="min-w-0">
+                                    <div className="mb-2.5 flex items-center gap-2">
+                                        <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] border sm:size-10 sm:rounded-[11px]" style={{ borderColor: "rgba(255,255,255,.14)", background: "rgba(0,0,0,.3)" }}>
+                                            <Trophy size={16} className="text-[var(--accent-gold)] sm:size-[19px]" />
+                                        </span>
+
+                                        <span className="text-[6px] font-bold uppercase tracking-[0.13em] text-white/45 sm:text-[7px]">Tournament</span>
                                     </div>
 
-                                    <div className="min-w-0">
-                                        <h1 className="line-clamp-2 text-[18px] font-black uppercase leading-[1.02] tracking-[-0.035em] text-white sm:max-w-[700px] sm:text-[28px] lg:text-[32px]">{tournament_name}</h1>
-                                    </div>
+                                    <h1 className="line-clamp-2 max-w-[760px] text-[20px] font-black leading-[1.05] tracking-[-0.04em] text-white sm:text-[28px] lg:text-[31px]">{tournament_name}</h1>
                                 </div>
 
-                                <div className="grid grid-cols-2 overflow-hidden rounded-[10px] border backdrop-blur-xl sm:grid-cols-4 sm:rounded-[12px]" style={{ borderColor: "rgba(255,255,255,.11)", background: "rgba(8,8,8,.58)" }}>
+                                <div className="grid grid-cols-2 overflow-hidden rounded-[11px] border sm:grid-cols-4 sm:rounded-[12px]" style={{ borderColor: "rgba(255,255,255,.11)", background: "rgba(8,8,8,.58)" }}>
                                     <HeroOverviewItem icon={<Trophy size={11} />} label="Prize Pool" value={formatCurrency(prize_pool)} accent />
                                     <HeroOverviewItem icon={<IndianRupee size={11} />} label="Contribution" value={formatCurrency(entry_fee)} />
                                     <HeroOverviewItem icon={<Swords size={11} />} label="Format" value={formatEnum(team_format)} />
@@ -90,20 +92,21 @@ export default function TournamentDetail({ tournament = {} }) {
                             </div>
                         </section>
 
-                        <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(270px,.72fr)] lg:items-stretch lg:gap-8">
-                            <section className="min-w-0 lg:flex lg:min-h-0 lg:flex-col">
-                                <SectionTitle eyebrow="Competition briefing" title="Tournament Description & Regulations" description="Review the official tournament information and regulations before completing your contribution." />
+                        <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(270px,.72fr)] lg:gap-8">
+                            <section className="min-w-0">
+                                <SectionTitle eyebrow="Competition briefing" title="Tournament Description" />
 
-                                <div className="mt-3.5 overflow-hidden rounded-[12px] border sm:mt-4 sm:rounded-[14px] lg:flex lg:min-h-0 lg:flex-1 lg:flex-col" style={{ borderColor: "var(--border-subtle)", background: "var(--surface-elevated)" }}>
-                                    <div className="flex shrink-0 items-center justify-between border-b px-3 py-2.5 sm:px-4" style={{ borderColor: "var(--border-subtle)" }}>
+                                <div className="mt-3 overflow-hidden rounded-[13px] border sm:mt-4 sm:rounded-[15px]" style={{ borderColor: "var(--border-subtle)", background: "var(--surface-elevated)" }}>
+                                    <div className="flex items-center justify-between border-b px-3 py-2.5 sm:px-4" style={{ borderColor: "var(--border-subtle)" }}>
                                         <div className="flex items-center gap-1.5">
                                             <ShieldCheck size={11} className="text-[var(--accent-gold)]" />
                                             <span className="text-[6px] font-bold uppercase tracking-[0.1em] text-[var(--text-muted)] sm:text-[7px]">Official Information</span>
                                         </div>
+
                                         <span className="hidden text-[6px] font-semibold text-[var(--text-muted)] sm:block">Tournament regulations</span>
                                     </div>
 
-                                    <div className="px-3 sm:px-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+                                    <div className="px-3 sm:px-4">
                                         <Description description={description} />
                                     </div>
                                 </div>
@@ -138,8 +141,10 @@ export default function TournamentDetail({ tournament = {} }) {
                                                 <Users size={12} className="text-[var(--accent-gold)]" />
                                                 <span className="text-[6px] font-bold uppercase tracking-[0.11em] text-[var(--text-muted)] sm:text-[7px]">Team Capacity</span>
                                             </div>
+
                                             <span className="text-[9px] font-black text-[var(--text-primary)]">{maxTeams || "—"}</span>
                                         </div>
+
                                         <p className="mt-1.5 text-[6px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)] sm:text-[7px]">{maxTeams ? `${maxTeams} team slots available` : "Team capacity not available"}</p>
                                     </div>
                                 </div>
@@ -147,22 +152,20 @@ export default function TournamentDetail({ tournament = {} }) {
                         </div>
 
                         <section className="mt-5 border-t pt-4 sm:mt-6 sm:pt-5" style={{ borderColor: "var(--border-subtle)" }}>
-                            <div className="flex items-start gap-2.5 rounded-[11px] border px-3 py-3 sm:gap-3 sm:rounded-[12px] sm:px-4 sm:py-3.5" style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 18%, var(--border-subtle))", background: "color-mix(in srgb, var(--accent-gold) 4%, var(--surface-elevated))" }}>
+                            <div className="flex items-start gap-2.5 rounded-[12px] border px-3 py-3 sm:gap-3 sm:px-4 sm:py-3.5" style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 18%, var(--border-subtle))", background: "color-mix(in srgb, var(--accent-gold) 4%, var(--surface-elevated))" }}>
                                 <div className="flex size-7 shrink-0 items-center justify-center rounded-full border" style={{ borderColor: "color-mix(in srgb, var(--accent-gold) 25%, transparent)", color: "var(--accent-gold)" }}>
                                     <ShieldCheck size={12} />
                                 </div>
 
                                 <div className="min-w-0">
-                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                                         <h3 className="text-[7px] font-black uppercase tracking-[0.09em] text-[var(--text-primary)] sm:text-[8px]">Individual Contribution</h3>
-                                        <span className="text-[6px] font-medium text-[var(--text-muted)] sm:text-[7px]">{formatCurrency(entry_fee)} per player</span>
+                                        <span className="whitespace-nowrap text-[6px] font-medium text-[var(--text-muted)] sm:text-[7px]">{formatCurrency(entry_fee)} per player</span>
                                     </div>
 
-                                    <p className="mt-1.5 max-w-[850px] text-[7px] leading-[1.75] text-[var(--text-secondary)] sm:text-[9px]">
-                                        Each player is responsible for completing their individual contribution. Completing the contribution alone does not confirm tournament participation. Eligibility to compete remains subject to inclusion in the team's confirmed tournament roster and fulfillment of all roster requirements.
-                                    </p>
+                                    <p className="mt-1.5 max-w-[850px] text-[7px] leading-[1.7] text-[var(--text-secondary)] sm:text-[9px]">Each player completes their own contribution. Payment alone does not confirm tournament participation. Final eligibility depends on the team's confirmed roster and all required roster members completing their contributions.</p>
 
-                                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5 sm:gap-x-4">
+                                    <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1.5 sm:gap-x-4">
                                         <ContributionPoint text="Individual payment required" />
                                         <ContributionPoint text="Confirmed roster required" />
                                         <ContributionPoint text="Eligibility verified" />
@@ -175,15 +178,11 @@ export default function TournamentDetail({ tournament = {} }) {
 
                 <footer className="shrink-0 border-t px-3 py-2.5 sm:px-6 sm:py-3" style={{ borderColor: "var(--border-subtle)", background: "var(--surface-base)" }}>
                     <div className="mx-auto flex w-full max-w-[1080px] items-center justify-between gap-3">
-                        <div className="min-w-0">
-                            <p className="text-[6px] font-bold uppercase tracking-[0.11em] text-[var(--text-muted)] sm:text-[7px]">Individual Contribution</p>
-                            <p className="mt-0.5 text-[14px] font-black tracking-[-0.02em] text-[var(--accent-gold)] sm:text-[16px]">{formatCurrency(entry_fee)}</p>
-                        </div>
-
-                        <button type="button" onClick={() => navigate(`/player/tournament/${id}/review-contribution`)} className="flex h-9 flex-1 items-center justify-center gap-2 rounded-[8px] px-3 text-[7px] font-black uppercase tracking-[0.09em] transition hover:-translate-y-px active:translate-y-0 sm:h-10 sm:min-w-[250px] sm:flex-none sm:px-6 sm:text-[8px]" style={{ color: "var(--bg-canvas)", background: "var(--accent-gold)" }}>
-                            <span className="truncate">Continue to Contribution</span>
-                            <ArrowRight size={12} strokeWidth={2.5} className="shrink-0" />
-                        </button>
+                        {isPaid ? (
+                            <PaidContributionState payment={payment} onContinue={() => navigate(`/player/tournament/${id}`)} />
+                        ) : (
+                            <PendingContributionState entryFee={entry_fee} onContinue={() => navigate(`/player/tournament/${id}/review-contribution`)} />
+                        )}
                     </div>
                 </footer>
             </section>
@@ -191,21 +190,62 @@ export default function TournamentDetail({ tournament = {} }) {
     )
 }
 
-function SectionTitle({ eyebrow, title, description }) {
+function PaidContributionState({ payment, onContinue }) {
+    return (
+        <div className="flex w-full items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--accent-gold) 11%, transparent)", color: "var(--accent-gold)" }}>
+                    <Check size={14} strokeWidth={2.8} />
+                </div>
+
+                <div className="min-w-0">
+                    <div className="flex min-w-0 items-center gap-2">
+                        <p className="truncate text-[7px] font-black uppercase tracking-[0.1em] text-[var(--text-primary)] sm:text-[8px]">Contribution Paid</p>
+                        <span className="hidden whitespace-nowrap text-[6px] font-bold uppercase tracking-[0.08em] text-[var(--accent-gold)] sm:inline">Confirmed</span>
+                    </div>
+
+                    <p className="mt-0.5 truncate text-[6px] text-[var(--text-muted)] sm:text-[7px]">Payment received successfully</p>
+                </div>
+            </div>
+
+            <button type="button" onClick={onContinue} className="flex h-9 shrink-0 items-center justify-center gap-2 rounded-[8px] px-3 text-[7px] font-black uppercase tracking-[0.08em] transition hover:-translate-y-px active:translate-y-0 sm:h-10 sm:min-w-[220px] sm:px-5 sm:text-[8px]" style={{ color: "var(--bg-canvas)", background: "var(--accent-gold)" }}>
+                <span className="whitespace-nowrap">Continue to Tournament</span>
+                <ArrowRight size={12} strokeWidth={2.5} />
+            </button>
+        </div>
+    )
+}
+
+function PendingContributionState({ entryFee, onContinue }) {
+    return (
+        <div className="flex w-full items-center justify-between gap-3">
+            <div className="min-w-0">
+                <p className="text-[6px] font-bold uppercase tracking-[0.11em] text-[var(--text-muted)] sm:text-[7px]">Individual Contribution</p>
+                <p className="mt-0.5 text-[14px] font-black tracking-[-0.02em] text-[var(--accent-gold)] sm:text-[16px]">{formatCurrency(entryFee)}</p>
+            </div>
+
+            <button type="button" onClick={onContinue} className="flex h-9 flex-1 items-center justify-center gap-2 rounded-[8px] px-3 text-[7px] font-black uppercase tracking-[0.09em] transition hover:-translate-y-px active:translate-y-0 sm:h-10 sm:min-w-[250px] sm:flex-none sm:px-6 sm:text-[8px]" style={{ color: "var(--bg-canvas)", background: "var(--accent-gold)" }}>
+                <span className="whitespace-nowrap">Continue to Contribution</span>
+                <ArrowRight size={12} strokeWidth={2.5} />
+            </button>
+        </div>
+    )
+}
+
+function SectionTitle({ eyebrow, title }) {
     return (
         <div className="max-w-[680px]">
             {eyebrow && <p className="text-[6px] font-bold uppercase tracking-[0.14em] text-[var(--accent-gold)] sm:text-[7px]">{eyebrow}</p>}
             <h2 className={`text-[14px] font-black tracking-[-0.02em] text-[var(--text-primary)] sm:text-[17px] ${eyebrow ? "mt-1.5" : ""}`}>{title}</h2>
-            {description && <p className="mt-1 text-[7px] leading-[1.7] text-[var(--text-secondary)] sm:mt-1.5 sm:text-[9px]">{description}</p>}
         </div>
     )
 }
 
 function HeroOverviewItem({ icon, label, value, accent = false }) {
     return (
-        <div className="min-w-0 border-b border-r border-white/10 px-2.5 py-2 sm:px-3.5 sm:py-3">
-            <div className="flex items-center gap-1.5">
-                <span className={accent ? "text-[var(--accent-gold)]" : "text-white/45"}>{icon}</span>
+        <div className="min-w-0 border-b border-r border-white/10 px-2.5 py-2.5 sm:px-3.5 sm:py-3">
+            <div className="flex min-w-0 items-center gap-1.5">
+                <span className={accent ? "shrink-0 text-[var(--accent-gold)]" : "shrink-0 text-white/45"}>{icon}</span>
                 <span className="truncate text-[5.5px] font-bold uppercase tracking-[0.09em] text-white/45 sm:text-[6px]">{label}</span>
             </div>
             <p className={`mt-1 truncate text-[8px] font-black uppercase sm:text-[10px] ${accent ? "text-[var(--accent-gold)]" : "text-white"}`}>{value}</p>
@@ -224,11 +264,11 @@ function DetailGroup({ title, children }) {
 
 function DetailRow({ icon, label, value }) {
     return (
-        <div className="flex items-start gap-2.5">
+        <div className="flex min-w-0 items-start gap-2.5">
             <span className="mt-0.5 shrink-0 text-[var(--text-muted)]">{icon}</span>
             <div className="min-w-0 flex-1">
                 <p className="text-[6px] font-bold uppercase tracking-[0.09em] text-[var(--text-muted)] sm:text-[7px]">{label}</p>
-                <p className="mt-0.5 break-words text-[8px] font-bold leading-[1.55] text-[var(--text-primary)] sm:text-[10px]">{value || "Not specified"}</p>
+                <p className="mt-0.5 break-words text-[8px] font-bold leading-[1.5] text-[var(--text-primary)] sm:text-[10px]">{value || "Not specified"}</p>
             </div>
         </div>
     )
@@ -236,9 +276,9 @@ function DetailRow({ icon, label, value }) {
 
 function ContributionPoint({ text }) {
     return (
-        <div className="flex items-center gap-1.5">
+        <div className="flex min-w-0 items-center gap-1.5">
             <CheckCircle2 size={9} className="shrink-0 text-[var(--accent-gold)]" />
-            <span className="text-[6px] font-semibold text-[var(--text-muted)] sm:text-[7px]">{text}</span>
+            <span className="whitespace-nowrap text-[6px] font-semibold text-[var(--text-muted)] sm:text-[7px]">{text}</span>
         </div>
     )
 }
@@ -263,6 +303,7 @@ function Description({ description = "" }) {
                         <span className="w-5 shrink-0 pt-0.5 text-[7px] font-black tracking-[0.05em] text-[var(--accent-gold)] sm:text-[8px]">{String(index + 1).padStart(2, "0")}</span>
                         <div className="min-w-0 flex-1">
                             <h3 className="text-[7px] font-black uppercase leading-[1.5] tracking-[0.04em] text-[var(--text-primary)] sm:text-[9px]">{section.heading}</h3>
+
                             <div className="mt-1.5 space-y-1.5">
                                 {section.content.map((line, lineIndex) => (
                                     <p key={lineIndex} className="text-[7px] leading-[1.8] text-[var(--text-secondary)] sm:text-[9px]">{line}</p>
@@ -279,11 +320,7 @@ function Description({ description = "" }) {
 function parseDescription(description = "") {
     if (typeof description !== "string" || !description.trim()) return []
 
-    const numberedRules = description
-        .replace(/\r/g, "")
-        .split(/\n+/)
-        .map((line) => line.trim())
-        .filter(Boolean)
+    const numberedRules = description.replace(/\r/g, "").split(/\n+/).map((line) => line.trim()).filter(Boolean)
 
     if (numberedRules.some((line) => /^\d+\./.test(line))) {
         return numberedRules.map((line, index) => {
@@ -294,16 +331,10 @@ function parseDescription(description = "") {
             const splitAt = separator > -1 ? separator : colon
 
             if (splitAt > -1) {
-                return {
-                    heading: text.slice(0, splitAt).trim(),
-                    content: [text.slice(splitAt + 1).trim()].filter(Boolean),
-                }
+                return { heading: text.slice(0, splitAt).trim(), content: [text.slice(splitAt + 1).trim()].filter(Boolean) }
             }
 
-            return {
-                heading: `Rule ${index + 1}`,
-                content: [text],
-            }
+            return { heading: `Rule ${index + 1}`, content: [text] }
         })
     }
 

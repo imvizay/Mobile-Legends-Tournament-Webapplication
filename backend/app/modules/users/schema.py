@@ -38,8 +38,7 @@ class DashboardTournamentResponse(BaseModel):
     game_name: str
     background_image_url : str | None= None
     banner_image_url: str | None = None
-    tournament_start_date: date
-    tournament_start_time: time
+    starts_at: datetime
     entry_fee: float
     max_teams: int
     server:str 

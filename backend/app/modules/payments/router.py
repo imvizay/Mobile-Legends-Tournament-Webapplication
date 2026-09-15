@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header,Query
 
 from ..auth.models import Player
 from app.dependencies.auth import get_current_user
@@ -17,9 +17,7 @@ def create_razorpay_order(
     current_user: Player = Depends(get_current_user),
     payment_service: PaymentService = Depends(get_payment_service),
 ):
-    print("REGISTRATION ID:", registration_id)
-    print("IDEMPOTENCY KEY:", idempotency_key)
-
+  
     return payment_service.create_razorpay_order(
         registration_id=registration_id,
         roster_id=payload.roster_id,
@@ -42,4 +40,17 @@ async def verify_payment(
         razorpay_order_id=payload.razorpay_order_id,
         razorpay_signature=payload.razorpay_signature,
         razorpay_payment_id=payload.razorpay_payment_id,
+    )
+
+# GET /api/payments/success/reference?payment_reference=PAY-TC-20260913-C98C550EB5
+@router.get('/success/reference/{payment_reference}')
+def get_payment_success_by_reference(
+    payment_reference:str ,
+    current_user:Player=Depends(get_current_user),
+    payment_service:PaymentService=Depends(get_payment_service)
+):
+    
+    return payment_service.get_successful_payment_by_reference(
+        payment_reference=payment_reference,
+        current_user=current_user
     )

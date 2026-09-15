@@ -1,14 +1,36 @@
-# responses.py
-
+from pydantic import BaseModel , ConfigDict
+from decimal import Decimal 
 from app.core.config.settings import settings
+from datetime import datetime
+from .models import PaymentStatus,PaymentType
+# frontend payment query res
+
+class PaymentSuccessData(BaseModel):
+    id: int
+    payment_reference: str
+    amount: Decimal
+    payment_type: PaymentType
+    status: PaymentStatus
+
+    tournament_id: int
+    team_id: int
+    registration_id: int
+    contribution_id: int
+
+    paid_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
 
 
+class PaymentSuccessResponse(BaseModel):
+    success: bool = True
+    code: str = "PAYMENT_SUCCESS"
+    message: str = "Payment was successfully completed."
+    data: PaymentSuccessData
+
+
+# razorpay order created and verification
 def payment_already_paid_response(payment):
-    """
-    Response returned when the contribution payment
-    has already been completed.
-    """
-
     return {
         "success": True,
         "code": "PAYMENT_ALREADY_PAID",
@@ -16,47 +38,30 @@ def payment_already_paid_response(payment):
         "data": {
             "payment_id": payment.id,
             "payment_reference": payment.payment_reference,
-            "status": payment.status.value
-            if hasattr(payment.status, "value")
-            else payment.status,
+            "status": payment.status,
             "paid_at": payment.paid_at,
+        
         },
     }
 
 
-def payment_attempt_processing_response(
+def payment_attempt_success_response(
     payment,
     payment_attempt,
 ):
-    """
-    Response returned when a payment attempt exists but
-    the Razorpay order has not been created/persisted yet.
-    """
-
     return {
         "success": True,
-        "code": "PAYMENT_ATTEMPT_PROCESSING",
-        "message": (
-            "Your payment request is being processed. "
-            "Please retry shortly."
-        ),
+        "code": "PAYMENT_VERIFIED",
+        "message": "Payment has already been successfully verified.",
         "data": {
             "payment_id": payment.id,
             "attempt_id": payment_attempt.id,
             "payment_reference": payment.payment_reference,
-            "status": payment_attempt.status.value
-            if hasattr(payment_attempt.status, "value")
-            else payment_attempt.status,
+            "status": payment_attempt.status,
             "order_id": payment_attempt.gateway_order_id,
-            "amount": float(payment_attempt.amount),
-            "currency": "INR",
-            "key_id": None,
             "gateway_payment_id": payment_attempt.gateway_payment_id,
-            "payment_method": (
-                payment_attempt.payment_method.value
-                if hasattr(payment_attempt.payment_method, "value")
-                else payment_attempt.payment_method
-            ),
+            "amount": payment_attempt.amount,
+            "currency": "INR",
         },
     }
 
@@ -65,11 +70,6 @@ def payment_attempt_resumable_response(
     payment,
     payment_attempt,
 ):
-    """
-    Response returned when an existing Razorpay order
-    can safely be resumed.
-    """
-
     return {
         "success": True,
         "code": "PAYMENT_ATTEMPT_RESUMABLE",
@@ -78,19 +78,13 @@ def payment_attempt_resumable_response(
             "payment_id": payment.id,
             "attempt_id": payment_attempt.id,
             "payment_reference": payment.payment_reference,
-            "status": payment_attempt.status.value
-            if hasattr(payment_attempt.status, "value")
-            else payment_attempt.status,
+            "status": payment_attempt.status,
             "order_id": payment_attempt.gateway_order_id,
-            "amount": float(payment_attempt.amount),
+            "amount": payment_attempt.amount,
             "currency": "INR",
             "key_id": settings.RAZORPAY_KEY_ID,
             "gateway_payment_id": payment_attempt.gateway_payment_id,
-            "payment_method": (
-                payment_attempt.payment_method.value
-                if hasattr(payment_attempt.payment_method, "value")
-                else payment_attempt.payment_method
-            ),
+            "payment_method": payment_attempt.payment_method,
         },
     }
 
@@ -100,11 +94,6 @@ def payment_order_created_response(
     payment_attempt,
     razorpay_order,
 ):
-    """
-    Response returned after successfully creating
-    and persisting a Razorpay order.
-    """
-
     return {
         "success": True,
         "code": "PAYMENT_ORDER_CREATED",
@@ -113,52 +102,27 @@ def payment_order_created_response(
             "payment_id": payment.id,
             "attempt_id": payment_attempt.id,
             "payment_reference": payment.payment_reference,
-            "status": payment_attempt.status.value
-            if hasattr(payment_attempt.status, "value")
-            else payment_attempt.status,
+            "status": payment_attempt.status,
             "order_id": razorpay_order["id"],
-            "amount": float(payment_attempt.amount),
-            "currency": razorpay_order.get("currency", "INR"),
+            "amount": payment_attempt.amount,
+            "currency": razorpay_order["currency"],
             "key_id": settings.RAZORPAY_KEY_ID,
-            "gateway_payment_id": payment_attempt.gateway_payment_id,
-            "payment_method": (
-                payment_attempt.payment_method.value
-                if hasattr(payment_attempt.payment_method, "value")
-                else payment_attempt.payment_method
-            ),
         },
     }
 
 
-def payment_attempt_success_response(
+def payment_attempt_failed_response(
     payment,
     payment_attempt,
 ):
-    """
-    Response returned when the payment attempt has
-    been successfully verified/reconciled.
-    """
-
     return {
-        "success": True,
-        "code": "PAYMENT_SUCCESS",
-        "message": "Payment completed successfully.",
+        "success": False,
+        "code": "PAYMENT_ATTEMPT_FAILED",
+        "message": "This payment attempt has failed. A new payment attempt is required.",
         "data": {
             "payment_id": payment.id,
             "attempt_id": payment_attempt.id,
             "payment_reference": payment.payment_reference,
-            "status": payment_attempt.status.value
-            if hasattr(payment_attempt.status, "value")
-            else payment_attempt.status,
-            "order_id": payment_attempt.gateway_order_id,
-            "amount": float(payment_attempt.amount),
-            "currency": "INR",
-            "key_id": settings.RAZORPAY_KEY_ID,
-            "gateway_payment_id": payment_attempt.gateway_payment_id,
-            "payment_method": (
-                payment_attempt.payment_method.value
-                if hasattr(payment_attempt.payment_method, "value")
-                else payment_attempt.payment_method
-            ),
+            "status": payment_attempt.status,
         },
     }

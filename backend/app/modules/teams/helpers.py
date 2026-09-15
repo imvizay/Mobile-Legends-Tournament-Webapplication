@@ -12,8 +12,6 @@ def make_roster_player_response(roster_players):
     if not roster_players:
         return None
     
-    
-
     return TeamRosterPlayer(
         roster_status=roster_players[0].roster.status.value,
         is_roster_locked=roster_players[0].roster.status.value == "confirmed",
@@ -25,6 +23,7 @@ def make_roster_player_response(roster_players):
                 role=rp.player.role,
                 tournament_readiness=rp.tournament_readiness,
                 status=rp.status,
+                fee_status=rp.contribution.status
             )
             for rp in roster_players
         ],

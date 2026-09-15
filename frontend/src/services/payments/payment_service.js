@@ -1,10 +1,11 @@
 import { api } from "../../api/client/request";
 
 export const paymentService = {
-    createOrder: (registrationId,roster_id, idempotencyKey) => {
+    createOrder: (registrationId, roster_id, idempotencyKey) => {
         return api.post(`/payments/contribution/${registrationId}/razorpay/create-order`,
-            {roster_id},
-            {
+            { roster_id },
+            {   
+                timeout: 20000,
                 headers: {
                     "Idempotency-Key": idempotencyKey,
                 },
@@ -19,7 +20,11 @@ export const paymentService = {
             razorpay_signature
         })
 
-    }
+    },
+    getPaymentByReference: (paymentReference) => {
+        return api.get(`/payments/success/reference/${paymentReference}`);
+    },
+
 }
 
 

@@ -1,23 +1,27 @@
-from .models import PaymentType
-from datetime import datetime, timezone
+# helpers.py
 from app.core.config.settings import settings
+from datetime import datetime, timezone
+from uuid import uuid4
+
+from .models import PaymentType
 
 
-def generate_payment_reference(payment_type: PaymentType):
-
-    now = datetime.now(timezone.utc)
-
-    type_code = {
+def generate_payment_reference(payment_type: PaymentType) -> str:
+    prefix_map = {
         PaymentType.TOURNAMENT_CONTRIBUTION: "TC",
         PaymentType.WALLET_TOPUP: "WT",
         PaymentType.WITHDRAWAL: "WD",
         PaymentType.REFUND: "RF",
         PaymentType.REWARD: "RW",
-    }[payment_type]
+        PaymentType.CLAIM: "CL",
+        PaymentType.BONUS: "BN",
+    }
 
-    return f"PAY-{type_code}-{now:%Y-%m%d}"
+    prefix = prefix_map.get(payment_type, "PAY")
+    date = datetime.now(timezone.utc).strftime("%Y%m%d")
+    unique_id = uuid4().hex[:10].upper()
 
-
+    return f"PAY-{prefix}-{date}-{unique_id}"
 # Responses helpers
 
 
