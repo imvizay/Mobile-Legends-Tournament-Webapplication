@@ -2,7 +2,7 @@ from datetime import date, time, datetime
 from fastapi import Form
 from decimal import Decimal
 from datetime import date, time
-from pydantic import BaseModel, model_validator, ConfigDict
+from pydantic import BaseModel, model_validator, ConfigDict,Field
 
 
 class TournamentForm(BaseModel):
@@ -115,6 +115,7 @@ class TournamentListResponse(BaseModel):
     registration_status: str
     status: str
     visibility_status: str
+    registration_count: int = 0
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -126,3 +127,63 @@ class AdminTournamentRes(BaseModel):
 class TournamentDetailResponse(BaseModel):
     success: str
     data: TournamentListResponse
+
+# Tournament Response Without Registration Summary
+class OngoingTournamentResponse(BaseModel):
+    code: int
+    message: str
+    data: list[TournamentListResponse] | None = None
+
+
+# Tournament Response Registration Summary
+class OngoingTournamentHeaderResponse(BaseModel):
+    id: int
+    background_image_url: str | None = None
+    tournament_name: str
+    game_name: str
+
+    min_teams: int
+    max_teams: int
+
+    prize_pool: Decimal | None = None
+    entry_fee: Decimal
+
+    registration_opens_at: datetime
+    registration_closes_at: datetime
+
+    starts_at: datetime
+    ends_at: datetime
+
+    bracket_format: str
+    tournament_type: str
+    server: str
+    status: str
+
+class OngoingRegistrationTeamContributionResponse(BaseModel):
+    id: int
+    roster_player_id: int
+    player_id: int
+    status: str
+    paid_at: datetime | None = None
+
+
+class OngoingRegistrationTeamResponse(BaseModel):
+    id: int
+
+    team_name: str
+    team_tag: str
+    team_logo_url:str | None = None
+
+    captain_id: int
+    captain_username: str | None = None
+    captain_email: str
+    captain_mlbb_id: str | None = None
+
+    contribution: list[OngoingRegistrationTeamContributionResponse] = Field(
+        default_factory=list
+    )
+
+
+class OngoingTournamentRegistrationListResponse(BaseModel):
+    tournament: OngoingTournamentHeaderResponse
+    registrations: list[OngoingRegistrationTeamResponse]

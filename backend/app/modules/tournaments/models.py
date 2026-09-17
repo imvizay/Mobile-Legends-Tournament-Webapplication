@@ -32,6 +32,10 @@ class EntryType(str, Enum):
     FREE = "free"
     PAID = "paid"
 
+class BracketStatus(str, Enum):
+    NOT_READY = "not_ready"
+    READY = "ready"
+    GENERATED = "generated"
 
 class Tournament(Base):
     __tablename__ = "tournaments"
@@ -45,6 +49,9 @@ class Tournament(Base):
     tournament_type = Column(String(50), nullable=False)
     team_format = Column(String(50), nullable=False)
     bracket_format = Column(String(50), nullable=True)
+    bracket_status = Column(String(30),nullable=True,default=BracketStatus.NOT_READY.value)
+    entry_type = Column(String(30), nullable=False, default=EntryType.FREE.value)
+    
     competition_type = Column(String(50), nullable=True)
     seeding_method = Column(String(50), nullable=True)
 
@@ -79,8 +86,30 @@ class Tournament(Base):
     banner_image_public_id = Column(String(255), nullable=True)
 
     status = Column(String(30), nullable=False, default=TournamentStatus.SCHEDULED.value)
+
     registration_status = Column(String(30), nullable=False, default=RegistrationStatus.UPCOMING.value)
     visibility_status = Column(String(30), nullable=False, default=VisibilityStatus.DRAFT.value)
+    
+    
+    # Registration extended
+    registration_extended_at = Column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+
+    registration_extension_reason = Column(
+        Text,
+        nullable=True
+    )
+    
+    # Postponement
+    postponed_at = Column(DateTime(timezone=True), nullable=True)
+    postponement_reason = Column(Text, nullable=True)
+
+    # Cancellation
+    cancelled_at = Column(DateTime(timezone=True), nullable=True)
+    cancellation_reason = Column(Text, nullable=True)
+    
 
     created_by = Column(Integer, ForeignKey("players.id", ondelete="RESTRICT"), nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))

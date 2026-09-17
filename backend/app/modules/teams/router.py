@@ -77,9 +77,7 @@ async def join_team(
     return team_service.join_team(team_id, current_user)
 
 
-# ======================================
 # TEAM TOURNAMENTS ENDPOINTS
-# ======================================
 
 
 # Register the team for a tournament
@@ -95,8 +93,11 @@ def register_team(
     )
 
 
+# CAPTAIN ROSTER's Endpoints
+
+
 # add Roster
-@router.post("/tournament/{tournament_id}/roster/{player_id}")
+@router.post("/tournament/{tournament_id}/add-roster/{player_id}")
 def add_roster(
     tournament_id: int,
     player_id: int,
@@ -108,9 +109,22 @@ def add_roster(
     )
 
 
-# CONFIRM ROSTER
+# remove roster
+@router.patch("/tournament/{tournament_id}/remove-roster/{roster_player_id}")
+def remove_roster_player(
+    tournament_id: int,
+    roster_player_id: int,
+    captain: Player = Depends(get_team_captain),
+    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+):
+    return tournament_service.remove_roster_player(
+        tournament_id=tournament_id,
+        player_id=roster_player_id,
+        captain=captain,
+    )
 
 
+# confirm roster
 @router.patch("/tournament/{registration_id}/roster/lock")
 def confirm_roster(
     registration_id: int,
@@ -134,23 +148,29 @@ def team_contribution(
         registration_id=registration_id, team_id=team_id, current_user=current_user
     )
 
+
 # Tournament Detail
 
-@router.get('/tournament/{tournament_id}/detail')
+
+@router.get("/tournament/{tournament_id}/detail")
 def tournament_detail(
-    tournament_id:int,
-    current_user: Player=Depends(get_current_user),
-    tournament_service:TeamTournamentService = Depends(get_teamtournament_service)
+    tournament_id: int,
+    current_user: Player = Depends(get_current_user),
+    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
 ):
-    
-    return tournament_service.tournament_detail(tournament_id=tournament_id,current_user=current_user)
+
+    return tournament_service.tournament_detail(
+        tournament_id=tournament_id, current_user=current_user
+    )
 
 
-@router.get('/tournament/{tournament_id}/payment-review')
+@router.get("/tournament/{tournament_id}/payment-review")
 def get_tournament_paying_review(
-    tournament_id:int,
-    current_user: Player=Depends(get_current_user),
-    tournament_service:TeamTournamentService = Depends(get_teamtournament_service)
+    tournament_id: int,
+    current_user: Player = Depends(get_current_user),
+    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
 ):
-    
-    return tournament_service.get_paying_review(tournament_id=tournament_id,current_user=current_user)
+
+    return tournament_service.get_paying_review(
+        tournament_id=tournament_id, current_user=current_user
+    )

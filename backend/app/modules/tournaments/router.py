@@ -9,6 +9,7 @@ from .schema import TournamentForm
 router = APIRouter(prefix="/tournament", tags=["Tournaments"])
 
 
+# admin
 @router.post("/create")
 async def create_tournament(
     data: TournamentForm = Depends(get_tournament_form),
@@ -26,6 +27,7 @@ async def create_tournament(
     )
 
 
+# admin/users
 @router.get("/tournaments")
 def tournaments(
     current_user: Player = Depends(get_current_user),
@@ -35,6 +37,7 @@ def tournaments(
     return tournament_service.get_tournaments(current_user=current_user)
 
 
+# admin
 @router.post("/{tournament_id}/publish")
 def publish_tournaments(
     tournament_id: int,
@@ -44,4 +47,26 @@ def publish_tournaments(
 
     return tournament_service.publish_tournament(
         tournament_id=tournament_id, current_user=current_user
+    )
+
+
+# admin
+@router.get("/ongoing-registrations")
+def ongoing_tournament_registration(
+    admin: Player = Depends(get_current_admin),
+    tournament_service: TournamentService = Depends(get_tournament_service),
+):
+    return tournament_service.get_ongoing_tournament_registration(admin=admin)
+
+
+# "GET /api/%27/tournament/ongoing-registration/1/details HTTP/1.1" 40
+# admin tournament registration details
+@router.get("/ongoing-registration/{ongoing_tournament_id}/details")
+def ongoing_tournament_registration_detail(
+    ongoing_tournament_id: int,
+    admin: Player = Depends(get_current_admin),
+    tournament_service: TournamentService = Depends(get_tournament_service),
+):
+    return tournament_service.get_ongoing_tournament_registration_detail(
+        admin=admin, ongoing_tournament_id=ongoing_tournament_id
     )
