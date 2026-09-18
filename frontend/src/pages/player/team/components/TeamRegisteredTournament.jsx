@@ -21,7 +21,7 @@ const dummyTournament = {
 }
 
 export default function RegisteredTournament({
-  tournament = dummyTournament,
+  tournament = {},
   isRosterLocked = true,
   isCurrentUserInRoster = false,
   isPlayerPaid = false,
@@ -36,6 +36,7 @@ export default function RegisteredTournament({
   onRoomDetails,
   onTournamentDetails,
 }) {
+  console.log("TOURNAMENT",tournament)
   return (
     <section className="w-full">
       <div className="mb-4 flex items-end justify-between gap-3">
@@ -60,7 +61,7 @@ export default function RegisteredTournament({
 
       <div className="w-full">
         <TournamentCard
-          tournament={dummyTournament}
+          tournament={tournament}
           isRosterLocked={isRosterLocked}
           isCurrentUserInRoster={isCurrentUserInRoster}
           isPlayerPaid={isPlayerPaid}
@@ -101,21 +102,12 @@ function TournamentCard({
 
   const navigate = useNavigate()
   const registeredTeams = Number(tournament.joined_teams ?? 0)
-  const totalTeams = Number(tournament.total_teams ?? 0)
+  const totalTeams = Number(tournament.max_teams ?? 0)
 
   const percentage = totalTeams > 0
     ? Math.min((registeredTeams / totalTeams) * 100, 100)
     : 0
-
-  /*
-   * This is the main permission variable.
-   *
-   * A player can perform tournament actions only when:
-   *
-   * 1. They are in the active roster
-   * OR
-   * 2. They are an approved substitute.
-   */
+ 
   const canOperateTournament =
     isCurrentUserInRoster || isPlayerSubstitute
 
@@ -130,8 +122,8 @@ function TournamentCard({
 
   return (
     <article className="relative isolate min-h-[300px] overflow-hidden rounded-[20px] border" style={{ borderColor: "var(--border-default)" }}>
-      {tournament.background_image ? (
-        <img src={tournament.background_image} alt="" aria-hidden="true" className="absolute inset-0 -z-30 h-full w-full object-cover object-center opacity-[0.3] saturate-[0.65]" />
+      {tournament.background_image_url ? (
+        <img src={tournament.background_image_url} alt="" aria-hidden="true" className="absolute inset-0 -z-30 h-full w-full object-cover object-center opacity-[0.3] saturate-[0.65]" />
       ) : (
         <div className="absolute inset-0 -z-30" style={{ background: "radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--accent-gold) 9%, transparent), #090909 60%)" }} />
       )}

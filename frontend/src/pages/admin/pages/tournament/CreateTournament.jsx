@@ -12,6 +12,7 @@ import TournamentRules from "../../components/TournamentRules"
 
 import { tournamentService } from "../../../../services/admin/tournament_service"
 import { validateTournamentData } from "../../../../utils/validators/tournament_creation"
+import { combineDateTime } from "../../../../utils/datetime/combineDatTime"
 
 const CreateTournament = () => {
     const [draftLoaded, setDraftLoaded] = useState(false)
@@ -149,7 +150,30 @@ const CreateTournament = () => {
         }
 
         setErrors(null)
-        const tournamentData = { ...basicData, ...scheduleData, ...rulesData, ...mediaData }
+        const tournamentData = {
+            ...basicData,
+            ...rulesData,
+            ...mediaData,
+            // schedule data
+            registration_opens_at: combineDateTime(
+                scheduleData.reg_open_date,
+                scheduleData.reg_open_time
+            ),
+            registration_closes_at: combineDateTime(
+                scheduleData.reg_close_date,
+                scheduleData.reg_close_time
+            ),
+            starts_at: combineDateTime(
+                scheduleData.tournament_start_date,
+                scheduleData.tournament_start_time
+            ),
+            ends_at: combineDateTime(
+                scheduleData.tournament_end_date,
+                scheduleData.tournament_end_time
+            ),
+            check_in: scheduleData.check_in,
+            grace_period: scheduleData.grace_period
+        }
 
         console.log('tournament merged data', tournamentData)
 

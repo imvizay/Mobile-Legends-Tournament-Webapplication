@@ -1,38 +1,46 @@
 import React, { useEffect } from "react"
 import { useOutletContext } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 
+// contexts
+import { useUserContext } from "../../../../contexts/UserContext"
+// service
 import { teamService, teamTournamentService } from "../../../../services/team_service"
 
+// componenets
 import RegisteredTournament from "../components/TeamRegisteredTournament"
 import EmptyRegisteredTournament from "../empty_states/EmptyRegisteredTournament"
 import TeamContribution from "../components/TeamContribution"
 import EmptyTeamContribution from "../empty_states/EmptyTeamContribution"
-import TournamentRoadmap from "../components/TournamentRoadmap"
 import TeamMembers from "../components/TeamMembers"
 import TeamMatches from "../components/TournamentMatches"
 import MatchProofUploads from "../components/MatchProofUploads"
 
+// skeletons
 import TeamPageSkeleton from "../../../../skeletons/playerdash/my_team/TeamPageSkeleton"
+import { getRegistrationRoadmap } from "../../../../utils/tournamentroadmap/roadmap"
+import TeamTournamentRoadmap from "../components/TournamentRoadmap"
 
-import { useMutation } from "@tanstack/react-query"
-import { useUserContext } from "../../../../contexts/UserContext"
 
 
 export default function TeamDashboard() {
     const { team } = useOutletContext()
     const { user } = useUserContext()
-    
+    const queryClient = useQueryClient()
 
     const teamId = team?.id
-
 
     const addRosterMutation = useMutation({
         mutationKey: ['tournament-addRoster', team?.id],
         mutationFn: ({ tournamentId, playerId }) =>
             teamTournamentService.addPlayerToRoster(
                 tournamentId, playerId
-            )
+            ),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["teamdashboard", teamId],
+            })
+        },
     })
 
     const removeRosterMutation = useMutation({
@@ -40,12 +48,22 @@ export default function TeamDashboard() {
         mutationFn: ({ tournamentId, playerId }) =>
             teamTournamentService.removePlayerFromRoster(
                 tournamentId, playerId
-            )
+            ),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["teamdashboard", teamId],
+            })
+        },
     })
 
     const confirmRosterMutation = useMutation({
         mutationKey: ['confirm-roster', teamId],
-        mutationFn: (registrationId) => teamTournamentService.lockRoster(registrationId)
+        mutationFn: (registrationId) => teamTournamentService.lockRoster(registrationId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["teamdashboard", teamId],
+            })
+        },
     })
 
     // REGISTERED TOURNAMENT & TEAM MEMBERS
@@ -90,10 +108,14 @@ export default function TeamDashboard() {
     const currentTournament = dashboard?.data?.current_tournament ?? null
     const feeContribution = dashboard?.data?.fee_contribution ?? null
 
+    // selected/confirmed roster player
     const roster = dashboard?.data?.current_tournament?.roster ?? null
 
+    // actual members in a team.
     const teamMembers = dashboard?.data?.team_members ?? []
+
     const scheduledMatches = dashboard?.data?.scheduled_matches ?? []
+
     const isLoggedUserCaptain = teamMembers?.some((el) => (el.id == user?.id && el.role.toLowerCase() == "captain"))
 
     const hasRegisteredTournament = !!currentTournament
@@ -107,7 +129,13 @@ export default function TeamDashboard() {
     const isCurrentUserInRoster = roster?.roster_players?.some(el => el.id == user.id)
 
     const isPlayerPaid = roster?.roster_players?.find(u => u.id == user.id)?.fee_status === "paid"
-
+    const teamCaptain = teamMembers?.filter(member => member.role == "captain")
+    
+    const registrationRoadmap = getRegistrationRoadmap({
+        tournament: currentTournament,
+        roster,
+    });
+   
 
     const addRoster = async (member) => {
 
@@ -117,19 +145,23 @@ export default function TeamDashboard() {
 
         try {
             const res = await addRosterMutation.mutateAsync({ tournamentId, playerId })
+
         } catch (error) {
-           
+            console.error("ADD ROSTER ERROR:", error);
             alert("Try Again! Adding Player To Roster Gets Failed.")
         }
     }
 
-    const removeRoster = async (member) => {
-        const playerId = Number(member?.id)
-        if (isNaN(playerId)) return
+    const removeRoster = async (rosterPlayerId) => {
+        const playerId = Number(rosterPlayerId)
+
+
+        if (isNaN(playerId) && !tournamentId) return
         try {
-            const res = await removeRosterMutation.mutateAsync({ tournamentId, playerId })
+            await removeRosterMutation.mutateAsync({ tournamentId, playerId })
         }
         catch (error) {
+            console.error("REMOVE ROSTER ERROR:", error);
             alert(`Failed Removing Player Id ${playerId} From Roster , Try Again!.`)
         }
     }
@@ -138,6 +170,7 @@ export default function TeamDashboard() {
         const registrationId = currentTournament?.tournament_id
         try {
             await confirmRosterMutation.mutateAsync(registrationId)
+
         } catch (error) {
             console.log("ERROR CONFIRMING ROSTER", error)
         }
@@ -159,15 +192,15 @@ export default function TeamDashboard() {
                             isRosterLocked={isRosterLocked}
                             isCurrentUserInRoster={isCurrentUserInRoster}
                             isPlayerPaid={isPlayerPaid}
-                            // isCheckInOpen={isCheckInOpen}
-                            // isPlayerCheckIn={isPlayerCheckIn}
-                            // isTournamentLive={isTournamentLive}
-                            // isPlayerInRoster={isPlayerInRoster}
-                            // isPlayerSubstitute={isPlayerSubstitute}
-                            // roomDetails={roomDetails}
-                            // onPayment={onPayment}
-                            // onCheckIn={onCheckIn}
-                            // onRoomDetails={onRoomDetails}
+                        // isCheckInOpen={isCheckInOpen}
+                        // isPlayerCheckIn={isPlayerCheckIn}
+                        // isTournamentLive={isTournamentLive}
+                        // isPlayerInRoster={isPlayerInRoster}
+                        // isPlayerSubstitute={isPlayerSubstitute}
+                        // roomDetails={roomDetails}
+                        // onPayment={onPayment}
+                        // onCheckIn={onCheckIn}
+                        // onRoomDetails={onRoomDetails}
                         />
                     ) : (
                         <EmptyRegisteredTournament />
@@ -196,7 +229,14 @@ export default function TeamDashboard() {
             ========================================================== */}
 
             {hasRegisteredTournament && (
-                <TournamentRoadmap tournament={currentTournament} />
+                <TeamTournamentRoadmap
+                    currentStage={registrationRoadmap.currentStage}
+                    rosterSelected={registrationRoadmap.roster.selected}
+                    rosterRequired={registrationRoadmap.roster.required}
+                    paymentsPaid={registrationRoadmap.payments.paid}
+                    paymentsRequired={registrationRoadmap.payments.required}
+                    registrationStatus={registrationRoadmap.registrationStatus}
+                />
             )}
 
 
@@ -212,6 +252,7 @@ export default function TeamDashboard() {
                     members={teamMembers}
                     selectedRosters={roster?.roster_players}
                     isCaptain={isLoggedUserCaptain}
+                    teamCaptain={teamCaptain}
                     isRosterLocked={isRosterLocked}
                     onConfirmRoster={handleConfirmRoster}
                     onMakeRoster={addRoster}

@@ -22,7 +22,7 @@ function PlayerLayout() {
                 </div>
 
                 {/* Main Workspace */}
-                <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-3 pb-7 pt-[4.75rem] sm:px-4 md:px-6 md:pb-8 lg:px-8 lg:py-7 xl:px-10 2xl:px-12">
+                <main className="bg-[var--bg-canvas)] min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-3 pb-7 pt-[4.75rem] sm:px-4 md:px-3 md:pb-8 lg:px-3 lg:py-2 xl:px-2 2xl:px-12">
                     <div className="mx-auto w-full min-w-0">
                         <Outlet />
                     </div>
