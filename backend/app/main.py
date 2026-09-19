@@ -10,6 +10,7 @@ from app.modules.teams.router import router as team_router
 from app.modules.tournaments.router import router as tournament_router
 from app.modules.users.router import router as users_router, player_router
 from app.modules.payments.router import router as payments_router
+from app.modules.registrations.router import router as registration_router
 
 # Exception handlers
 from app.core.exceptions.exceptions import *
@@ -46,6 +47,7 @@ app_routes = (
     users_router,
     player_router,
     payments_router,
+    registration_router
 )
 
 for router in app_routes:

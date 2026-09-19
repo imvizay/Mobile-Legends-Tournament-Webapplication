@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from app.modules.auth.models import Player
-from .dependency import get_tournament_service, get_tournament_form
-from .service import TournamentService
+from .dependency import get_tournament_service, get_tournament_form, get_bracket_service
+from .service import TournamentService, BracketService
 from app.dependencies.roles import get_current_admin
 from app.dependencies.auth import get_current_user
-from .schema import TournamentForm
+from .schema import TournamentForm, RoundCreateRequest
 
 router = APIRouter(prefix="/tournament", tags=["Tournaments"])
 
@@ -69,4 +69,26 @@ def ongoing_tournament_registration_detail(
 ):
     return tournament_service.get_ongoing_tournament_registration_detail(
         admin=admin, ongoing_tournament_id=ongoing_tournament_id
+    )
+
+
+# bracket
+@router.get("/bracket/{tournament_id}/initialize-bracket")
+def tournament_round_detail(
+    tournament_id: int,
+    admin: Player = Depends(get_current_admin),
+    bracket_service: BracketService = Depends(get_bracket_service),
+):
+    return bracket_service.get_initial_bracket_data(tournament_id=tournament_id)
+
+
+@router.post("/bracket/{tournament_id}/round")
+def create_round(
+    tournament_id: int,
+    payload: RoundCreateRequest,
+    admin: Player = Depends(get_current_admin),
+    bracket_service: BracketService = Depends(get_bracket_service),
+):
+    return bracket_service.create_initial_round(
+        tournament_id=tournament_id, payload=payload
     )
