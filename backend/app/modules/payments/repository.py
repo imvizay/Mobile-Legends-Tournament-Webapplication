@@ -347,7 +347,7 @@ class PaymentRepository:
                 ),
             )
             .filter(
-                TeamTournamentRegistration.id == registration_id,
+                TeamTournamentRegistration.tournament_id == registration_id,
                 TeamTournamentRegistration.team_id == team_id,
                 TournamentRoster.team_id == team_id,
                 TournamentRosterPlayer.player_id == player_id,
@@ -372,7 +372,7 @@ class PaymentRepository:
                 TournamentRoster.id == TournamentRosterPlayer.roster_id,
             )
             .filter(
-                TournamentRoster.registration_id == registration_id,
+                TournamentRoster.tournament_id == registration_id,
                 TournamentRosterPlayer.player_id == player_id,
             )
             .first()

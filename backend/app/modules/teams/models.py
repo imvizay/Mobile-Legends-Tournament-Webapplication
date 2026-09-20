@@ -203,8 +203,8 @@ class TeamJoinRequest(Base):
 class TournamentRegistrationStatus(str, Enum):
     PENDING = "pending"
     UNDER_REVIEW = "under_review"
-    PAYMENT_PENDING = "payment_pending"
     APPROVED = "approved"
+    
     FAILED = "failed"
     CANCELLED = "cancelled"
     DISQUALIFIED = "disqualified"
@@ -264,6 +264,7 @@ class TeamTournamentRegistration(Base):
 
     tournament = relationship("Tournament", back_populates="team_registrations")
     team = relationship("Team",back_populates="tournament_registrations")
+    captain= relationship("Player",foreign_keys=[captain_id])
     roster = relationship(
         "TournamentRoster",
         back_populates="registration",
@@ -366,7 +367,6 @@ class TournamentRoster(Base):
 class TournamentRosterPlayerStatus(str, Enum):
     SELECTED = "selected"
     REMOVED = "removed"
-    
     SUBSTITUTE = "substitute"
 
 

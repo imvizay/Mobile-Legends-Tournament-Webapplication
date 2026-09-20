@@ -37,7 +37,7 @@ export default function TeamLayout() {
 
   if (!team) {
     return (
-      <section className="flex min-h-screen items-center justify-center bg-[var(--surface-base)]">
+      <section className="border rounded-2xl flex min-h-screen items-center justify-center bg-[var(--surface-base)]">
         <div className="text-center">
           <p className="text-sm font-semibold text-[var(--text-primary)]">TEAM NOT FOUND</p>
           <button type="button" onClick={() => navigate("/player/team")} className="mt-2 text-xs font-medium text-[var(--accent-gold)]">
@@ -49,10 +49,11 @@ export default function TeamLayout() {
   }
 
   return (
-    <section className="min-h-screen bg-[var(--surface-base)] text-[var(--text-primary)]">
-      <div className="mx-auto w-full max-w-[1480px] px-3 py-3 sm:px-4 lg:px-6">
-        <button type="button" onClick={() => navigate("/player", { replace: true })} className="mb-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)] transition-transform hover:-translate-y-px hover:text-[var(--text-primary)]">
-          <ArrowLeft size={13} strokeWidth={1.8} />
+    <section className="min-h-screen border-none rounded-2xl bg-[var(--surface-base)] text-[var(--text-primary)]">
+      <div className=" mx-auto w-full max-w-[1480px] px-3 py-3 sm:px-4 lg:px-6">
+
+        <button type="button" onClick={() => navigate("/player", { replace: true })} className="mb-3 flex items-center gap-1.5 text-[8px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)] transition-transform hover:-translate-y-px hover:text-[var(--text-primary)]">
+          <ArrowLeft size={13} strokeWidth={2} />
           BACK TO PLAYER
         </button>
 
@@ -79,7 +80,7 @@ export default function TeamLayout() {
           </div>
         </nav>
 
-        <main className="pt-5 sm:pt-6">
+        <main className="pt-2 sm:pt-3">
           <Outlet context={{ team }} />
         </main>
       </div>
@@ -91,72 +92,89 @@ function TeamHeader({ team, captain, memberCount, maxMembers, createdDate }) {
   const rosterPercent = maxMembers > 0 ? Math.min((memberCount / maxMembers) * 100, 100) : 0;
 
   return (
-    <header className="relative isolate overflow-hidden rounded-[20px] border border-[var(--border-default)]">
+    <header className="relative isolate overflow-hidden rounded-[16px] border border-[var(--border-default)] sm:rounded-[20px]">
       {team.team_banner_url ? (
-        <img src={team.team_banner_url} alt="" aria-hidden="true" className="absolute inset-0 -z-30 h-full w-full object-cover object-center opacity-[0.36] saturate-[0.7]" />
+        <img src={team.team_banner_url} alt="" aria-hidden="true" className="absolute inset-0 -z-30 h-full w-full object-cover object-center opacity-[0.30] saturate-[0.65] sm:opacity-[0.36]" />
       ) : (
         <div className="absolute inset-0 -z-30" style={{ background: "radial-gradient(circle at 75% 20%, color-mix(in srgb, var(--accent-gold) 10%, transparent), var(--surface-elevated) 55%)" }} />
       )}
 
-      {/* <div className="absolute inset-0 -z-20" style={{ background: "linear-gradient(90deg, var(--surface-elevated) 0%, color-mix(in srgb, var(--surface-elevated) 88%, transparent) 42%, color-mix(in srgb, var(--surface-elevated) 45%, transparent) 100%)" }} /> */}
-      <div className="absolute inset-0 -z-20" style={{ background: "linear-gradient(180deg, color-mix(in srgb, var(--surface-elevated) 12%, transparent), color-mix(in srgb, var(--surface-elevated) 90%, transparent) 100%)" }} />
+      <div className="absolute inset-0 -z-20" style={{ background: "linear-gradient(180deg, color-mix(in srgb, var(--surface-elevated) 18%, transparent), color-mix(in srgb, var(--surface-elevated) 88%, transparent) 100%)" }} />
 
-      <div className="relative px-4 py-3.5 sm:px-5 sm:py-4 lg:px-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex min-w-0 flex-1 items-center gap-3.5 sm:gap-4">
-            <div className="relative size-[58px] shrink-0 sm:size-[68px]">
-              <div className="absolute -inset-1 rounded-[17px] opacity-20" style={{ background: "var(--accent-gold)" }} />
+      <div className="relative px-3 py-3 sm:px-5 sm:py-4 lg:px-6">
 
-              <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[15px] border border-[var(--border-default)] bg-[var(--surface-base)] p-1">
-                <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[11px]" style={{ background: "var(--surface-elevated)" }}>
-                  {team.team_logo_url ? (
-                    <img src={team.team_logo_url} alt={`${team.team_name} logo`} className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-xl font-black uppercase text-[var(--accent-gold)]">
-                      {team.team_tag || team.team_name?.charAt(0)}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
+        {/* Main identity */}
 
-            <div className="min-w-0 flex-1">
-              <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                <span className="flex items-center gap-1 text-[7px] font-bold uppercase tracking-[0.17em] text-emerald-500">
-                  <span className="size-1.5 rounded-full bg-emerald-500" />
-                  ACTIVE
-                </span>
+        <div className="flex items-center gap-2.5 sm:gap-4">
 
-                <span className="h-3 w-px bg-[var(--border-default)]" />
+          <div className="relative size-[48px] shrink-0 sm:size-[68px]">
+            <div className="absolute -inset-1 rounded-[15px] opacity-20" style={{ background: "var(--accent-gold)" }} />
 
-                {team.team_tag && (
-                  <>
-                    <span className="text-[7px] font-bold uppercase tracking-[0.15em] text-[var(--text-muted)]">
-                      #{team.team_tag}
-                    </span>
-                    <span className="h-3 w-px bg-[var(--border-default)]" />
-                  </>
+            <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[13px] border border-[var(--border-default)] bg-[var(--surface-base)] p-1 sm:rounded-[15px]">
+              <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[9px] sm:rounded-[11px]" style={{ background: "var(--surface-elevated)" }}>
+                {team.team_logo_url ? (
+                  <img src={team.team_logo_url} alt={`${team.team_name} logo`} className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-base font-black uppercase text-[var(--accent-gold)] sm:text-xl">
+                    {team.team_tag || team.team_name?.charAt(0)}
+                  </span>
                 )}
-
-                <span className="flex items-center gap-1 text-[7px] font-bold uppercase tracking-[0.13em] text-[var(--text-muted)]">
-                  <Globe2 size={9} />
-                  {team.team_visibility || "PUBLIC"}
-                </span>
               </div>
-
-              <h1 className="truncate text-[28px] font-black uppercase leading-none tracking-[-0.045em] sm:text-4xl lg:text-[40px]" style={{ fontFamily: "Google Sans" }}>
-                {team.team_name}
-              </h1>
-
-              {team.team_bio && (
-                <p className="mt-1.5 line-clamp-1 max-w-[580px] text-[10px] leading-4 text-[var(--text-secondary)] sm:text-[11px]">
-                  {team.team_bio}
-                </p>
-              )}
             </div>
           </div>
 
-          <div className="w-full shrink-0 lg:w-[200px]">
+
+          <div className="min-w-0 flex-1">
+
+            {/* Status */}
+
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className="flex items-center gap-1 text-[6px] font-bold uppercase tracking-[0.15em] text-emerald-500 sm:text-[7px]">
+                <span className="size-1.5 rounded-full bg-emerald-500" />
+                ACTIVE
+              </span>
+
+              <span className="h-3 w-px bg-[var(--border-default)]" />
+
+              {team.team_tag && (
+                <>
+                  <span className="text-[6px] font-bold uppercase tracking-[0.13em] text-[var(--text-muted)] sm:text-[7px]">
+                    #{team.team_tag}
+                  </span>
+
+                  <span className="h-3 w-px bg-[var(--border-default)]" />
+                </>
+              )}
+
+              <span className="flex items-center gap-1 text-[6px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)] sm:text-[7px]">
+                <Globe2 size={8} />
+                {team.team_visibility || "PUBLIC"}
+              </span>
+            </div>
+
+
+            {/* Team name */}
+
+            <h1 className="mt-1 truncate text-[22px] font-black uppercase leading-none tracking-[-0.04em] sm:text-4xl lg:text-[40px]" style={{ fontFamily: "Google Sans" }}>
+              {team.team_name}
+            </h1>
+
+
+            {/* Bio */}
+
+            {team.team_bio && (
+              <p className="mt-1 truncate text-[8px] leading-3.5 text-[var(--text-secondary)] sm:mt-1.5 sm:line-clamp-1 sm:max-w-[580px] sm:text-[11px] sm:leading-4">
+                {team.team_bio}
+              </p>
+            )}
+
+          </div>
+
+
+          {/* Desktop roster */}
+
+          <div className="hidden w-[200px] shrink-0 lg:block">
+
             <div className="mb-1.5 flex items-end justify-between">
               <div>
                 <p className="text-[7px] font-bold uppercase tracking-[0.17em] text-[var(--text-muted)]">
@@ -165,9 +183,7 @@ function TeamHeader({ team, captain, memberCount, maxMembers, createdDate }) {
 
                 <p className="mt-0.5 text-[22px] font-black leading-none tracking-tight">
                   {memberCount}
-                  <span className="ml-1 text-[11px] font-medium text-[var(--text-muted)]">
-                    / {maxMembers}
-                  </span>
+                  <span className="ml-1 text-[11px] font-medium text-[var(--text-muted)]">/ {maxMembers}</span>
                 </p>
               </div>
 
@@ -182,15 +198,60 @@ function TeamHeader({ team, captain, memberCount, maxMembers, createdDate }) {
               <span>{memberCount >= maxMembers ? "ROSTER COMPLETE" : "ROSTER CAPACITY"}</span>
               <span>{Math.round(rosterPercent)}%</span>
             </div>
+
           </div>
+
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-y-2.5 border-t border-[var(--border-default)] pt-3 sm:grid-cols-4 sm:gap-y-0">
-          <TeamMeta icon={<Crown size={11} />} label="CAPTAIN" value={captain?.player_name || "NOT ASSIGNED"} />
-          <TeamMeta icon={<Globe2 size={11} />} label="COUNTRY" value={team.team_country || "NOT SET"} />
-          <TeamMeta icon={<Users size={11} />} label="MEMBERS" value={`${memberCount} / ${maxMembers}`} />
-          <TeamMeta icon={<CalendarDays size={11} />} label="ESTABLISHED" value={createdDate || "NOT SET"} />
+
+        {/* Mobile roster */}
+
+        <div className="mt-2.5 border-t border-[var(--border-default)] pt-2.5 lg:hidden">
+
+          <div className="flex items-center justify-between gap-3">
+
+            <div className="flex items-center gap-2">
+              <Users size={12} style={{ color: "var(--accent-gold)" }} />
+
+              <div className="flex items-baseline gap-1">
+                <span className="text-[15px] font-black leading-none">
+                  {memberCount}
+                </span>
+
+                <span className="text-[8px] font-medium text-[var(--text-muted)]">
+                  / {maxMembers} members
+                </span>
+              </div>
+
+            </div>
+
+            <span className="text-[7px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)]">
+              {Math.round(rosterPercent)}% capacity
+            </span>
+
+          </div>
+
+          <div className="mt-1.5 h-[2px] overflow-hidden rounded-full bg-[var(--border-default)]">
+            <div className="h-full rounded-full" style={{ width: `${rosterPercent}%`, background: "var(--accent-gold)" }} />
+          </div>
+
         </div>
+
+
+        {/* Metadata */}
+
+        <div className="mt-3 grid grid-cols-4 border-t border-[var(--border-default)] pt-2.5 sm:mt-4 sm:pt-3">
+
+          <TeamMeta icon={<Crown size={10} />} label="CAPTAIN" value={captain?.player_name || "NOT ASSIGNED"} />
+
+          <TeamMeta icon={<Users size={10} />} label="MEMBERS" value={`${memberCount} / ${maxMembers}`} />
+
+          <TeamMeta icon={<Globe2 size={10} />} label="COUNTRY" value={team.team_country || "NOT SET"} />
+
+          <TeamMeta icon={<CalendarDays size={10} />} label="JOINED" value={createdDate || "NOT SET"} />
+
+        </div>
+
       </div>
     </header>
   );

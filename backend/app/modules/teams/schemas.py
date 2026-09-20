@@ -20,8 +20,7 @@ class TeamCreateSchema(BaseModel):
 
     team_country: str = Field(min_length=2, max_length=50)
 
-    team_region: str | None = Field(min_length=2, max_length=50)
-
+    team_region: str | None = Field( default=None, min_length=2, max_length=50, )
     team_city: str | None = Field(default=None, max_length=60)
 
     team_visibility: TeamVisibility
@@ -53,7 +52,7 @@ class TeamCreateSchema(BaseModel):
         team_tag: Annotated[str, Form(...)],
         team_description: Annotated[str | None, Form()] = None,
         team_country: Annotated[str, Form(...)] = "India",
-        team_region: Annotated[str, Form(...)] = "",
+        team_region: Annotated[str | None, Form()] = None,
         team_city: Annotated[str | None, Form()] = None,
         team_visibility: Annotated[TeamVisibility, Form(...)] = TeamVisibility.PUBLIC,
     ) -> "TeamCreateSchema":
@@ -157,7 +156,7 @@ class RosterPlayer(BaseModel):
     role: str
     tournament_readiness: str
     status: str
-    fee_status:str
+    fee_status:str | None = None
 
 
 class TeamRosterPlayer(BaseModel):

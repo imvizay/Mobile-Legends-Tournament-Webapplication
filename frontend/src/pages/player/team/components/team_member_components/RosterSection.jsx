@@ -1,196 +1,406 @@
-import { Check, CircleAlert, Clock3, LockKeyhole, ShieldCheck, Users } from "lucide-react";
+import {
+  Check,
+  LockKeyhole,
+  Users,
+  X,
+} from "lucide-react";
 import { getDisplayName } from "./SupportingComponent";
 
-function RosterSection({
+const ROSTER_SIZE = 5;
+
+const RosterSection = ({
   selectedRoster = [],
   isRosterConfirmed = false,
-  isCaptain = true,
+  isCaptain = false,
+  teamCaptain = {},
   isConfirming = false,
   onConfirmRoster,
-}) {
+  onRemoveRoster,
+}) => {
   const rosterCount = selectedRoster.length;
-  const readyCount = selectedRoster.filter((member) => member.tournament_readiness === "ready").length;
 
-  const isComplete = rosterCount === 5;
-  const canConfirm = isCaptain && isComplete && !isRosterConfirmed && !isConfirming;
+  console.log("selectedRoster",selectedRoster)
 
-  const status = isRosterConfirmed
-    ? { label: "Roster Confirmed", className: "text-emerald-600", dot: "bg-emerald-500" }
-    : isComplete
-      ? { label: "Ready for Confirmation", className: "text-[var(--accent-gold)]", dot: "bg-[var(--accent-gold)]" }
-      : { label: "Selection in Progress", className: "text-[var(--text-muted)]", dot: "bg-[var(--text-muted)]" };
+  const readyCount = selectedRoster.filter(
+    (member) => member.tournament_readiness === "ready"
+  ).length;
+
+  const isComplete = rosterCount === ROSTER_SIZE;
+
+  const canConfirm =
+    isCaptain &&
+    isComplete &&
+    !isRosterConfirmed &&
+    !isConfirming;
+
+  const remainingPlayers = Math.max(
+    ROSTER_SIZE - rosterCount,
+    0
+  );
+
+  /*
+   * teamCaptain can be either:
+   *
+   * { id: 13, ... }
+   *
+   * or:
+   *
+   * [{ id: 13, ... }]
+   */
+  const captain = Array.isArray(teamCaptain)
+    ? teamCaptain[0]
+    : teamCaptain;
+
+  const captainId = captain?.id ?? null;
+
+  /*
+   * Find the captain from the actual teamCaptain object.
+   *
+   * We do not depend on member.role because roster
+   * members may not contain the captain role.
+   */
+  const captainIndex = selectedRoster.findIndex(
+    (member) =>
+      member &&
+      captainId !== null &&
+      String(member.id) === String(captainId)
+  );
+
+  const captainInRoster = captainIndex !== -1;
+
+  /*
+   * Normal rendering order:
+   *
+   * Captain exists:
+   * [Captain, Player, Player, Player, Player]
+   *
+   * Captain doesn't exist:
+   * [Player, Player, Player, Player, Player]
+   *
+   * No center-position manipulation or translate-x.
+   */
+  const orderedRoster = captainInRoster
+    ? [
+      selectedRoster[captainIndex],
+      ...selectedRoster.filter(
+        (_, index) => index !== captainIndex
+      ),
+    ]
+    : selectedRoster;
+
+  const slots = Array.from(
+    { length: ROSTER_SIZE },
+    (_, index) => orderedRoster[index] || null
+  );
 
   return (
-    <section className="overflow-hidden rounded-[18px] border border-[var(--border-default)] bg-[var(--surface-base)]">
+    <section className="overflow-hidden rounded-[16px] border border-[var(--border-default)] bg-[var(--surface-base)]">
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 border-b border-[var(--border-subtle)] px-3.5 py-3.5 sm:px-4 sm:py-4">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={12} className="text-[var(--accent-gold)]" />
-            <h2 className="text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--text-primary)]">
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-3.5 py-2.5 sm:px-4 sm:py-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] border border-[var(--border-subtle)] bg-[var(--surface-elevated)]">
+            <Users
+              size={15}
+              strokeWidth={1.9}
+              className="text-[var(--accent-gold)]"
+            />
+          </div>
+
+          <div className="min-w-0">
+            <h3 className="truncate text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--headline-primary)] sm:text-[13px]">
               Tournament Roster
-            </h2>
-          </div>
+            </h3>
 
-          <p className="mt-1 max-w-xl text-[7px] leading-relaxed text-[var(--text-muted)] sm:text-[8px]">
-            Select the five players officially representing the team in this tournament.
-          </p>
-        </div>
-
-        <div className={`flex shrink-0 items-center gap-1.5 pt-0.5 text-[6px] font-bold uppercase tracking-[0.1em] sm:text-[7px] ${status.className}`}>
-          <span className={`size-1.5 rounded-full ${status.dot}`} />
-          <span className="hidden xs:inline">{status.label}</span>
-        </div>
-      </div>
-
-      {/* Roster Overview */}
-      <div className="border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]/35 px-3.5 py-2.5 sm:px-4 sm:py-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-baseline gap-2">
-            <span className="text-[19px] font-black tracking-[-0.05em] text-[var(--text-primary)] sm:text-[21px]">
-              {String(rosterCount).padStart(2, "0")}
-            </span>
-
-            <span className="text-[7px] font-bold uppercase tracking-[0.1em] text-[var(--text-muted)]">
-              of 05 selected
-            </span>
-          </div>
-
-          <div className="text-right">
-            <p className="text-[6px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)]">
-              Tournament Readiness
-            </p>
-
-            <p className="mt-0.5 text-[8px] font-bold text-[var(--text-primary)]">
-              <span className={readyCount === rosterCount && rosterCount > 0 ? "text-emerald-600" : ""}>
-                {readyCount}
-              </span>
-              <span className="text-[var(--text-muted)]"> / {rosterCount} Ready</span>
+            <p className="mt-0.5 truncate text-[9px] text-[var(--text-muted)] sm:text-[10px]">
+              Select five players for this tournament
             </p>
           </div>
         </div>
 
-        <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--border-subtle)]">
-          <div className={`h-full rounded-full transition-all duration-300 ${isRosterConfirmed ? "bg-emerald-500" : "bg-[var(--accent-gold)]"}`} style={{ width: `${Math.min((rosterCount / 5) * 100, 100)}%` }} />
+        <div className="flex shrink-0 items-baseline gap-0.5">
+          <span className="text-[17px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
+            {String(rosterCount).padStart(2, "0")}
+          </span>
+
+          <span className="text-[9px] font-medium text-[var(--text-muted)]">
+            /05
+          </span>
         </div>
       </div>
 
-      {/* Selected Players */}
-      <div className="p-2.5 sm:p-3.5">
-        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-5">
-          {Array.from({ length: 5 }).map((_, index) => {
-            const player = selectedRoster[index];
-            const isReady = player?.tournament_readiness === "ready";
+      {/* Roster Players */}
+      <div className="px-3 py-3 sm:px-4 sm:py-3.5">
+        <div className="overflow-x-auto scrollbar-none">
+          <div className="flex min-w-max items-center justify-center gap-1.5 sm:gap-2">
+            {slots.map((member, index) => {
+              const isEmpty = !member;
 
-            return (
-              <article key={index} className={`min-w-0 rounded-[11px] border px-2.5 py-2 ${player ? "bg-[var(--surface-elevated)]" : "border-dashed bg-[var(--surface-elevated)]/30"}`} style={{ borderColor: player && isRosterConfirmed ? "color-mix(in srgb, #10b981 22%, var(--border-default))" : "var(--border-subtle)" }}>
+              const isReady =
+                member?.tournament_readiness === "ready";
 
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[6px] font-bold uppercase tracking-[0.1em] text-[var(--text-muted)]">
-                    Player {String(index + 1).padStart(2, "0")}
-                  </span>
+              /*
+               * Because the captain has already been moved
+               * to slot 01, this simply checks the actual ID.
+               */
+              const isCaptainCard = !isEmpty && captainId !== null && String(member.id) === String(captainId);
 
-                  {player && (
-                    <span className={`flex size-4 shrink-0 items-center justify-center rounded-full ${isReady ? "bg-emerald-500/10 text-emerald-600" : "border border-[var(--border-subtle)] text-[var(--text-muted)]"}`}>
-                      {isReady ? <Check size={8} strokeWidth={3} /> : <Clock3 size={8} />}
+              return (
+                <div
+                  key={member?.id ?? `empty-${index}`}
+                  className={`relative shrink-0 overflow-visible rounded-[12px] border transition-all ${isCaptainCard
+                      ? "w-[96px] border-[var(--text-primary)] bg-[var(--surface-elevated)] shadow-[0_8px_24px_rgba(0,0,0,0.18)] sm:w-[116px]"
+                      : "w-[78px] border-[var(--border-subtle)] bg-[var(--surface-elevated)] sm:w-[96px]"
+                    }`}
+                >
+                 
+
+                  {/* Mobile Remove */}
+                  {!isEmpty &&
+                    !isRosterConfirmed &&
+                    isCaptain && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onRemoveRoster?.(member.id)
+                        }
+                        className="absolute -right-1.5 -top-1.5 z-30 flex h-5 w-5 items-center justify-center rounded-full border border-[var(--border-default)] bg-[var(--surface-base)] text-[var(--text-muted)] shadow-md transition-colors hover:text-[var(--text-primary)] md:hidden"
+                        aria-label={`Remove ${getDisplayName(
+                          member
+                        )} from roster`}
+                      >
+                        <X
+                          size={10}
+                          strokeWidth={2}
+                        />
+                      </button>
+                    )}
+
+                  {/* Slot Header */}
+                  <div
+                    className={`flex items-center justify-between px-2 ${isCaptainCard ? "h-7" : "h-6"
+                      }`}
+                  >
+                    <span className="text-[8px] font-medium tabular-nums text-[var(--text-muted)]">
+                      {String(index + 1).padStart(2, "0")}
                     </span>
-                  )}
-                </div>
 
-                {player ? (
-                  <div className="mt-2 flex min-w-0 items-center gap-2">
-                    <div className={`flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full border text-[8px] font-bold ${isRosterConfirmed ? "text-emerald-600" : "text-[var(--accent-gold)]"}`} style={{ background: "var(--surface-base)", borderColor: isRosterConfirmed ? "color-mix(in srgb, #10b981 20%, var(--border-default))" : "var(--border-default)" }}>
-                      {player.avatar ? (
-                        <img src={player.avatar} alt={getDisplayName(player)} className="h-full w-full object-cover" />
-                      ) : (
-                        getDisplayName(player).charAt(0).toUpperCase()
+                    {isCaptainCard && (
+                      <span className="text-[7px] font-semibold uppercase tracking-[0.08em] text-[var(--accent-gold)]">
+                        Captain
+                      </span>
+                    )}
+
+                    {/* Desktop Remove */}
+                    {!isEmpty &&
+                      !isRosterConfirmed &&
+                      isCaptain && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onRemoveRoster?.(member.id)
+                          }
+                          className="hidden h-5 w-5 items-center justify-center rounded-md text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-base)] hover:text-[var(--text-primary)] md:flex"
+                          aria-label={`Remove ${getDisplayName(
+                            member
+                          )} from roster`}
+                        >
+                          <X
+                            size={10}
+                            strokeWidth={1.8}
+                          />
+                        </button>
+                      )}
+
+                    {isRosterConfirmed && !isEmpty && (
+                      <LockKeyhole
+                        size={10}
+                        strokeWidth={1.8}
+                        className="text-[var(--text-muted)]"
+                      />
+                    )}
+                  </div>
+
+                  {/* Empty Slot */}
+                  {isEmpty ? (
+                    <div className="flex h-[76px] flex-col items-center justify-center sm:h-[82px]">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-[var(--border-default)]">
+                        <span className="text-[15px] font-light text-[var(--text-muted)]">
+                          +
+                        </span>
+                      </div>
+
+                      <span className="mt-1.5 text-[8px] text-[var(--text-muted)]">
+                        Empty
+                      </span>
+                    </div>
+                  ) : (
+                    <div
+                      className={`px-1.5 pb-2.5 ${isCaptainCard
+                          ? "sm:px-2"
+                          : "sm:px-1.5"
+                        }`}
+                    >
+                      {/* Avatar */}
+                      <div className="flex justify-center">
+                        <div
+                          className={`relative overflow-visible ${isCaptainCard
+                              ? "h-11 w-11 sm:h-12 sm:w-12"
+                              : "h-9 w-9 sm:h-10 sm:w-10"
+                            }`}
+                        >
+                          <div className="h-full w-full overflow-hidden rounded-full border border-[var(--border-default)] bg-[var(--surface-base)]">
+                            {member.avatar ? (
+                              <img
+                                src={member.avatar}
+                                alt={getDisplayName(member)}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-[11px] font-semibold text-[var(--text-secondary)]">
+                                {getDisplayName(member)
+                                  ?.charAt(0)
+                                  ?.toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+
+                          {isReady && (
+                            <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[var(--surface-elevated)] bg-[var(--accent-gold)]">
+                              <Check
+                                size={8}
+                                strokeWidth={2.5}
+                                className="text-[var(--surface-base)]"
+                              />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Player */}
+                      <p
+                        className={`mt-1.5 truncate text-center font-semibold text-[var(--text-primary)] ${isCaptainCard
+                            ? "text-[10px]"
+                            : "text-[9px]"
+                          }`}
+                        title={getDisplayName(member)}
+                      >
+                        {getDisplayName(member)}
+                      </p>
+
+                      {member.mlbb_id && (
+                        <p
+                          className="mt-0.5 truncate text-center text-[8px] tabular-nums text-[var(--text-muted)]"
+                          title={member.mlbb_id}
+                        >
+                          ID {member.mlbb_id}
+                        </p>
+                      )}
+
+                      {isReady && (
+                        <div className="mt-1.5 flex justify-center">
+                          <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-base)] px-1.5 py-0.5 text-[7px] font-medium uppercase tracking-[0.05em] text-[var(--text-secondary)]">
+                            Ready
+                          </span>
+                        </div>
                       )}
                     </div>
-
-                    <div className="min-w-0">
-                      <p className="truncate text-[8px] font-bold uppercase tracking-[-0.01em] text-[var(--text-primary)]">
-                        {getDisplayName(player)}
-                      </p>
-
-                      <p className={`mt-0.5 truncate text-[6px] font-semibold uppercase tracking-[0.06em] ${isReady ? "text-emerald-600" : "text-[var(--text-muted)]"}`}>
-                        {isReady ? "Ready" : "Awaiting"}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mt-2 flex items-center gap-1.5">
-                    <Users size={9} className="text-[var(--text-muted)]" />
-                    <span className="text-[7px] text-[var(--text-muted)]">Not selected</span>
-                  </div>
-                )}
-              </article>
-            );
-          })}
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
+
+        <p className="mt-1.5 text-center text-[8px] text-[var(--text-muted)] sm:hidden">
+          Swipe to view all players
+        </p>
       </div>
 
-      {/* Action / Confirmation */}
-      {!isRosterConfirmed && (
-        <div className="border-t border-[var(--border-subtle)] bg-[var(--surface-elevated)]/25 px-3.5 py-3 sm:px-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-start gap-2">
-              {isComplete ? (
-                <ShieldCheck size={12} className="mt-0.5 shrink-0 text-[var(--accent-gold)]" />
-              ) : (
-                <CircleAlert size={12} className="mt-0.5 shrink-0 text-[var(--text-muted)]" />
-              )}
+      {/* Confirmation */}
+      {!isRosterConfirmed ? (
+        <div className="border-t border-[var(--border-subtle)] px-3.5 py-3 sm:px-4 sm:py-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-[10px] font-semibold text-[var(--text-primary)]">
+                {isComplete
+                  ? "Roster is ready"
+                  : `${remainingPlayers} more player${remainingPlayers > 1 ? "s" : ""
+                  } required`}
+              </p>
 
-              <div className="min-w-0">
-                <p className="text-[7px] font-bold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
-                  {isComplete ? "Official roster selection" : "Roster incomplete"}
-                </p>
-
-                <p className="mt-1 max-w-2xl text-[7px] leading-[1.6] text-[var(--text-muted)] sm:text-[8px]">
-                  {isComplete
-                    ? "Confirm the selected players to establish the official tournament roster. Only confirmed players will be eligible to contribute the tournament entry fee and compete."
-                    : `${5 - rosterCount} more player${5 - rosterCount === 1 ? "" : "s"} must be selected before the tournament roster can be confirmed.`}
-                </p>
-              </div>
+              <p className="mt-0.5 hidden text-[8px] text-[var(--text-muted)] sm:block">
+                Confirmation permanently locks the tournament roster.
+              </p>
             </div>
 
-            {isCaptain && (
-              <button type="button" disabled={!canConfirm} onClick={onConfirmRoster} className="inline-flex h-9 w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-[var(--action-primary-bg)] px-4 text-[7px] font-bold uppercase tracking-[0.1em] text-[var(--action-primary-text)] transition-transform hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-35 sm:w-auto">
-                <ShieldCheck size={11} />
-                {isConfirming ? "Confirming..." : "Confirm Roster"}
-              </button>
-            )}
+            <button
+              type="button"
+              disabled={!canConfirm}
+              onClick={onConfirmRoster}
+              className={`shrink-0 rounded-[8px] border px-3.5 py-2 text-[9px] font-semibold uppercase tracking-[0.04em] transition-all sm:px-4 ${canConfirm
+                  ? "border-[var(--text-primary)] bg-[var(--text-primary)] text-[var(--surface-base)] hover:-translate-y-px hover:opacity-90"
+                  : "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--text-muted)]"
+                } disabled:cursor-not-allowed disabled:opacity-45`}
+            >
+              {isConfirming
+                ? "Confirming..."
+                : "Confirm Roster"}
+            </button>
           </div>
-
-          {!isCaptain && isComplete && (
-            <div className="mt-2 flex items-center gap-1.5">
-              <LockKeyhole size={9} className="text-[var(--text-muted)]" />
-              <span className="text-[7px] text-[var(--text-muted)]">Roster confirmation is restricted to the team captain.</span>
+        </div>
+      ) : (
+        <div className="border-t border-[var(--border-subtle)] px-3.5 py-3 sm:px-4">
+          <div className="flex items-start gap-2.5">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-elevated)]">
+              <LockKeyhole
+                size={12}
+                strokeWidth={1.8}
+                className="text-[var(--accent-gold)]"
+              />
             </div>
-          )}
+
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold text-[var(--text-primary)]">
+                Roster Locked
+              </p>
+
+              <p className="mt-0.5 text-[8px] leading-relaxed text-[var(--text-muted)] sm:text-[9px]">
+                Your tournament roster is permanently locked.
+                Selected teammates cannot be removed or kicked
+                from the team, and no new teammates can be added
+                until the tournament ends or your team is eliminated.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Confirmed */}
-      {isRosterConfirmed && (
-        <div className="border-t border-[var(--border-subtle)] bg-emerald-500/[0.025] px-3.5 py-3 sm:px-4">
+      {/* Important Confirmation Notice */}
+      {!isRosterConfirmed && (
+        <div className="border-t border-[var(--border-subtle)] bg-[var(--surface-elevated)]/40 px-3.5 py-2.5 sm:px-4">
           <div className="flex items-start gap-2">
-            <LockKeyhole size={12} className="mt-0.5 shrink-0 text-emerald-600" />
+            <LockKeyhole
+              size={11}
+              strokeWidth={1.9}
+              className="mt-0.5 shrink-0 text-[var(--text-secondary)]"
+            />
 
-            <div className="min-w-0">
-              <p className="text-[7px] font-bold uppercase tracking-[0.1em] text-emerald-600">
-                Tournament Roster Confirmed
-              </p>
-
-              <p className="mt-1 max-w-2xl text-[7px] leading-[1.6] text-[var(--text-muted)] sm:text-[8px]">
-                The selected players are now the official tournament participants. Only these members may complete the required contribution and compete in the tournament.
-              </p>
-            </div>
+            <p className="text-[8px] leading-relaxed text-[var(--text-muted)] sm:text-[9px]">
+              <span className="font-semibold text-[var(--text-secondary)]">
+                Important:
+              </span>{" "}
+              Once confirmed, these five players become your
+              official tournament roster. They cannot be kicked
+              or removed from the team, and additional teammates
+              cannot be added until the tournament ends or your
+              team is eliminated.
+            </p>
           </div>
         </div>
       )}
     </section>
   );
-}
+};
 
 export default RosterSection;

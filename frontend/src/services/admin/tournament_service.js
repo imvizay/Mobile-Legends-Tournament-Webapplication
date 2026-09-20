@@ -51,10 +51,17 @@ export const tournamentService = {
 
         return response
     },
-    onGoingTournament: async () => {
+    ongoingTournamentRegistration: async () => {
         const response = await api.get(
             TOURNAMENT_ENDPOINT.ONGOING_TOURNAMENT
         )
+        return response
+    },
+    ongoingTournamentRegistrationDetail:async(ongoingTournamentRegistrationId)=>{
+        const response = await api.get(
+            TOURNAMENT_ENDPOINT.ONGOING_TOURNAMENT_DETAIL(ongoingTournamentRegistrationId)
+        )
+        return response
     }
 
 }

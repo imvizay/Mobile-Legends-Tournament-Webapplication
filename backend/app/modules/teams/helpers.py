@@ -22,8 +22,8 @@ def make_roster_player_response(roster_players):
                 mlbb_server=rp.player.mlbb_server,
                 role=rp.player.role,
                 tournament_readiness=rp.tournament_readiness,
-                status=rp.status,
-                fee_status=rp.contribution.status
+                status=rp.status if rp.status else None,
+                fee_status=rp.contribution.status if rp.contribution is not None else None
             )
             for rp in roster_players
         ],

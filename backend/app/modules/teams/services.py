@@ -216,7 +216,6 @@ class TeamService:
 
             self.db.flush()
 
-            team_wallet = self.repository.create_team_wallet(team_id=team.id)
             team_member = self.repository.join_team(
                 team_id=team.id, player_id=current_user.id, player_role="captain"
             )
@@ -490,14 +489,13 @@ class TeamTournamentService:
         }
 
     # ADD TEAM MEMBER AS TOURNAMENT ROSTER PLAYER
-   
+
     def add_roster_player(
         self,
         tournament_id: int,
         player_id: int,
         captain: Player,
     ):
-
         roster = self.repository.get_captain_tournament_roster(
             captain_id=captain.player_id,
             tournament_id=tournament_id,
@@ -509,14 +507,14 @@ class TeamTournamentService:
                 detail="Tournament roster not found.",
             )
 
-        # Roster modification status
+        # Roster must still be editable
         if roster.status != TournamentRosterStatus.SELECTING:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Roster can no longer be modified.",
             )
 
-        # Make sure player belongs to this team
+        # Player must belong to the team
         team_member = self.repository.get_active_team_member(
             team_id=roster.team_id,
             player_id=player_id,
@@ -528,19 +526,44 @@ class TeamTournamentService:
                 detail="Player is not an active member of this team.",
             )
 
-        # Prevent duplicate player
+        # Check whether this player already has a roster record
         existing_player = self.repository.get_roster_player(
             roster_id=roster.id,
             player_id=player_id,
         )
 
         if existing_player:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Player is already in the tournament roster.",
+
+            # Already selected , nothing to do
+            if existing_player.status != TournamentRosterPlayerStatus.REMOVED.value:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Player is already in the tournament roster.",
+                )
+
+            # Previously removed , try to restore
+            roster_count = self.repository.count_roster_players(
+                roster_id=roster.id,
             )
 
-        # Maximum 5 players
+            if roster_count >= 5:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Roster already contains the maximum of 5 players.",
+                )
+
+            existing_player.status = TournamentRosterPlayerStatus.SELECTED.value
+
+            self.repository.db.commit()
+
+            return {
+                "message": "Player added back to tournament roster.",
+                "roster_id": roster.id,
+                "player_id": existing_player.player_id,
+                "roster_size": roster_count + 1,
+            }
+
+        # Completely new player
         roster_count = self.repository.count_roster_players(
             roster_id=roster.id,
         )
@@ -551,7 +574,6 @@ class TeamTournamentService:
                 detail="Roster already contains the maximum of 5 players.",
             )
 
-        #  Add player
         roster_player = self.repository.add_roster_player(
             roster_id=roster.id,
             roster_player_id=player_id,
@@ -565,6 +587,69 @@ class TeamTournamentService:
             "player_id": roster_player.player_id,
             "roster_size": roster_count + 1,
         }
+
+    # Remove Roster Player
+
+    def remove_roster_player(
+        self,
+        tournament_id: int,
+        captain: Player,
+        player_id: int,
+    ):
+        if not tournament_id or not player_id:
+            return
+
+        try:
+            roster = self.repository.get_captain_tournament_roster(
+                captain_id=captain.player_id,
+                tournament_id=tournament_id,
+            )
+            print("roster.id",roster.id)
+            if not roster:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Tournament roster not found.",
+                )
+
+            roster_player = self.repository.get_roster_player_by_id(
+                roster_id=roster.id, player_id=player_id
+            )
+
+            if not roster_player:
+                return {
+                    "code": 404,
+                    "status": "NOT_FOUND",
+                    "message": f"Roster player with id {player_id} was not found.",
+                    "data": None,
+                }
+
+            # Already removed
+            if roster_player.status == TournamentRosterPlayerStatus.REMOVED.value:
+                return {
+                    "code": 400,
+                    "status": "ALREADY_REMOVED",
+                    "message": "This player has already been removed from the roster.",
+                    "data": None,
+                }
+
+            roster_player.status = TournamentRosterPlayerStatus.REMOVED.value
+
+            self.repository.db.commit()
+
+            return {
+                "code": 200,
+                "status": "REMOVED",
+                "message": "Player removed from roster successfully.",
+                "data": None,
+            }
+
+        except Exception as e:
+            self.repository.db.rollback()
+            print("Removing roster player error:", e)
+            raise
+        
+        
+        
 
     # Confirm Roster
     def confirm_roster(self, registration_id: int, captain: Player):
@@ -650,32 +735,31 @@ class TeamTournamentService:
         return TournamentDetailResponse.model_validate(tournament)
 
     def get_paying_review(self, tournament_id: int, current_user: Player):
-        
+
         if not tournament_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Tournament Id Missing."
             )
-            
-        # Current User Team Tournament
-        
-        review = self.repository.get_tournament_review(tournament_id=tournament_id,player_id=current_user.id)
 
-        
+        # Current User Team Tournament
+
+        review = self.repository.get_tournament_review(
+            tournament_id=tournament_id, player_id=current_user.id
+        )
+
         if not review:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Tournament Not Found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Tournament Not Found"
             )
-        
+
         return TournamentReviewResponse(
             team=TeamReview(
                 id=review.team.id,
                 roster_id=review.roster.id,
-                team_name=review.team.name
+                team_name=review.team.name,
             ),
             tournament=TournamentReview.model_validate(review.tournament),
             player=PlayerReview(
-                id=current_user.id,
-                player_name=current_user.email.split('@')[0]
-            )   
+                id=current_user.id, player_name=current_user.email.split("@")[0]
+            ),
         )

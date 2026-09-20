@@ -9,6 +9,7 @@ from .models import (
     TournamentRosterPlayer,
     TeamTournamentContribution,
     TeamTournamentContributionStatus,
+    TournamentRosterPlayerStatus,
 )
 
 from ..auth.models import Player
@@ -32,7 +33,11 @@ class TeamRepository:
                 joinedload(TournamentRosterPlayer.contribution),
                 joinedload(TournamentRosterPlayer.player),
             )
-            .filter(TournamentRoster.registration_id == registration_id)
+            .filter(
+                TournamentRoster.registration_id == registration_id,
+                TournamentRosterPlayer.status
+                == TournamentRosterPlayerStatus.SELECTED.value,
+            )
             .all()
         )
 
@@ -398,6 +403,16 @@ class TeamTournamentRepository:
             .first()
         )
 
+    def get_roster_player_by_id(self, roster_id: int, player_id: int):
+        return (
+            self.db.query(TournamentRosterPlayer)
+            .filter(
+                TournamentRosterPlayer.roster_id == roster_id,
+                TournamentRosterPlayer.player_id == player_id,
+            )
+            .one_or_none()
+        )
+
     def make_roster(
         self,
         team_id: int,
@@ -454,6 +469,7 @@ class TeamTournamentRepository:
             self.db.query(TournamentRosterPlayer)
             .filter(
                 TournamentRosterPlayer.roster_id == roster_id,
+                TournamentRosterPlayer.status == TournamentRosterPlayerStatus.SELECTED.value
             )
             .count()
         )
@@ -529,7 +545,7 @@ class TeamTournamentRepository:
                 TournamentRoster.id == TournamentRosterPlayer.roster_id,
             )
             .filter(
-                TournamentRoster.registration_id == registration_id,
+                TournamentRoster.tournament_id == registration_id,
                 TournamentRoster.team_id == team_id,
             )
             .all()
@@ -540,8 +556,7 @@ class TeamTournamentRepository:
             self.db.query(TeamTournamentRegistration)
             .options(
                 joinedload(TeamTournamentRegistration.tournament),
-                joinedload(TeamTournamentRegistration.team)
-                
+                joinedload(TeamTournamentRegistration.team),
             )
             .join(
                 TournamentRoster,

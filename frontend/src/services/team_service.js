@@ -63,32 +63,32 @@ export const teamTournamentService = {
 
     addPlayerToRoster(tournamentId, playerId) {
         return api.post(
-            `/player/team/tournament/${tournamentId}/roster/${playerId}`
+            `/player/team/tournament/${tournamentId}/add-roster/${playerId}`
         )
     },
 
     removePlayerFromRoster(tournamentId, playerId) {
-        return api.delete(
-            `/player/team/tournament/${tournamentId}/roster/${playerId}`
+        return api.patch(
+            `/player/team/tournament/${tournamentId}/remove-roster/${playerId}`
         )
     },
 
     addPlayerToSubstitute(tournamentId, playerId) {
         return api.post(
-            `/player/team/tournament/${tournamentId}/substitutes/${playerId}`,
+            `/player/team/tournament/${tournamentId}/add-substitutes/${playerId}`,
 
         )
     },
 
     removePlayerFromSubstitute(tournamentId, playerId) {
         return api.delete(
-            `/player/team/tournament/${tournamentId}/substitutes/${playerId}`
+            `/player/team/tournament/${tournamentId}/remove-substitutes/${playerId}`
         )
     },
 
     promoteSubstituteToRoster(tournamentId, playerId) {
         return api.post(
-            `/player/team/tournament/${tournamentId}/roster/promote/${playerId}`,
+            `/player/team/tournament/${tournamentId}/promote-substitute/${playerId}`,
         )
     },
 
