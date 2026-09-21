@@ -6,20 +6,6 @@ import { replace, useNavigate } from "react-router-dom"
 
 const CONTRIBUTION_PER_PLAYER = 100
 
-const dummyTournament = {
-  id: 1,
-  tournament_name: "Mobile Legends Champions Cup",
-  background_image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1800&q=85",
-  team_format: "5V5",
-  tournament_type: "Single Elimination",
-  joined_teams: 12,
-  total_teams: 20,
-  prize_pool: 50000,
-  entry_fee: 500,
-  country: "India",
-  tournament_date: "Sep 18, 2026",
-}
-
 export default function RegisteredTournament({
   tournament = {},
   isRosterLocked = true,
@@ -36,7 +22,9 @@ export default function RegisteredTournament({
   onRoomDetails,
   onTournamentDetails,
 }) {
+
   console.log("TOURNAMENT",tournament)
+
   return (
     <section className="w-full">
       <div className="mb-4 flex items-end justify-between gap-3">
@@ -111,6 +99,16 @@ function TournamentCard({
   const canOperateTournament =
     isCurrentUserInRoster || isPlayerSubstitute
 
+  const formatDate = (dateTime) => {
+    if(!dateTime) return '-'
+    let date = new Date(dateTime).toLocaleDateString("en-IN",{
+      day:'2-digit',
+      month:'short',
+      year:"numeric"
+    })
+    return date
+  }
+
   const action = getTournamentAction({
     isRosterLocked,
     isPlayerPaid,
@@ -122,8 +120,8 @@ function TournamentCard({
 
   return (
     <article className="relative isolate min-h-[300px] overflow-hidden rounded-[20px] border" style={{ borderColor: "var(--border-default)" }}>
-      {tournament.background_image_url ? (
-        <img src={tournament.background_image_url} alt="" aria-hidden="true" className="absolute inset-0 -z-30 h-full w-full object-cover object-center opacity-[0.3] saturate-[0.65]" />
+      {tournament.images.background_url ? (
+        <img src={tournament.images.background_url} alt="" aria-hidden="true" className="absolute inset-0 -z-30 h-full w-full object-cover object-center opacity-[0.3] saturate-[0.65]" />
       ) : (
         <div className="absolute inset-0 -z-30" style={{ background: "radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--accent-gold) 9%, transparent), #090909 60%)" }} />
       )}
@@ -152,7 +150,7 @@ function TournamentCard({
 
             <span className="hidden shrink-0 items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-white/45 sm:flex">
               <Globe2 size={10} />
-              {tournament.country}
+              {tournament.server}
             </span>
           </div>
 
@@ -186,7 +184,7 @@ function TournamentCard({
 
               <span className="flex items-center gap-1.5">
                 <Globe2 size={10} />
-                {tournament.country}
+                {tournament.server}
               </span>
             </div>
           </div>
@@ -194,7 +192,7 @@ function TournamentCard({
 
         <div className="mt-8">
           <div className="grid grid-cols-2 border-y border-white/10 sm:grid-cols-4">
-            <TournamentStat icon={<CalendarDays size={12} />} label="DATE" value={tournament.tournament_date} />
+            <TournamentStat icon={<CalendarDays size={12} />} label="DATE" value={formatDate(tournament.timeline.starts_at)} />
 
             <TournamentStat icon={<Users size={12} />} label="TEAMS" value={`${registeredTeams}/${totalTeams}`} progress={percentage} />
 
