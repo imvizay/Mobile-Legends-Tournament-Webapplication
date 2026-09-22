@@ -61,7 +61,13 @@ function OngoingRegistrationDetailsLayout() {
                     <OngoingRegistrationHeader tournament={tournament} onBack={() => window.history.back()} />
 
                     <div className="mt-1 sm:mt-2">
-                        <AllTeamsSection registration={registrations} entryFee={entryFee} openMenu={openMenu} setOpenMenu={setOpenMenu} actionRefs={actionRefs} />
+                        <AllTeamsSection
+                            tournamentId={ongoingTournamentRegistrationId}
+                            registration={registrations}
+                            entryFee={entryFee}
+                            openMenu={openMenu}
+                            setOpenMenu={setOpenMenu}
+                            actionRefs={actionRefs} />
                     </div>
                 </div>
             </main>
