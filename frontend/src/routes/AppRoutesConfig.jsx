@@ -42,6 +42,8 @@ import TournamentEntryCheckoutPage from '../pages/player/onboarding/components/T
 import PaymentSuccess from '../pages/player/onboarding/components/PaymentSuccess'
 import OngoingTournamentRegistration from '../pages/admin/pages/tournament/ongoingRegistration/OngoingRegistration'
 import TournamentRegistrationPage from '../pages/admin/pages/tournament/ongoingRegistration/OngoingRegistrationDetails'
+import AdminBracketLayout from '../features/tournaments/brackets/layout/AdminBracketLayout'
+import Bracketpage from '../features/tournaments/brackets/layout/components/Bracketpage'
 
 
 
@@ -125,6 +127,11 @@ function AppRoutesConfig() {
           <Route path='ongoing-registration/:ongoingTournamentRegistrationId' element={<TournamentRegistrationPage />} />
 
           {/* <Route path='ongoing-registration/:id' element={<PublishedTournament />} /> */}
+        
+        </Route>
+
+        <Route path='bracket/:tournamentId' element={<AdminBracketLayout/>}> 
+          <Route path='create' element={<Bracketpage/>} />
 
         </Route>
 
