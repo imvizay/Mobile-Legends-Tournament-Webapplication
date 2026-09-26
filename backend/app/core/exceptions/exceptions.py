@@ -30,11 +30,3 @@ class RevokedTokenException(AppException):
 
 
 # TEAM EXCEPTIONS
-class ExceptionPlayerAlreadyHasTeam(AppException):
-    pass
-
-class ExceptionTeamAlreadyExits(AppException):
-    pass
-
-class NoTeamException(AppException):
-    pass

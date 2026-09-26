@@ -13,14 +13,45 @@ from app.modules.payments.router import router as payments_router
 from app.modules.registrations.router import router as registration_router
 
 # Exception handlers
-from app.core.exceptions.exceptions import *
-from app.core.exceptions.handlers import *
-from app.modules.teams.exceptions import *
-from app.modules.teams.handlers import *
+from app.core.exceptions.exceptions import (
+    InvalidTokenException,
+    PendingRegistrationExistsError,
+    TokenExpiredException,
+    UserAlreadyExistsError,
+    UserBannedException,
+    UserNotFoundException,
+)
+from app.core.exceptions.handlers import (
+    invalid_credentials,
+    invalid_token,
+    player_already_in_team,
+    player_no_team,
+    team_exists,
+    user_banned,
+    user_not_found,
+    user_pending_registration_exists,
+    user_already_exists,
+)
+from app.modules.teams.exceptions import (
+    MaximumJoinRequestException,
+    NoTeamError,
+    PendingApplicationException,
+    PlayerAlreadyHasTeamError,
+    TeamAlreadyExistsError,
+    TeamFullException,
+    TeamNotFound,
+    UserInTeam,
+    UserIsBlockedOrInactive,
+)
+from app.modules.teams.handlers import (
+    maximum_join_request_exceed,
+    team_full,
+    team_not_found,
+    team_pending_application,
+    user_in_team,
+    user_is_blocked_or_inactive,
+)
 
-import logging
-
-logger = logging.getLogger("app.payment")
 
 
 configure_logging()
@@ -63,9 +94,9 @@ EXCEPTION_HANDLERS = {
     InvalidTokenException: invalid_credentials,
     TokenExpiredException: invalid_token,
     # Team exceptions
-    ExceptionPlayerAlreadyHasTeam: player_already_in_team,
-    ExceptionTeamAlreadyExits: team_exists,
-    NoTeamException: player_no_team,
+    PlayerAlreadyHasTeamError: player_already_in_team,
+    TeamAlreadyExistsError: team_exists,
+    NoTeamError: player_no_team,
     UserIsBlockedOrInactive: user_is_blocked_or_inactive,
     UserInTeam: user_in_team,
     TeamFullException: team_full,
@@ -78,16 +109,6 @@ for exception_class, handler in EXCEPTION_HANDLERS.items():
     app.add_exception_handler(exception_class, handler)
 
 
-logger.info(
-    "payment.logging_test",
-    extra={
-        "event": "payment.logging_test",
-        "user_id": None,
-        "payment_id": None,
-        "payment_attempt_id": None,
-        "order_id": None,
-    },
-)
 
 
 @app.exception_handler(Exception)

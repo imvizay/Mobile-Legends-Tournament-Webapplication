@@ -1,10 +1,10 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 
-import PlayerSidebar from "../pages/player/layouts/navigations/Sidebar";
-import MobileNavbar from "../components/navigations/MobileNavbar";
+import PlayerSidebar from "../components/navigation/PlayerSidebar";
+import MobileNavbar from "../components/navigation/MobileNavbar";
 
-import { PLAYER_DASHBOARD_NAVIGATION_LINKS } from "../utils/playerdashboard_links/playerdash_links";
+import { PLAYER_DASHBOARD_NAVIGATION_LINKS } from "../features/player-dashboard/config/navigationLinks";
 
 function PlayerLayout() {
     return (

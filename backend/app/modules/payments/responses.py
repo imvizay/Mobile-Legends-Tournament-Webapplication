@@ -30,6 +30,24 @@ class PaymentSuccessResponse(BaseModel):
 
 
 # razorpay order created and verification
+
+
+def contribution_already_paid_response(contribution):
+    return {
+        "success": True,
+        "code": "CONTRIBUTION_ALREADY_PAID",
+        "message": "This contribution has already been paid.",
+        "data": {
+            "contribution_id": contribution.id,
+            "status": (
+                contribution.status.value
+                if hasattr(contribution.status, "value")
+                else contribution.status
+            ),
+            "amount": contribution.amount,
+            "paid_at": contribution.paid_at,
+        },
+    }
 def payment_already_paid_response(payment):
     return {
         "success": True,

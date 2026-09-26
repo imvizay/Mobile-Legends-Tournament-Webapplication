@@ -1,214 +1,18 @@
+import secrets
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
-from passlib.context import CryptContext
-from .repository import AuthRepository,SessionRepository
-
-from jose import jwt,JWTError
-from app.core.config.settings import settings
-from uuid import uuid4
-
-
-from .models import Player,PendingRegistration,PlayerSession
-from .schema import AuthCreateRequest,RegistrationResponse,LoginRequest
-
-from app.core.exceptions import exceptions
 from fastapi.background import BackgroundTasks
 
-# secrets
-import secrets
-from datetime import datetime,UTC,timedelta
+from app.core.config.settings import settings
+from app.core.security.security import hash_password, verify_password
+from app.core.exceptions import exceptions
+from app.integrations.email.service import AuthEmailService
 
-from app.core.security.security import hash_password,verify_password
-
-# background tasks
-from app.common.services.email_service import AuthEmailService 
-service = AuthEmailService()
-
-
-password_context = CryptContext(
-    schemes=['bcrypt'],
-    deprecated="auto"
-)
-
-frontend_url = "http://127.0.0.1:5173"
-
-
-class TokenService:
-
-    ACCESS_TOKEN_EXPIRE_MINUTES = 12*60  # valid for 12 hours
-    REFRESH_TOKEN_EXPIRE_DAYS = 7    # for 7 days
-
-    SECRET_KEY = settings.SECRET_KEY
-    ALGORITHM = "HS256"
-
-    def create_access_token(self,user_id:int):
-
-        payload = {
-            "sub": str(user_id),
-            "type": "access",
-            "jti": str(uuid4()),
-            "exp": datetime.now(UTC) + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
-        }
-        access_token = jwt.encode(
-            payload,
-            self.SECRET_KEY,
-            algorithm=self.ALGORITHM
-        )
-
-        return access_token
-
-    def create_refresh_token(  
-            self,
-            user_id: int,
-            session_id: int,
-            refresh_jti: str,
-        ):
-
-        payload = {
-            "sub":str(user_id),
-            "type":"refresh",
-            "session_id":session_id,
-            "jti":refresh_jti,
-            "exp":datetime.now(UTC) + timedelta(days=self.REFRESH_TOKEN_EXPIRE_DAYS)
-        }
-
-        refresh_token = jwt.encode(
-            payload,
-            self.SECRET_KEY,
-            algorithm=self.ALGORITHM
-        )
-
-        return refresh_token
-
-    def decode_token(self,token:str):
-
-        try :
-            payload = jwt.decode(
-                token,
-                self.SECRET_KEY,
-                algorithms=[self.ALGORITHM]
-            )
-
-            return payload 
-        
-        except JWTError as error:
-            print("JWT ERROR:",error)
-            raise exceptions.InvalidTokenException()
-            
-
-
-    def verify_token_type(self,payload:dict,token_type:str):
-        
-        if payload.get('type') != token_type:
-            raise exceptions.InvalidTokenException()
-        
-        return payload
-
-
-
-
-   
-
-class SessionService:
-
-    def __init__(self,token_service: TokenService,repository:SessionRepository):
-        self.token_service = token_service
-        self.repository = repository
-
-    # pvt helper function
-
-    def _validate_refresh_session(
-        self,
-        refresh_token: str
-    ) -> tuple[PlayerSession, dict]:
-
-        if not refresh_token:
-            raise exceptions.InvalidTokenException()
-
-        payload = self.token_service.decode_token(refresh_token)
-
-        self.token_service.verify_token_type(payload,"refresh")
-
-        session = self.repository.get_session_by_id(payload["session_id"])
-
-        if session is None:
-            raise exceptions.InvalidSessionException()
-
-        if session.is_revoked:
-            raise exceptions.RevokedTokenException()
-
-        if session.refresh_jti != payload["jti"]:
-            raise exceptions.InvalidTokenException()
-
-        return session, payload
-
-
-    def create_login_session(
-            self,
-            player:Player
-        ):
-
-        refresh_jti = str(uuid4())
-        expires_at = (
-            datetime.now(UTC) + timedelta(days=self.token_service.REFRESH_TOKEN_EXPIRE_DAYS)
-        )
-
-        session = self.repository.create_session(
-            player_id=player.id,
-            refresh_jti=refresh_jti,
-            expires_at=expires_at
-        )
-
-        access_token = self.token_service.create_access_token(
-            player.id
-        )
-
-        refresh_token = self.token_service.create_refresh_token(
-            player.id,
-            session.id,
-            refresh_jti
-        )
-
-        return {
-            "access": access_token,
-            "refresh": refresh_token,
-        }
-
-    def refresh_session(
-            self,
-            refresh_token:str
-        ):
-
-        _,payload = self._validate_refresh_session(refresh_token)
-        
-        # new access token
-        new_access = self.token_service.create_access_token(int(payload["sub"]))
-
-        return{
-            "access":new_access
-        }
-        
-
-    def rotate_refresh_token():
-        ...
-
-    def revoke_session(self,refresh_token:str):
-
-        session,_ = self._validate_refresh_session(refresh_token)
-
-        self.repository.revoke_session(
-            session,
-            reason="logout"
-        )
-        
-        # logget out successfully via router response
-
-    def revoke_all_sessions():
-        ...
-
-    def cleanup_expired_sessions():
-        ...
-
+from .models import PendingRegistration
+from .repository import AuthRepository
+from .schemas import AuthCreateRequest, LoginRequest, RegistrationResponse
+from .session_service import SessionService
 
 
 class AuthService:
@@ -243,8 +47,8 @@ class AuthService:
         session = self.session_service.create_login_session(user)
 
         return {
-            "access": session.access,
-            "refresh": session.refresh,
+            "access": session["access"],
+            "refresh": session["refresh"],
             "message": (
                 "Account Created Successfully."
                 if created
@@ -319,12 +123,12 @@ class AuthService:
         )
         
         verify_url = (
-                    f"{frontend_url}/activate-account?token={secret_token}"
+                    f"{settings.FRONTEND_URL}/activate-account?token={secret_token}"
         )
 
         # resend email
         bg_task.add_task(
-                    service.send_verification_email,
+                    self.email_service.send_verification_email,
                     pending_user.email,
                     verify_url
         )
@@ -356,9 +160,7 @@ class AuthService:
                 message="Verification token expired"
             )
     
-        verified_user = self.repository.activate_pending_user(
-            pending_user
-        )
+        self.repository.activate_pending_user(pending_user)
 
         return RegistrationResponse(
             status="success",
@@ -397,12 +199,12 @@ class AuthService:
                 )   
 
                 verify_url = (
-                    f"{frontend_url}/activate-account?token={secret_token}"
+                    f"{settings.FRONTEND_URL}/activate-account?token={secret_token}"
                 )
 
                 # send mail
                 bg_task.add_task(
-                    service.send_verification_email,
+                    self.email_service.send_verification_email,
                     pending_user.email,
                     verify_url
                 )
@@ -422,14 +224,14 @@ class AuthService:
         
 
         # hashpassword
-        hashed_password = password_context.hash(payload.password)
+        hashed_password = hash_password(payload.password)
         
         # generate token length 32
         secret_token = secrets.token_urlsafe(32) 
         token_expiry = datetime.now(UTC) + timedelta(hours=24) # invalidate token after 24 hrs
 
         # create pending record with expiry
-        pending_registratiion = PendingRegistration(
+        pending_registration = PendingRegistration(
             email=payload.email,
             password=hashed_password,
             provider=payload.provider,
@@ -438,12 +240,12 @@ class AuthService:
         )
 
         pending_player = (
-            self.repository.create_pending_user(pending_registratiion)
+            self.repository.create_pending_user(pending_registration)
         )
 
         # verification url 
         verify_url = (
-            f"{frontend_url}/activate-account?token={secret_token}"
+            f"{settings.FRONTEND_URL}/activate-account?token={secret_token}"
         )
         
         # verification email as background task.
@@ -455,5 +257,3 @@ class AuthService:
         
 
         return pending_player
-        
- 

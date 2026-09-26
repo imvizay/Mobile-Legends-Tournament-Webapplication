@@ -8,7 +8,7 @@ import { createContext, useContext } from 'react'
 
 export const UserContext = createContext()
 
-import { authService } from '../services/auth.service'
+import { authService } from '../services/authService'
 
 export const UserProvider = ({ children }) => {
 

@@ -2,10 +2,10 @@ import React from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Outlet } from "react-router-dom"
 
-import { teamService } from "../services/team_service"
+import { teamService } from "../services/teamService"
 
-import EmptyTeamState from "../pages/player/team/EmptyTeam"
-import TeamPageSkeleton from "../skeletons/playerdash/my_team/TeamPageSkeleton"
+import EmptyTeamState from "../features/team/components/TeamEmptyState"
+import TeamPageSkeleton from "../features/team/components/skeletons/TeamPageSkeleton"
 
 const RequireTeam = () => {
     const {

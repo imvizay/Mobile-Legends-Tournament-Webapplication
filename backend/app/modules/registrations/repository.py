@@ -18,7 +18,7 @@ class TournamentRegistrationRepository:
     def __init__(self, db):
         self.db = db
 
-    def fetch_team_registered_application(self, team_id: int, registration_id: int):
+    def get_registration(self, team_id: int, registration_id: int):
         reg_application = (
             self.db.query(TeamTournamentRegistration)
             .filter(
@@ -85,15 +85,3 @@ class TournamentRegistrationRepository:
         roster.status = TournamentRosterStatus.LOCKED.value
         self.db.commit()
         self.db.refresh(roster)
-
-    def get_registration(self, team_id: int, registration_id: int):
-        
-        registration = (
-            self.db.query(TeamTournamentRegistration)
-            .filter(
-                TeamTournamentRegistration.team_id == team_id,
-                TeamTournamentRegistration.id == registration_id,
-            )
-            .one_or_none()
-        )
-        return registration

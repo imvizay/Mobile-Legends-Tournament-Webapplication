@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, Header,Query
+from fastapi import APIRouter, Depends, Header
 
 from ..auth.models import Player
 from app.dependencies.auth import get_current_user
-from .services import PaymentService
-from .dependency import get_payment_service
-from .schemas import *
+from .service import PaymentService
+from .dependencies import get_payment_service
+from .schemas import CreateRazorpayOrderRequest, VerifyRazorpayPaymentRequest
 
-router = APIRouter(prefix="/payments", tags=["PAYMETS"])
+router = APIRouter(prefix="/payments", tags=["Payments"])
 
 
 @router.post("/contribution/{registration_id}/razorpay/create-order")

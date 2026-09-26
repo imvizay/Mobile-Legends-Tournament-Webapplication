@@ -2,7 +2,7 @@ from app.modules.auth.models import Player
 from fastapi import Depends,HTTPException,status
 from app.dependencies.auth import get_current_user
 from app.modules.teams.repository import TeamRepository
-from app.modules.teams.dependency import get_team_repository
+from app.modules.teams.dependencies import get_team_repository
 
 
 def get_current_admin(

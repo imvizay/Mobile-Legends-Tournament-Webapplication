@@ -8,42 +8,40 @@ import PlatformLayout from '../layouts/PlatformLayout'
 
 /* Auth components */
 // common components
-import LoginPage from '../pages/common/LoginPage'
-import RegisterPage from '../pages/common/SignupPage'
+import LoginPage from '../pages/auth/LoginPage'
+import RegisterPage from '../pages/auth/SignupPage'
 
 // auth verification component
-import { EmailVerificationPending } from '../pages/common/EmailVerification'
-import RegistrationSuccess from '../pages/common/RegistrationSuccess'
+import { EmailVerificationPending } from '../pages/auth/EmailVerificationPage'
+import RegistrationSuccess from '../pages/auth/RegistrationSuccessPage'
 
 // Default Home page component.
 
-/* PlayerDashboard Components */
+/* PlayerDashboardPage Components */
 
-import TeamLayout from '../pages/player/layouts/TeamLayout'
-import DiscoverTeamPage from '../pages/player/team/DiscoverTeamPage'
-import TeamCreatePage from '../pages/player/team/TeamCreatePage'
+import TeamLayout from '../features/team/layouts/TeamLayout'
+import DiscoverTeamsPage from '../pages/player/team/DiscoverTeamsPage'
+import CreateTeamPage from '../pages/player/team/CreateTeamPage'
 import RequireTeam from './RequireTeam'
 
-import AdminTournamentLayout from '../pages/admin/pages/layouts/AdminTournamentLayout'
-import AdminTournamentOverview from '../pages/admin/pages/tournament/AdminTournamentOverview'
-import CreateTournament from '../pages/admin/pages/tournament/CreateTournament'
+import AdminTournamentLayout from '../layouts/AdminTournamentLayout'
+import AdminTournamentOverview from '../pages/admin/tournaments/AdminTournamentOverviewPage'
+import CreateTournamentPage from '../pages/admin/tournaments/CreateTournamentPage'
 
 import ProtectedRoutes from './ProtectedRoutes'
 
-import AdminUsersOverview from '../pages/admin/pages/users/AdminUsersOverview'
-import AdminUsersLayout from '../pages/admin/pages/layouts/AdminUsersLayout'
+import AdminUsersOverview from '../pages/admin/users/AdminUsersOverviewPage'
+import AdminUsersLayout from '../layouts/AdminUsersLayout'
 
-import PlayerDashboard from '../pages/player/onboarding/PlayerDashboard'
-import TeamDashboard from '../pages/player/team/dashboard/TeamDashboard'
-import TournamentDetail from '../pages/player/onboarding/components/TournamentDetail'
-import TournamentPage from '../pages/player/team/components/TournamentDetailPage'
-import PublishedTournament from '../pages/admin/pages/tournament/ongoingRegistration/OngoingRegistration'
-import TournamentEntryCheckoutPage from '../pages/player/onboarding/components/TournaCheckoutEntryPage'
-import PaymentSuccess from '../pages/player/onboarding/components/PaymentSuccess'
-import OngoingTournamentRegistration from '../pages/admin/pages/tournament/ongoingRegistration/OngoingRegistration'
-import TournamentRegistrationPage from '../pages/admin/pages/tournament/ongoingRegistration/OngoingRegistrationDetails'
-import AdminBracketLayout from '../features/tournaments/brackets/layout/AdminBracketLayout'
-import Bracketpage from '../features/tournaments/brackets/layout/components/Bracketpage'
+import PlayerDashboardPage from '../pages/player/PlayerDashboardPage'
+import TeamDashboardPage from '../pages/player/team/TeamDashboardPage'
+import TeamTournamentDetailsPage from '../pages/player/tournaments/TeamTournamentDetailsPage'
+import TournamentEntryCheckoutPage from '../pages/player/tournaments/TournamentEntryCheckoutPage'
+import PaymentSuccess from '../pages/player/payments/PaymentSuccessPage'
+import OngoingRegistrationPage from '../pages/admin/tournaments/registration/OngoingRegistrationPage'
+import OngoingRegistrationDetailsPage from '../pages/admin/tournaments/registration/OngoingRegistrationDetailsPage'
+import BracketAdminLayout from '../features/tournaments/bracket/admin/BracketAdminLayout'
+import BracketBuilderPage from '../features/tournaments/bracket/admin/BracketBuilderPage'
 
 
 
@@ -74,9 +72,9 @@ function AppRoutesConfig() {
         path='/player'
         element={<ProtectedRoutes role="player" />}>
 
-        <Route index element={<PlayerDashboard />} />
+        <Route index element={<PlayerDashboardPage />} />
 
-        {/* <Route path='tournament/:id/detail' element={<TournamentPage />} /> */}
+        {/* <Route path='tournament/:id/detail' element={<TeamTournamentDetailsPage />} /> */}
 
         {/* PAYMENTS */}
         <Route path='payments/success/:payment_reference' element={<PaymentSuccess/>}/>
@@ -84,19 +82,19 @@ function AppRoutesConfig() {
 
 
         {/* TEAM */}
-        <Route path='team/create' element={<TeamCreatePage />} />
-        <Route path='team/discover' element={<DiscoverTeamPage />} />
+        <Route path='team/create' element={<CreateTeamPage />} />
+        <Route path='team/discover' element={<DiscoverTeamsPage />} />
 
         {/* Team Routes */}
         <Route path="team" element={<RequireTeam />}>
           <Route element={<TeamLayout />}>
-            <Route index element={<TeamDashboard />} />
+            <Route index element={<TeamDashboardPage />} />
           </Route>
         </Route>
 
         {/* Tournaments Detail and Payment Flow */}
         <Route path='tournament/:id'>
-          <Route path='detail' element={<TournamentPage />} />
+          <Route path='detail' element={<TeamTournamentDetailsPage />} />
           <Route path='review-contribution' element={<TournamentEntryCheckoutPage />} />
           <Route path='paymethod-wallet' />
           <Route path='verify-payment' />
@@ -122,16 +120,16 @@ function AppRoutesConfig() {
         <Route path="tournaments" element={<AdminTournamentLayout />}>
           {/* Index Component */}
           <Route index element={<AdminTournamentOverview />} />
-          <Route path='create' element={<CreateTournament />} />
-          <Route path='ongoing-registration' element={<OngoingTournamentRegistration />} />
-          <Route path='ongoing-registration/:ongoingTournamentRegistrationId' element={<TournamentRegistrationPage />} />
+          <Route path='create' element={<CreateTournamentPage />} />
+          <Route path='ongoing-registration' element={<OngoingRegistrationPage />} />
+          <Route path='ongoing-registration/:ongoingTournamentRegistrationId' element={<OngoingRegistrationDetailsPage />} />
 
           {/* <Route path='ongoing-registration/:id' element={<PublishedTournament />} /> */}
         
         </Route>
 
-        <Route path='bracket/:tournamentId' element={<AdminBracketLayout/>}> 
-          <Route path='create' element={<Bracketpage/>} />
+        <Route path='bracket/:tournamentId' element={<BracketAdminLayout/>}> 
+          <Route path='create' element={<BracketBuilderPage/>} />
 
         </Route>
 

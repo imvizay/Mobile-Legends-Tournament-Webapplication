@@ -1,11 +1,22 @@
 from fastapi import UploadFile
+
+from app.integrations.cloudinary.service import cloudinary_service
 from app.modules.auth.models import Player
-from .repository import TournamentRepository
-from .schema import *
+from app.common.validators.image import validate_image
+
 from .models import Tournament, TournamentStatus
-from ...core.cloudinary.cloudinary_services import cloud_service
-from .validators import validate_image
-from datetime import timezone
+from .repository import TournamentRepository
+from .schemas import (
+    AdminTournamentRes,
+    OngoingRegistrationTeamContributionResponse,
+    OngoingRegistrationTeamResponse,
+    OngoingTournamentHeaderResponse,
+    OngoingTournamentRegistrationListResponse,
+    OngoingTournamentResponse,
+    TournamentDetailResponse,
+    TournamentForm,
+    TournamentListResponse,
+)
 
 
 class TournamentService:
@@ -14,18 +25,13 @@ class TournamentService:
         self.repository = repository
 
     def get_tournament_detail(self, tournament_id):
-        detail = self.repository.get_tournament_detail(tournament_id=tournament_id)
+        detail = self.repository.get_tournament_by_id(tournament_id=tournament_id)
         return TournamentDetailResponse(
             success="DONE.", data=TournamentListResponse.model_validate(detail)
         )
 
     def get_tournaments(self, current_user: Player):
-
-        if current_user.role == "admin":
-            results = self.repository.load_tournaments()
-
-            return AdminTournamentRes(tournament=results)
-
+        results = self.repository.load_tournaments()
         return AdminTournamentRes(tournament=results)
 
     async def create_tournament(
@@ -60,7 +66,7 @@ class TournamentService:
             validate_image(value)
 
             # upload cloudinary
-            result = cloud_service.upload_image(value, folder=f"tournament/{key}")
+            result = cloudinary_service.upload_image(value, folder=f"tournament/{key}")
 
             image_data[key] = {
                 "public_id": result["public_id"],
@@ -81,8 +87,6 @@ class TournamentService:
             "message": f"Tournament: {created_tournament.tournament_name} created successfully.",
         }
 
-    def update_tournament(self, tournament_id, validated_data):
-        pass
 
     def publish_tournament(self, tournament_id: int, current_user: Player):
 
@@ -91,13 +95,10 @@ class TournamentService:
         return {
             "success": True,
             "status": 200,
-            "message": "Tournament published {tournament.tournament_name}",
+            "message": f"Tournament published {tournament.tournament_name}",
         }
 
-    def cancel_tournament(self, tournament_id):
-        pass
 
-    # admin operational route service
     def get_ongoing_tournament_registration(self, admin: Player):
         ongoing_tournaments = (
             self.repository.check_and_get_ongoing_tournament_registration()
@@ -127,8 +128,8 @@ class TournamentService:
         ongoing_tournament_id: int,
     ):
         # check tournament
-        tournament = self.repository.get_tournament(
-            ongoing_tournament_id=ongoing_tournament_id
+        tournament = self.repository.get_tournament_by_id(
+            tournament_id=ongoing_tournament_id
         )
 
         # if not found return
@@ -221,236 +222,3 @@ class TournamentService:
             registrations=registration_response,
         )
 
-
-class BracketService:
-    def __init__(self, repository: TournamentRepository):
-        self.repository = repository
-
-    def get_initial_bracket_data(self, tournament_id: int):
-
-        if not tournament_id:
-            return {
-                "code": 400,
-                "status": "BAD_REQUEST",
-                "message": "required credentials not provided",
-            }
-
-        try:
-            # get tournament
-            tournament = self.repository.get_tournament(tournament_id)
-            if not tournament:
-                raise {
-                    "status": 400,
-                    "code": "NOT_FOUND",
-                    "message": "tournament with this tournament id:{tournament_id} not found.",
-                }
-
-            teams = self.repository.get_initial_bracket_team_data(
-                tournament_id=tournament_id
-            )
-
-            # get all approved team for this tournament
-            return {
-                "status": 200,
-                "code": "OK",
-                "data": {"tournament": tournament, "teams": teams or []},
-            }
-
-        except Exception as e:
-            raise
-
-    def create_initial_round(self, tournament_id: int, payload: RoundCreateRequest):
-
-        if not tournament_id:
-            return {
-                "success": False,
-                "message": "Missing tournament ID.",
-            }
-
-        tournament = self.repository.tournament_registration_by_id(
-            tournament_id=tournament_id
-        )
-
-        if not tournament:
-            return {
-                "success": False,
-                "message": "Tournament not found.",
-            }
-
-        round_type = payload.round_type or "round_1"
-
-        allowed_round_types = {
-            "round_1",
-            "round_2",
-            "quarter_final",
-            "semi_final",
-            "final",
-        }
-
-        if round_type not in allowed_round_types:
-            return {
-                "success": False,
-                "message": f"Invalid round type: {round_type}.",
-            }
-
-        existing_round = self.repository.get_round_by_type(
-            tournament_id=tournament_id,
-            round_type=round_type,
-        )
-
-        if existing_round:
-            return {
-                "success": False,
-                "message": f"{round_type} already exists for this tournament.",
-            }
-
-        if not payload.matches:
-            return {
-                "success": False,
-                "message": "At least one match is required.",
-            }
-
-        matches = [
-            {
-                "match_number": match.match_number,
-                "team_a_id": match.team.id,
-                "team_b_id": match.opponent.id,
-                "scheduled_at": match.scheduled_at,
-            }
-            for match in payload.matches
-        ]
-
-        match_numbers = [match["match_number"] for match in matches]
-
-        if len(match_numbers) != len(set(match_numbers)):
-            return {
-                "success": False,
-                "message": "Duplicate match numbers are not allowed.",
-            }
-
-        submitted_team_ids_list = [
-            team_id
-            for match in matches
-            for team_id in (match["team_a_id"], match["team_b_id"])
-        ]
-
-        duplicate_team_ids = [
-            team_id
-            for team_id in set(submitted_team_ids_list)
-            if submitted_team_ids_list.count(team_id) > 1
-        ]
-
-        if duplicate_team_ids:
-            return {
-                "success": False,
-                "message": f"A team cannot participate in more than one {round_type} match.",
-                "duplicate_team_ids": duplicate_team_ids,
-            }
-
-        submitted_team_ids = set(submitted_team_ids_list)
-
-        registered_teams = self.repository.get_registered_teams(
-            tournament_id=tournament_id
-        )
-
-        if not registered_teams:
-            return {
-                "success": False,
-                "message": f"No approved team registrations found for tournament {tournament_id}.",
-            }
-
-        registered_team_ids = {
-            registration.team_id for registration in registered_teams
-        }
-
-        invalid_team_ids = submitted_team_ids - registered_team_ids
-
-        if invalid_team_ids:
-            return {
-                "success": False,
-                "message": "One or more submitted teams are not registered for this tournament.",
-                "invalid_team_ids": sorted(invalid_team_ids),
-            }
-
-        bye_team_ids = registered_team_ids - submitted_team_ids
-
-        schedule_error = self._validate_match_schedules(
-            matches=matches,
-            tournament=tournament,
-        )
-
-        if schedule_error:
-            return schedule_error
-
-        created_round = self.repository.create_round(
-            tournament_id=tournament_id,
-            round_number=1,
-            round_type=round_type,
-            matches=matches,
-        )
-
-        return {
-            "success": True,
-            "message": f"{round_type} created successfully.",
-            "tournament_id": tournament_id,
-            "round_type": round_type,
-            "round_id": created_round.id,
-            "matches": matches,
-            "bye_team_ids": sorted(bye_team_ids),
-        }
-
-    def _validate_match_schedules(self, matches, tournament):
-        current_datetime = datetime.now(timezone.utc)
-
-        tournament_start = tournament.starts_at
-        tournament_end = tournament.ends_at
-
-        if tournament_start.tzinfo is None:
-            tournament_start = tournament_start.replace(tzinfo=timezone.utc)
-
-        if tournament_end.tzinfo is None:
-            tournament_end = tournament_end.replace(tzinfo=timezone.utc)
-
-        for match in matches:
-            scheduled_at = match["scheduled_at"]
-
-            if not scheduled_at:
-                return {
-                    "success": False,
-                    "message": (
-                        f"Match {match['match_number']} "
-                        "must have a scheduled date and time."
-                    ),
-                }
-
-            if scheduled_at.tzinfo is None:
-                scheduled_at = scheduled_at.replace(tzinfo=timezone.utc)
-
-            if scheduled_at < current_datetime:
-                return {
-                    "success": False,
-                    "message": (
-                        f"Match {match['match_number']} "
-                        "cannot be scheduled in the past."
-                    ),
-                }
-
-            if scheduled_at < tournament_start:
-                return {
-                    "success": False,
-                    "message": (
-                        f"Match {match['match_number']} "
-                        "cannot be scheduled before the tournament starts."
-                    ),
-                }
-
-            if scheduled_at > tournament_end:
-                return {
-                    "success": False,
-                    "message": (
-                        f"Match {match['match_number']} "
-                        "cannot be scheduled after the tournament ends."
-                    ),
-                }
-
-        return None

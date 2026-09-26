@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Request, Response, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File
 from app.modules.auth.models import Player
 from .schemas import TeamCreateSchema
 from app.dependencies.auth import get_current_user
-from .services import TeamService, TeamTournamentService
-from .dependency import get_team_service, get_teamtournament_service
+from .service import TeamService
+from .tournament_service import TeamTournamentService
+from .dependencies import get_team_service, get_team_tournament_service
 
 # captain
 from app.dependencies.roles import get_team_captain
@@ -16,7 +17,7 @@ def team_dashboard(
     current_user: Player = Depends(get_current_user),
     team_service: TeamService = Depends(get_team_service),
 ):
-    return team_service.get_teamdashboard(current_user=current_user)
+    return team_service.get_team_dashboard(current_user=current_user)
 
 
 @router.get("/summary")
@@ -85,7 +86,7 @@ async def join_team(
 def register_team(
     tournament_id: int,
     current_user: Player = Depends(get_current_user),
-    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+    tournament_service: TeamTournamentService = Depends(get_team_tournament_service),
 ):
 
     return tournament_service.register_team_tournament(
@@ -102,7 +103,7 @@ def add_roster(
     tournament_id: int,
     player_id: int,
     captain: Player = Depends(get_team_captain),
-    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+    tournament_service: TeamTournamentService = Depends(get_team_tournament_service),
 ):
     return tournament_service.add_roster_player(
         tournament_id=tournament_id, player_id=player_id, captain=captain
@@ -115,7 +116,7 @@ def remove_roster_player(
     tournament_id: int,
     roster_player_id: int,
     captain: Player = Depends(get_team_captain),
-    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+    tournament_service: TeamTournamentService = Depends(get_team_tournament_service),
 ):
     return tournament_service.remove_roster_player(
         tournament_id=tournament_id,
@@ -129,7 +130,7 @@ def remove_roster_player(
 def confirm_roster(
     registration_id: int,
     captain: Player = Depends(get_team_captain),
-    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+    tournament_service: TeamTournamentService = Depends(get_team_tournament_service),
 ):
     return tournament_service.confirm_roster(
         registration_id=registration_id, captain=captain
@@ -141,7 +142,7 @@ def team_contribution(
     registration_id: int,
     team_id: int,
     current_user: Player = Depends(get_current_user),
-    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+    tournament_service: TeamTournamentService = Depends(get_team_tournament_service),
 ):
 
     return tournament_service.contribution_stats(
@@ -156,7 +157,7 @@ def team_contribution(
 def tournament_detail(
     tournament_id: int,
     current_user: Player = Depends(get_current_user),
-    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+    tournament_service: TeamTournamentService = Depends(get_team_tournament_service),
 ):
 
     return tournament_service.tournament_detail(
@@ -168,9 +169,9 @@ def tournament_detail(
 def get_tournament_paying_review(
     tournament_id: int,
     current_user: Player = Depends(get_current_user),
-    tournament_service: TeamTournamentService = Depends(get_teamtournament_service),
+    tournament_service: TeamTournamentService = Depends(get_team_tournament_service),
 ):
 
-    return tournament_service.get_paying_review(
+    return tournament_service.get_payment_review(
         tournament_id=tournament_id, current_user=current_user
     )

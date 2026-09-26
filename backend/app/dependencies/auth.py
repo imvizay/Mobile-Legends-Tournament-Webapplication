@@ -4,7 +4,7 @@ from fastapi import Depends,Request
 from sqlalchemy.orm import Session
 from app.core.db.session import get_db
 
-from app.modules.auth.service import TokenService
+from app.modules.auth.token_service import TokenService
 from app.core.exceptions.exceptions import InvalidTokenException
 
 token_service = TokenService()
@@ -24,7 +24,7 @@ def get_current_user(
     payload = token_service.decode_token(token)
 
     # verify token
-    verified_token = token_service.verify_token_type(payload,"access")
+    token_service.verify_token_type(payload, "access")
 
     user_id = int(payload["sub"])
 
