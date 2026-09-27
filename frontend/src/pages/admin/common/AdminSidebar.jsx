@@ -1,237 +1,269 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, ShieldCheck, Trophy, ChartPie, BadgeCheck, MessageSquare, FileWarning, Megaphone, Gift, WalletCards, UserCog, Settings, ClipboardList, Headphones, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  ShieldCheck,
+  Trophy,
+  ChartPie,
+  BadgeCheck,
+  MessageSquare,
+  FileWarning,
+  Megaphone,
+  Gift,
+  WalletCards,
+  UserCog,
+  Settings,
+  ClipboardList,
+  Headphones,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
 
 import { useUserContext } from "../../../contexts/UserContext";
 
-export default function AdminSidebar() {
+const GOLD = "var(--accent-gold)";
 
+const managementSections = [
+  {
+    key: "users",
+    label: "Users",
+    icon: Users,
+    basePath: "/admin/users",
+    items: [
+      ["All Users", "/admin/users"],
+      ["Active Users", "/admin/users/active"],
+      ["Suspended Users", "/admin/users/suspended"],
+    ],
+  },
+  {
+    key: "teams",
+    label: "Teams",
+    icon: ShieldCheck,
+    basePath: "/admin/teams",
+    items: [
+      ["All Teams", "/admin/teams"],
+      ["Active Teams", "/admin/teams/active"],
+      ["Pending Teams", "/admin/teams/pending"],
+    ],
+  },
+  {
+    key: "tournaments",
+    label: "Tournaments",
+    icon: Trophy,
+    basePath: "/admin/tournaments",
+    items: [
+      ["All Tournaments", "/admin/tournaments"],
+      ["Ongoing Registration", "/admin/tournaments/ongoing-registration"],
+      ["Live Tournaments", "/admin/tournaments/live-tournament"],
+      ["Completed", "/admin/tournaments/completed"],
+      ["Cancelled", "/admin/tournaments/cancelled"],
+    ],
+  },
+  {
+    key: "prizes",
+    label: "Prize Distribution",
+    icon: ChartPie,
+    basePath: "/admin/prize-distribution",
+    items: [
+      ["Overview", "/admin/prize-distribution"],
+      ["Pending Payouts", "/admin/prize-distribution/pending"],
+      ["Completed Payouts", "/admin/prize-distribution/completed"],
+    ],
+  },
+  {
+    key: "verification",
+    label: "Verification",
+    icon: BadgeCheck,
+    basePath: "/admin/verification",
+    items: [
+      ["Screenshots", "/admin/verification/screenshots"],
+      ["KYC", "/admin/verification/kyc"],
+      ["Team Verification", "/admin/verification/teams"],
+    ],
+  },
+];
+
+const communicationItems = [
+  { label: "Feedbacks", path: "/admin/feedbacks", icon: MessageSquare },
+  { label: "Complaints", path: "/admin/complaints", icon: FileWarning },
+  { label: "Announcements", path: "/admin/announcements", icon: Megaphone },
+];
+
+const platformItems = [
+  { label: "Rewards & Coupons", path: "/admin/rewards", icon: Gift },
+  { label: "Wallet Management", path: "/admin/wallet", icon: WalletCards },
+  { label: "Roles & Permissions", path: "/admin/roles", icon: UserCog },
+  { label: "Activity Logs", path: "/admin/activity", icon: ClipboardList },
+  { label: "System Settings", path: "/admin/settings", icon: Settings },
+];
+
+export default function AdminSidebar() {
   const { user } = useUserContext();
   const location = useLocation();
-
   const [openSection, setOpenSection] = useState(null);
 
   const isActive = (path) => location.pathname === path;
   const isSectionActive = (path) => location.pathname.startsWith(path);
 
   const toggleSection = (section) => {
-    setOpenSection((current) => current === section ? null : section);
+    setOpenSection((current) => (current === section ? null : section));
   };
 
   useEffect(() => {
-    if (location.pathname.startsWith("/admin/users")) setOpenSection("users");
-    else if (location.pathname.startsWith("/admin/teams")) setOpenSection("teams");
-    else if (location.pathname.startsWith("/admin/tournaments")) setOpenSection("tournaments");
-    else if (location.pathname.startsWith("/admin/prize-distribution")) setOpenSection("prizes");
-    else if (location.pathname.startsWith("/admin/verification")) setOpenSection("verification");
+    const activeSection = managementSections.find((section) => isSectionActive(section.basePath));
+    setOpenSection(activeSection?.key || null);
   }, [location.pathname]);
 
+  const adminName = user?.email?.split("@")[0]?.toUpperCase() || "ADMIN";
+
+  const adminRole = user?.role === "admin" ? "Super Administrator" : "Administrator";
+
   return (
-    <aside className="hidden h-screen w-[220px] shrink-0 flex-col border-r lg:flex" style={{ background: "var(--surface-base)", borderColor: "var(--border-default)" }}>
+    <aside className="hidden h-screen w-[228px] shrink-0 flex-col border-r lg:flex" style={{ background: "var(--surface-base)", borderColor: "var(--border-default)" }}>
 
       {/* Brand */}
-      <div className="border-b px-5 py-5" style={{ borderColor: "var(--border-default)" }}>
-        <Link to="/admin" className="flex items-center justify-between">
-          <h1 className="text-[21px] font-bold tracking-[-1.5px]" style={{ color: "var(--text-primary)" }}>GAMI<span style={{ color: "var(--accent-gold)" }}>X</span></h1>
-          <span className="text-[7px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-muted)" }}>Control</span>
+      <div className="border-b px-5 pb-4 pt-5" style={{ borderColor: "var(--border-default)" }}>
+        <Link to="/admin" className="group flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex size-7 items-center justify-center rounded-[7px]" style={{ background: "rgba(200,176,122,0.10)", border: "1px solid rgba(200,176,122,0.14)" }}>
+              <span className="text-[9px] font-bold" style={{ color: GOLD }}>G</span>
+            </div>
+
+            <div>
+              <h1 className="text-[18px] font-bold leading-none tracking-[-1.2px]" style={{ color: "var(--text-primary)" }}>
+                GAMI<span style={{ color: GOLD }}>X</span>
+              </h1>
+              <p className="mt-[3px] text-[6px] font-medium uppercase tracking-[0.2em]" style={{ color: "var(--text-muted)" }}>
+                Administration
+              </p>
+            </div>
+          </div>
+
+          <span className="rounded-[5px] border px-1.5 py-1 text-[6px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text-muted)", borderColor: "var(--border-subtle)" }}>
+            Admin
+          </span>
         </Link>
       </div>
 
-      {/* Admin Profile */}
-      <div className="border-b px-5 py-4" style={{ borderColor: "var(--border-default)" }}>
-        <div className="flex items-center gap-2.5">
-          <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full" style={{ background: "var(--surface-elevated)", color: "var(--accent-gold)" }}>
-            <span className="text-[10px] font-semibold">{user?.email?.charAt(0).toUpperCase()}</span>
-            <span className="absolute bottom-0 right-0 h-[6px] w-[6px] rounded-full bg-emerald-500" style={{ boxShadow: "0 0 0 2px var(--surface-base)" }} />
+      {/* Admin profile */}
+      <div className="px-4 py-3">
+        <div className="flex items-center gap-2.5 rounded-[9px] border px-2 py-2" style={{ background: "var(--surface-elevated)", borderColor: "var(--border-subtle)" }}>
+          <div className="relative shrink-0">
+            <div className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--surface-floating)", color: GOLD }}>
+              <span className="text-[9px] font-bold">{user?.email?.charAt(0).toUpperCase()}</span>
+            </div>
+
+            <span className="absolute bottom-0 right-0 size-[6px] rounded-full bg-emerald-500" style={{ boxShadow: "0 0 0 2px var(--surface-elevated)" }} />
           </div>
 
-          <div className="min-w-0">
-            <p className="truncate text-[10px] font-semibold" style={{ color: "var(--text-primary)" }}>{user?.email?.split("@")[0]?.toUpperCase()}</p>
-            <p className="mt-0.5 truncate text-[8px]" style={{ color: "var(--text-muted)" }}>{user?.role === "admin" ? "Super Administrator" : "Administrator"}</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[9px] font-semibold" style={{ color: "var(--text-primary)" }}>
+              {adminName}
+            </p>
+
+            <div className="mt-[3px] flex items-center gap-1.5">
+              <span className="size-[4px] rounded-full bg-emerald-500" />
+              <p className="truncate text-[7px]" style={{ color: "var(--text-muted)" }}>
+                {adminRole}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-5">
+      {/* Navigation links */}
+      <nav className="min-h-0 flex-1 overflow-y-auto px-3 pb-4 scrollbar-hide">
 
-        {/* Workspace */}
-        <p className="mb-2 px-2 text-[7px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-muted)" }}>Workspace</p>
+        <SectionLabel>Workspace</SectionLabel>
 
-        <Link to="/admin" className={`group relative flex items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isActive("/admin") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin") ? "var(--text-primary)" : "var(--text-muted)" }}>
-          {isActive("/admin") && <span className="absolute left-0 h-4 w-[1px]" style={{ background: "var(--accent-gold)" }} />}
-          <LayoutDashboard size={15} strokeWidth={1.6} style={{ color: isActive("/admin") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-          <span>Overview</span>
-          {isActive("/admin") && <span className="ml-auto h-[4px] w-[4px] rounded-full" style={{ background: "var(--accent-gold)" }} />}
-        </Link>
+        <NavLink to="/admin" icon={LayoutDashboard} label="Overview" active={isActive("/admin")} />
 
-        {/* Management */}
-        <p className="mb-2 mt-6 px-2 text-[7px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-muted)" }}>Management</p>
+        <SectionLabel className="mt-6">Management</SectionLabel>
 
-        <div className="space-y-0.5">
+        <div className="space-y-1">
+          {managementSections.map((section) => {
+            const Icon = section.icon;
+            const active = isSectionActive(section.basePath);
+            const expanded = openSection === section.key;
 
-          {/* Users */}
-          <button onClick={() => toggleSection("users")} className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isSectionActive("/admin/users") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isSectionActive("/admin/users") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <Users size={15} strokeWidth={1.6} style={{ color: isSectionActive("/admin/users") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span className="flex-1 text-left">Users</span>
-            {openSection === "users" ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-          </button>
+            return (
+              <div key={section.key}>
+                <button type="button" onClick={() => toggleSection(section.key)} className="group relative flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-2 text-left transition-colors" style={{ color: active ? "var(--text-primary)" : "var(--text-secondary)", background: active ? "rgba(200,176,122,0.055)" : "transparent" }}>
+                  {active && <span className="absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-r-full" style={{ background: GOLD }} />}
 
-          {openSection === "users" && (
-            <div className="ml-4 space-y-0.5 border-l pl-3" style={{ borderColor: "var(--border-default)" }}>
-              <Link to="/admin/users" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/users") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/users") ? "var(--text-primary)" : "var(--text-muted)" }}>All Users</Link>
-              <Link to="/admin/users/active" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/users/active") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/users/active") ? "var(--text-primary)" : "var(--text-muted)" }}>Active Users</Link>
-              <Link to="/admin/users/suspended" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/users/suspended") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/users/suspended") ? "var(--text-primary)" : "var(--text-muted)" }}>Suspended Users</Link>
-            </div>
-          )}
+                  <Icon size={14} strokeWidth={1.6} style={{ color: active ? GOLD : "var(--text-muted)" }} />
 
-          {/* Teams */}
-          <button onClick={() => toggleSection("teams")} className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isSectionActive("/admin/teams") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isSectionActive("/admin/teams") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <ShieldCheck size={15} strokeWidth={1.6} style={{ color: isSectionActive("/admin/teams") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span className="flex-1 text-left">Teams</span>
-            {openSection === "teams" ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-          </button>
+                  <span className="flex-1 text-[10px] font-medium">{section.label}</span>
 
-          {openSection === "teams" && (
-            <div className="ml-4 space-y-0.5 border-l pl-3" style={{ borderColor: "var(--border-default)" }}>
-              <Link to="/admin/teams" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/teams") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/teams") ? "var(--text-primary)" : "var(--text-muted)" }}>All Teams</Link>
-              <Link to="/admin/teams/active" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/teams/active") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/teams/active") ? "var(--text-primary)" : "var(--text-muted)" }}>Active Teams</Link>
-              <Link to="/admin/teams/pending" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/teams/pending") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/teams/pending") ? "var(--text-primary)" : "var(--text-muted)" }}>Pending Teams</Link>
-            </div>
-          )}
+                  <span style={{ color: active ? "var(--text-secondary)" : "var(--text-muted)" }}>
+                    {expanded ? <ChevronDown size={12} strokeWidth={1.7} /> : <ChevronRight size={12} strokeWidth={1.7} />}
+                  </span>
+                </button>
 
-          {/* Tournaments */}
-          <button onClick={() => toggleSection("tournaments")} className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isSectionActive("/admin/tournaments") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isSectionActive("/admin/tournaments") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <Trophy size={15} strokeWidth={1.6} style={{ color: isSectionActive("/admin/tournaments") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span className="flex-1 text-left">Tournaments</span>
-            {openSection === "tournaments" ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-          </button>
-
-          {openSection === "tournaments" && (
-            <div className="ml-4 space-y-0.5 border-l pl-3" style={{ borderColor: "var(--border-default)" }}>
-              <Link
-                to="/admin/tournaments"
-                className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`}
-                style={{ color: isActive("/admin/tournaments") ? "var(--text-primary)" : "var(--text-muted)" }}>
-                All Tournaments
-              </Link>
-
-              <Link to="/admin/tournaments/ongoing-registration" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/published") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/published") ? "var(--text-primary)" : "var(--text-muted)" }}>Ongoing Registration</Link>
-
-
-              <Link to="/admin/tournaments/live-tournament" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/ongoing") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/live") ? "var(--text-primary)" : "var(--text-muted)" }}>Live</Link>
-
-              <Link to="/admin/tournaments/completed" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/completed") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/completed") ? "var(--text-primary)" : "var(--text-muted)" }}>Completed</Link>
-              
-              <Link to="/admin/tournaments/cancelled" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/tournaments/cancelled") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/tournaments/cancelled") ? "var(--text-primary)" : "var(--text-muted)" }}>Cancelled</Link>
-            </div>
-          )}
-
-          {/* Prize Distribution */}
-          <button onClick={() => toggleSection("prizes")} className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isSectionActive("/admin/prize-distribution") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isSectionActive("/admin/prize-distribution") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <ChartPie size={15} strokeWidth={1.6} style={{ color: isSectionActive("/admin/prize-distribution") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span className="flex-1 text-left">Prize Distribution</span>
-            {openSection === "prizes" ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-          </button>
-
-          {openSection === "prizes" && (
-            <div className="ml-4 space-y-0.5 border-l pl-3" style={{ borderColor: "var(--border-default)" }}>
-              <Link to="/admin/prize-distribution" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/prize-distribution") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/prize-distribution") ? "var(--text-primary)" : "var(--text-muted)" }}>Overview</Link>
-              <Link to="/admin/prize-distribution/pending" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/prize-distribution/pending") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/prize-distribution/pending") ? "var(--text-primary)" : "var(--text-muted)" }}>Pending Payouts</Link>
-              <Link to="/admin/prize-distribution/completed" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/prize-distribution/completed") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/prize-distribution/completed") ? "var(--text-primary)" : "var(--text-muted)" }}>Completed Payouts</Link>
-            </div>
-          )}
-
-          {/* Verification */}
-          <button onClick={() => toggleSection("verification")} className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isSectionActive("/admin/verification") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isSectionActive("/admin/verification") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <BadgeCheck size={15} strokeWidth={1.6} style={{ color: isSectionActive("/admin/verification") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span className="flex-1 text-left">Verification</span>
-            {openSection === "verification" ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-          </button>
-
-          {openSection === "verification" && (
-            <div className="ml-4 space-y-0.5 border-l pl-3" style={{ borderColor: "var(--border-default)" }}>
-              <Link
-                to="/admin/verification/screenshots"
-                className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors 
-              ${isActive("/admin/verification/screenshots") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`}
-                style={{ color: isActive("/admin/verification/screenshots") ? "var(--text-primary)" : "var(--text-muted)" }}>Screenshots</Link>
-
-              <Link to="/admin/verification/kyc" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/verification/kyc") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/verification/kyc") ? "var(--text-primary)" : "var(--text-muted)" }}>KYC</Link>
-              <Link to="/admin/verification/teams" className={`block rounded-md px-3 py-1.5 text-[10px] transition-colors ${isActive("/admin/verification/teams") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/verification/teams") ? "var(--text-primary)" : "var(--text-muted)" }}>Team Verification</Link>
-            </div>
-          )}
-
+                {expanded && (
+                  <div className="ml-[19px] mt-1 space-y-0.5 border-l pl-3" style={{ borderColor: "var(--border-subtle)" }}>
+                    {section.items.map(([label, path]) => <SubNavLink key={path} to={path} label={label} active={isActive(path)} />)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        {/* Communication */}
-        <p className="mb-2 mt-6 px-2 text-[7px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-muted)" }}>Communication</p>
+        <SectionLabel className="mt-6">Communication</SectionLabel>
 
-        <div className="space-y-0.5">
-          <Link to="/admin/feedbacks" className={`flex items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isActive("/admin/feedbacks") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/feedbacks") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <MessageSquare size={15} strokeWidth={1.5} style={{ color: isActive("/admin/feedbacks") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span>Feedbacks</span>
-          </Link>
-
-          <Link to="/admin/complaints" className={`flex items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isActive("/admin/complaints") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/complaints") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <FileWarning size={15} strokeWidth={1.5} style={{ color: isActive("/admin/complaints") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span>Complaints</span>
-          </Link>
-
-          <Link to="/admin/announcements" className={`flex items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isActive("/admin/announcements") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/announcements") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <Megaphone size={15} strokeWidth={1.5} style={{ color: isActive("/admin/announcements") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span>Announcements</span>
-          </Link>
+        <div className="space-y-1">
+          {communicationItems.map((item) => <NavLink key={item.path} to={item.path} icon={item.icon} label={item.label} active={isActive(item.path)} />)}
         </div>
 
-        {/* Platform */}
-        <p className="mb-2 mt-6 px-2 text-[7px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-muted)" }}>Platform</p>
+        <SectionLabel className="mt-6">Platform</SectionLabel>
 
-        <div className="space-y-0.5">
-          <Link to="/admin/rewards" className={`flex items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isActive("/admin/rewards") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/rewards") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <Gift size={15} strokeWidth={1.5} style={{ color: isActive("/admin/rewards") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span>Rewards & Coupons</span>
-          </Link>
-
-          <Link to="/admin/wallet" className={`flex items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isActive("/admin/wallet") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/wallet") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <WalletCards size={15} strokeWidth={1.5} style={{ color: isActive("/admin/wallet") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span>Wallet Management</span>
-          </Link>
-
-          <Link to="/admin/roles" className={`flex items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isActive("/admin/roles") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/roles") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <UserCog size={15} strokeWidth={1.5} style={{ color: isActive("/admin/roles") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span>Roles & Permissions</span>
-          </Link>
-
-          <Link to="/admin/activity" className={`flex items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isActive("/admin/activity") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/activity") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <ClipboardList size={15} strokeWidth={1.5} style={{ color: isActive("/admin/activity") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span>Activity Logs</span>
-          </Link>
-
-          <Link to="/admin/settings" className={`flex items-center gap-3 rounded-md px-3 py-2 text-[11px] font-medium transition-all ${isActive("/admin/settings") ? "bg-[rgba(200,176,122,0.07)]" : "hover:bg-[rgba(255,255,255,0.025)]"}`} style={{ color: isActive("/admin/settings") ? "var(--text-primary)" : "var(--text-muted)" }}>
-            <Settings size={15} strokeWidth={1.5} style={{ color: isActive("/admin/settings") ? "var(--accent-gold)" : "var(--text-muted)" }} />
-            <span>System Settings</span>
-          </Link>
+        <div className="space-y-1">
+          {platformItems.map((item) => <NavLink key={item.path} to={item.path} icon={item.icon} label={item.label} active={isActive(item.path)} />)}
         </div>
-
       </nav>
 
       {/* Support */}
-      <div className="border-t px-4 py-4" style={{ borderColor: "var(--border-default)" }}>
-        <Link to="/admin/support" className="group flex items-center gap-2.5 rounded-md px-2 py-2 transition-colors hover:bg-[rgba(255,255,255,0.025)]">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md" style={{ background: "rgba(200,176,122,0.07)", color: "var(--accent-gold)" }}>
-            <Headphones size={14} strokeWidth={1.5} />
+      <div className="border-t px-4 py-3" style={{ borderColor: "var(--border-default)" }}>
+        <Link to="/admin/support" className="group flex items-center gap-2.5 rounded-[8px] px-2 py-2 transition-colors hover:bg-[rgba(255,255,255,0.025)]">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-[6px]" style={{ background: "rgba(200,176,122,0.07)", border: "1px solid rgba(200,176,122,0.10)", color: GOLD }}>
+            <Headphones size={13} strokeWidth={1.6} />
           </div>
 
-          <div className="flex-1">
-            <p className="text-[10px] font-semibold" style={{ color: "var(--text-primary)" }}>Support</p>
-            <p className="mt-0.5 text-[8px]" style={{ color: "var(--text-muted)" }}>Contact the team</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-[9px] font-semibold" style={{ color: "var(--text-primary)" }}>Support</p>
+            <p className="mt-[2px] truncate text-[7px]" style={{ color: "var(--text-muted)" }}>Contact the team</p>
           </div>
 
-          <ChevronRight size={12} strokeWidth={1.5} style={{ color: "var(--text-muted)" }} />
+          <ChevronRight size={12} strokeWidth={1.5} className="transition-transform group-hover:translate-x-0.5" style={{ color: "var(--text-muted)" }} />
         </Link>
       </div>
-
     </aside>
-  )
+  );
+}
+
+function SectionLabel({ children, className = "" }) {
+  return <p className={`mb-2 px-2 text-[6px] font-semibold uppercase tracking-[0.2em] ${className}`} style={{ color: "var(--text-muted)" }}>{children}</p>;
+}
+
+function NavLink({ to, icon: Icon, label, active }) {
+  return (
+    <Link to={to} className="group relative flex items-center gap-2.5 rounded-[7px] px-2.5 py-2 transition-colors" style={{ color: active ? "var(--text-primary)" : "var(--text-secondary)", background: active ? "rgba(200,176,122,0.055)" : "transparent" }}>
+      {active && <span className="absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-r-full" style={{ background: GOLD }} />}
+      <Icon size={14} strokeWidth={1.6} style={{ color: active ? GOLD : "var(--text-muted)" }} />
+      <span className="text-[10px] font-medium">{label}</span>
+      {active && <span className="ml-auto size-[4px] rounded-full" style={{ background: GOLD }} />}
+    </Link>
+  );
+}
+
+function SubNavLink({ to, label, active }) {
+  return (
+    <Link to={to} className="relative flex items-center rounded-[6px] px-2.5 py-[6px] transition-colors" style={{ color: active ? "var(--text-primary)" : "var(--text-muted)", background: active ? "rgba(200,176,122,0.045)" : "transparent" }}>
+      {active && <span className="absolute -left-[14px] top-1/2 h-3 w-[2px] -translate-y-1/2 rounded-r-full" style={{ background: GOLD }} />}
+      <span className="text-[9px]">{label}</span>
+      {active && <span className="ml-auto size-[3px] rounded-full" style={{ background: GOLD }} />}
+    </Link>
+  );
 }

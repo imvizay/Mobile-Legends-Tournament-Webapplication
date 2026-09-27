@@ -1,48 +1,41 @@
-from typing import Annotated, Optional
-import re
 from datetime import datetime
-from fastapi import Form
 from decimal import Decimal
-from pydantic import BaseModel, ConfigDict, Field, field_validator, computed_field
+from typing import Annotated
+import re
+
+from fastapi import Form
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 from .models import TeamVisibility
 
+# Team Creation
+
 
 class TeamCreateSchema(BaseModel):
-
     model_config = ConfigDict(str_strip_whitespace=True)
 
     team_name: str = Field(min_length=3, max_length=60)
-
     team_tag: str = Field(min_length=2, max_length=10)
-
     team_bio: str | None = Field(default=None, max_length=500)
-
     team_country: str = Field(min_length=2, max_length=50)
-
-    team_region: str | None = Field( default=None, min_length=2, max_length=50, )
+    team_region: str | None = Field(default=None, min_length=2, max_length=50)
     team_city: str | None = Field(default=None, max_length=60)
-
     team_visibility: TeamVisibility
 
     @field_validator("team_tag")
     @classmethod
-    def normalize_tag(cls, value: str):
-
+    def normalize_tag(cls, value: str) -> str:
         return value.upper()
 
     @field_validator("team_name")
     @classmethod
     def validate_team_name(cls, value: str) -> str:
-
         if not re.fullmatch(r"[A-Za-z0-9 _-]+", value):
             raise ValueError(
                 "Team name may only contain letters, numbers, spaces, '_' and '-'."
             )
-
         if not re.search(r"[A-Za-z]", value):
             raise ValueError("Team name cannot contain only numbers.")
-
         return value
 
     @classmethod
@@ -56,7 +49,6 @@ class TeamCreateSchema(BaseModel):
         team_city: Annotated[str | None, Form()] = None,
         team_visibility: Annotated[TeamVisibility, Form(...)] = TeamVisibility.PUBLIC,
     ) -> "TeamCreateSchema":
-
         return cls(
             team_name=team_name,
             team_tag=team_tag,
@@ -66,6 +58,9 @@ class TeamCreateSchema(BaseModel):
             team_city=team_city,
             team_visibility=team_visibility,
         )
+
+
+# Team Responses
 
 
 class TeamMemberResponse(BaseModel):
@@ -83,14 +78,16 @@ class TeamResponse(BaseModel):
     team_banner_url: str | None
     team_max_members: int
     team_created_at: datetime
-
     team_country: str
     team_visibility: str
     team_members: list[TeamMemberResponse]
 
 
 class TeamResponseOutput(BaseModel):
-    team: Optional[TeamResponse] = None
+    team: TeamResponse | None = None
+
+
+# Team Discovery
 
 
 class DiscoverTeamResponse(BaseModel):
@@ -121,6 +118,8 @@ class JoinTeamResponse(BaseModel):
 
 
 # Team Summary
+
+
 class CaptainSummary(BaseModel):
     id: int
     captain_name: str
@@ -141,10 +140,7 @@ class TeamSummaryResponse(BaseModel):
     team: TeamSummary | None = None
 
 
-# REGISTERED TOURNAMENT DASHBOARD RESPONSE
-
-
-# ROSTER PLAYER
+# Tournament Dashboard
 
 
 class RosterPlayer(BaseModel):
@@ -156,7 +152,7 @@ class RosterPlayer(BaseModel):
     role: str
     tournament_readiness: str
     status: str
-    fee_status:str | None = None
+    fee_status: str | None = None
 
 
 class TeamRosterPlayer(BaseModel):
@@ -167,35 +163,78 @@ class TeamRosterPlayer(BaseModel):
     roster_players: list[RosterPlayer] = Field(default_factory=list)
 
 
-class TeamRegisteredTournament(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+class TournamentImages(BaseModel):
+    background_url: str | None = None
+    banner_url: str | None = None
 
+
+class TournamentTimeline(BaseModel):
+    registration_opens_at: datetime | None = None
+    registration_closes_at: datetime | None = None
+    registration_extended_at: datetime | None = None
+    starts_at: datetime | None = None
+    ends_at: datetime | None = None
+
+
+class TournamentStatusInfo(BaseModel):
+    status: str | None = None
+    registration_status: str | None = None
+    visibility_status: str | None = None
+    bracket_status: str | None = None
+    extension_reason: str | None = None
+    postponement_reason: str | None = None
+    cancellation_reason: str | None = None
+    postponed_at: datetime | None = None
+    cancelled_at: datetime | None = None
+
+
+class TournamentEligibility(BaseModel):
+    minimum_account_level: int | None = None
+    minimum_rank: str | None = None
+    registration_access: str | None = None
+    registration_approval: str | None = None
+
+
+class TeamRegisteredTournament(BaseModel):
     tournament_id: int
     tournament_name: str
-    server: str
+    game_name: str | None = None
+    tournament_type: str | None = None
+    team_format: str | None = None
+    min_teams: int | None = None
+    max_teams: int | None = None
+    description: str | None = None
+    server: str | None = None
+    category: str | None = None
+    competition_type: str | None = None
+    bracket_format: str | None = None
+    seeding_method: str | None = None
 
+    entry_fee: Decimal | None = None
+    entry_type: str | None = None
     prize_pool: Decimal | None = None
-    entry_fee: Decimal
-    max_teams: int
+    platform_fee: Decimal | None = None
+    winner_share: Decimal | None = None
+    runner_up_share: Decimal | None = None
 
-    registration_opens_at: datetime
-    registration_closes_at: datetime
-    starts_at: datetime
-    ends_at: datetime
+    eligibility: TournamentEligibility
+    images: TournamentImages
+    timeline: TournamentTimeline
+    status: TournamentStatusInfo
 
-    status: str
+    registration_id: int
+    applied_at: datetime | None = None
+    registration_status_for_team: str
     roster: TeamRosterPlayer | None = None
-    applied_at: datetime
 
 
 class TeamMembers(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
+    
     id: int
     email: str
     mlbb_id: str | None = None
     mlbb_server: str | None = None
-
     role: str
     status: str
 
@@ -209,6 +248,9 @@ class TeamDashboardData(BaseModel):
 class TeamDashboardResponse(BaseModel):
     success: bool
     data: TeamDashboardData | None = None
+
+
+# Team Contribution
 
 
 class TeamContributionResponse(BaseModel):
@@ -226,9 +268,10 @@ class TeamContributionResponse(BaseModel):
         return self.email.split("@")[0]
 
 
-# Tournament Detailed Response
-class TournamentDetailResponse(BaseModel):
+# Tournament Detail
 
+
+class TournamentDetailResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -259,7 +302,6 @@ class TournamentDetailResponse(BaseModel):
 
     entry_type: str
     entry_fee: Decimal
-
     prize_pool: Decimal | None
     winner_share: Decimal | None
     runner_up_share: Decimal | None
@@ -271,40 +313,39 @@ class TournamentDetailResponse(BaseModel):
     registration_approval: str | None
 
     server: str
-
     status: str
     registration_status: str
 
 
+# Tournament Review / Checkout
+
 
 class TournamentReview(BaseModel):
-        model_config=ConfigDict(from_attributes=True)
-        id:int
-        
-        tournament_name:str
-        game_name:str | None
-        
-        tournament_type: str
-        bracket_format: str | None
-        team_format: str
-        
-        entry_fee:int
-        
-        background_image_url: str | None
-        banner_image_url: str | None
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    tournament_name: str
+    game_name: str | None
+    tournament_type: str
+    bracket_format: str | None
+    team_format: str
+    entry_fee: int
+    background_image_url: str | None
+    banner_image_url: str | None
+
 
 class PlayerReview(BaseModel):
-    id:int
-    player_name:str
+    id: int
+    player_name: str
 
-    
+
 class TeamReview(BaseModel):
-    id:int
-    roster_id:int
-    team_name:str
-    
+    id: int
+    roster_id: int
+    team_name: str
+
+
 class TournamentReviewResponse(BaseModel):
-    team:TeamReview
-    tournament:TournamentReview
-    player:PlayerReview
-     
+    team: TeamReview
+    tournament: TournamentReview
+    player: PlayerReview

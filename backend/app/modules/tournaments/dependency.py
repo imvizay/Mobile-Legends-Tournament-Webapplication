@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.db.session import get_db
 from .repository import TournamentRepository
 from .schema import TournamentForm
-from .service import TournamentService
+from .service import TournamentService, BracketService
 
 
 def get_tournament_repository(db: Session = Depends(get_db)):
@@ -77,3 +77,9 @@ def get_tournament_form(
         registration_approval=registration_approval,
         server=server,
     )
+
+
+def get_bracket_service(
+    repository: TournamentRepository = Depends(get_tournament_repository),
+):
+    return BracketService(repository=repository)

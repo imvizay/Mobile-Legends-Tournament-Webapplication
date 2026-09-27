@@ -2,7 +2,7 @@ from datetime import date, time, datetime
 from fastapi import Form
 from decimal import Decimal
 from datetime import date, time
-from pydantic import BaseModel, model_validator, ConfigDict,Field
+from pydantic import BaseModel, model_validator, ConfigDict, Field
 
 
 class TournamentForm(BaseModel):
@@ -128,6 +128,7 @@ class TournamentDetailResponse(BaseModel):
     success: str
     data: TournamentListResponse
 
+
 # Tournament Response Without Registration Summary
 class OngoingTournamentResponse(BaseModel):
     code: int
@@ -159,6 +160,7 @@ class OngoingTournamentHeaderResponse(BaseModel):
     server: str
     status: str
 
+
 class OngoingRegistrationTeamContributionResponse(BaseModel):
     id: int
     roster_player_id: int
@@ -168,11 +170,12 @@ class OngoingRegistrationTeamContributionResponse(BaseModel):
 
 
 class OngoingRegistrationTeamResponse(BaseModel):
-    id: int
+    registration_id: int
+    team_id: int
 
     team_name: str
     team_tag: str
-    team_logo_url:str | None = None
+    team_logo_url: str | None = None
 
     captain_id: int
     captain_username: str | None = None
@@ -183,7 +186,36 @@ class OngoingRegistrationTeamResponse(BaseModel):
         default_factory=list
     )
 
+    # status
+    team_registration_id: int
+    registration_status: str
+    roster_status: str
+
 
 class OngoingTournamentRegistrationListResponse(BaseModel):
     tournament: OngoingTournamentHeaderResponse
     registrations: list[OngoingRegistrationTeamResponse]
+
+
+# Bracket Schema
+
+from typing import List
+
+
+class BracketTeamInput(BaseModel):
+    id: int
+    name: str
+
+
+class RoundMatchCreate(BaseModel):
+    match_number: int = Field(..., ge=1)
+
+    team: BracketTeamInput
+    opponent: BracketTeamInput
+
+    scheduled_at: datetime
+
+
+class RoundCreateRequest(BaseModel):
+    round_type: str
+    matches: List[RoundMatchCreate]

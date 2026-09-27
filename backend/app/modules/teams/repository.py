@@ -255,7 +255,6 @@ class TeamTournamentRepository:
                 TeamTournamentRegistration.tournament_id == tournament_id,
             )
         )
-
         return result.scalar_one_or_none()
 
     # Create a new tournament registration
@@ -469,7 +468,8 @@ class TeamTournamentRepository:
             self.db.query(TournamentRosterPlayer)
             .filter(
                 TournamentRosterPlayer.roster_id == roster_id,
-                TournamentRosterPlayer.status == TournamentRosterPlayerStatus.SELECTED.value
+                TournamentRosterPlayer.status
+                == TournamentRosterPlayerStatus.SELECTED.value,
             )
             .count()
         )

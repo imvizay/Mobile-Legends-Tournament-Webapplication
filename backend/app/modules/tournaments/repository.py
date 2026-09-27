@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 from .models import *
+
 from sqlalchemy.sql import func
 
 from sqlalchemy.orm import joinedload, selectinload, load_only, with_loader_criteria
@@ -13,14 +14,80 @@ from ..teams.models import (
     TournamentRoster,
     TournamentRosterPlayer,
     TeamTournamentContribution,
-    TournamentRosterPlayerStatus
+    TournamentRosterPlayerStatus,
+    TournamentRegistrationStatus,
 )
+
+from ..tournaments.models import *
 
 
 class TournamentRepository:
 
     def __init__(self, db: AsyncSession):
         self.db = db
+
+    def get_round_by_type(self, tournament_id: int, round_type: str):
+        return (
+            self.db.query(TournamentRound)
+            .filter(
+                TournamentRound.tournament_id == tournament_id,
+                TournamentRound.round_type == round_type,
+            )
+            .first()
+        )
+
+    def create_round(
+        self,
+        tournament_id: int,
+        round_number: int,
+        round_type: TournamentRoundType,
+        matches: list,
+    ):
+        tournament_round = TournamentRound(
+            tournament_id=tournament_id,
+            round_number=round_number,
+            round_type=round_type,
+            status=TournamentRoundStatus.READY.value,
+        )
+
+        self.db.add(tournament_round)
+        self.db.flush()
+
+        tournament_matches = [
+            TournamentMatch(
+                round_id=tournament_round.id,
+                match_number=match["match_number"],
+                team_a_id=match["team_a_id"],
+                team_b_id=match["team_b_id"],
+                scheduled_at=match["scheduled_at"],
+                status=TournamentMatchStatus.UPCOMING.value,
+            )
+            for match in matches
+        ]
+
+        self.db.add_all(tournament_matches)
+        self.db.commit()
+
+        return tournament_round
+
+    def get_registered_teams(self, tournament_id: int):
+        return (
+            self.db.query(TeamTournamentRegistration)
+            .filter(
+                TeamTournamentRegistration.tournament_id == tournament_id,
+                TeamTournamentRegistration.status == "approved",
+            )
+            .all()
+        )
+
+    def tournament_registration_by_id(self, tournament_id: int):
+        registration = (
+            self.db.query(Tournament)
+            .filter(Tournament.id == tournament_id)
+            .one_or_none()
+        )
+
+        return registration
 
     def get_tournament(self, ongoing_tournament_id: int):
         detail = (
@@ -215,3 +282,34 @@ class TournamentRepository:
         )
 
         return ongoing_detail
+
+    def get_initial_bracket_team_data(self, tournament_id: int):
+        teams = (
+            self.db.query(TeamTournamentRegistration)
+            .join(Team, Team.id == TeamTournamentRegistration.team_id)
+            .filter(
+                TeamTournamentRegistration.tournament_id == tournament_id,
+                TeamTournamentRegistration.status
+                == TournamentRegistrationStatus.APPROVED.value,
+            )
+            .with_entities(
+                Team.id,
+                Team.name,
+                Team.tag,
+                Team.logo_url,
+            )
+            .all()
+        )
+
+        if not teams:
+            return None
+
+        return [
+            {
+                "team_id": team.id,
+                "team_name": team.name,
+                "team_tag": team.tag,
+                "team_logo": team.logo_url,
+            }
+            for team in teams
+        ]
