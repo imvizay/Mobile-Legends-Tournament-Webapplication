@@ -271,7 +271,7 @@ class TeamContributionResponse(BaseModel):
 # Tournament Detail
 
 
-class TournamentDetailResponse(BaseModel):
+class TeamTournamentDetailResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int

@@ -1,1 +1,0 @@
-from app.modules.teams.validators import validate_image

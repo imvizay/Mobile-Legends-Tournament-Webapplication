@@ -1,7 +1,18 @@
-from ...core.exceptions.exceptions import AppException
+from app.core.exceptions.exceptions import AppException
 
 
-# Team Exceptions
+class PlayerAlreadyHasTeamError(AppException):
+    pass
+
+
+class TeamAlreadyExistsError(AppException):
+    pass
+
+
+class NoTeamError(AppException):
+    pass
+
+
 class UserIsBlockedOrInactive(AppException):
     pass
 

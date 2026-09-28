@@ -1,2 +1,4 @@
 from app.core.db.base_class import Base
-from app.models import *
+from app import models  # noqa: F401
+
+__all__ = ["Base"]

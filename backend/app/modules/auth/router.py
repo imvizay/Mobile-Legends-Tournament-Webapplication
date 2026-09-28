@@ -1,15 +1,14 @@
-from fastapi import APIRouter,Depends,Response,Request,Cookie
-from .schema import AuthCreateRequest,LoginRequest
-from .service import AuthService,SessionService
-from .dependency import get_auth_service,get_session_service
+from fastapi import APIRouter, Depends, Response, Request, Cookie
+from .schemas import AuthCreateRequest, LoginRequest
+from .service import AuthService
+from .session_service import SessionService
+from .dependencies import get_auth_service, get_session_service
 from app.core.config.settings import settings
-import json
-
 from .oauth import oauth
 from fastapi.responses import RedirectResponse
+from fastapi.background import BackgroundTasks
 
 # background tasks
-from fastapi.background import BackgroundTasks
 
 router = APIRouter(
     prefix='/auth',

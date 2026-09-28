@@ -5,7 +5,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     
-    APP_NAME : str = "MLBB Esports Tournamnet WebApp"
+    APP_NAME : str = "MLBB Esports Tournament WebApp"
     APP_VERSION : str =  '1.0'\
     
     # CONFIGURE DATABASE

@@ -1,8 +1,8 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import Navbar from '../components/common/Navbar'
-import HeroSection from '../components/sections/HeroSection'
-import TournamentLanding from '../components/sections/TournamentLanding'
+import Navbar from '../components/navigation/LandingNavbar'
+import HeroSection from '../features/landing/components/HeroSection'
+import TournamentLanding from '../features/landing/components/TournamentLanding'
 
 function PlatformLayout() {
   return (

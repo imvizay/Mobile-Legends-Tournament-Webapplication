@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from app.dependencies.roles import get_current_admin
 from ..auth.models import Player
-from .dependecies import get_tournament_registration_service
-from .services import TournamentRegistrationService
+from .dependencies import get_tournament_registration_service
+from .service import TournamentRegistrationService
 from .schemas import TeamRegistrationFailedRequestSchema
 
 # router
